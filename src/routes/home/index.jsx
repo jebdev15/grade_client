@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Avatar,
@@ -14,7 +14,6 @@ import {
   MenuItem,
   MenuList,
   Paper,
-  Select,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -25,18 +24,24 @@ import {
   LooksTwo,
   Menu as MenuIcon,
 } from "@mui/icons-material";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLoaderData } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { googleLogout } from "@react-oauth/google";
+import axios from "axios";
+import { urlEncode, urlDecode } from 'url-encode-base64';
 const Home = () => {
   const siteCookies = ["picture", "name", "faculty_id", "email", "campus"];
-  const [cookies, setCookie, removeCookie] = useCookies(siteCookies);
-  const schoolYears = [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022];
+  const [cookies, , removeCookie] = useCookies(siteCookies);
+  // const schoolYears = [2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022];
   const navigate = useNavigate();
-
-  const [currentSchoolYear, setCurrentSchoolYear] = useState(
-    schoolYears[schoolYears.length - 1]
-  );
+  const {schoolyear, semester} = useLoaderData()
+  // const [currentSchoolYear, setCurrentSchoolYear] = useState(
+  //   schoolYears[schoolYears.length - 1]
+  // );
+  const [currentSchoolYear, setCurrentSchoolYear] = useState(0)
+  const getCurrentSchoolYear = async (year) => {
+    return setCurrentSchoolYear(year)
+  }
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -47,6 +52,15 @@ const Home = () => {
     navigate("/");
   };
 
+  const encodedSchoolYear = urlEncode(schoolyear);
+  const encodedSemester = urlEncode('2nd');
+  useEffect(() => {
+    getCurrentSchoolYear(schoolyear)
+    console.log(encodedSchoolYear);
+    console.log(urlDecode(encodedSchoolYear));
+    console.log(encodedSemester);
+    console.log(urlDecode(encodedSemester));
+  }, [schoolyear])
   return (
     <Box
       sx={{
@@ -72,23 +86,7 @@ const Home = () => {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Academic Year:{" "}
-              <Select
-                value={currentSchoolYear}
-                onChange={(e) => setCurrentSchoolYear(e.target.value)}
-                size="small"
-                sx={{
-                  width: 200,
-                  bgcolor: "white",
-                  p: 0,
-                  ml: 1,
-                }}
-              >
-                <MenuItem>Select academic year</MenuItem>
-                {schoolYears.map((sy) => (
-                  <MenuItem key={sy} value={sy}>{`${sy} - ${sy + 1}`}</MenuItem>
-                ))}
-              </Select>
+              {`Academic Year: ${currentSchoolYear} - ${currentSchoolYear+1}`}
             </Typography>
             <Button
               color="inherit"
@@ -159,45 +157,39 @@ const Home = () => {
         <Box sx={{ width: drawerMinimize ? 65 : 250, height: "100%" }}>
           <Paper elevation={4} square sx={{ height: "inherit" }}>
             <List>
+            {semester && (
+          <>
+            {(semester === '1st') && (
               <ListItemButton
                 onClick={() => {
                   setDrawerMinimize(false);
-                  navigate(
-                    `/home/1st-${currentSchoolYear}-${cookies.faculty_id}`
-                  );
+                  navigate(`/home/1st-${currentSchoolYear}-${cookies.faculty_id}`);
                 }}
               >
                 <ListItemIcon>
                   <LooksOne />
                 </ListItemIcon>
-                {drawerMinimize ? null : (
-                  <ListItemText primary="First Semester" />
-                )}
+                {drawerMinimize ? null : <ListItemText primary="First Semester" />}
               </ListItemButton>
-
+            )}
+            {(semester === '2nd') && (
               <ListItemButton
                 onClick={() => {
                   setDrawerMinimize(false);
-                  navigate(
-                    `/home/2nd-${currentSchoolYear}-${cookies.faculty_id}`
-                  );
+                  navigate(`/home/2nd-${currentSchoolYear}-${cookies.faculty_id}`);
                 }}
               >
                 <ListItemIcon>
                   <LooksTwo />
                 </ListItemIcon>
-                {drawerMinimize ? null : (
-                  <ListItemText primary="Second Semester" />
-                )}
+                {drawerMinimize ? null : <ListItemText primary="Second Semester" />}
               </ListItemButton>
-
+            )}
+            {(semester !== '1st' && semester !== '2nd') && (
               <ListItemButton
                 onClick={() => {
                   setDrawerMinimize(false);
-
-                  navigate(
-                    `/home/summer-${currentSchoolYear}-${cookies.faculty_id}`
-                  );
+                  navigate(`/home/summer-${currentSchoolYear}-${cookies.faculty_id}`);
                 }}
               >
                 <ListItemIcon>
@@ -205,6 +197,9 @@ const Home = () => {
                 </ListItemIcon>
                 {drawerMinimize ? null : <ListItemText primary="Summer" />}
               </ListItemButton>
+            )}
+          </>
+        )}
             </List>
           </Paper>
         </Box>
@@ -216,6 +211,11 @@ const Home = () => {
   );
 };
 
-
-
+export const loader = async () => {
+  const {data} = await axios.get(
+    `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear?getYear=currentYearSetBySystem`
+  )
+  const {schoolyear, semester} = data[0]
+  return {schoolyear, semester}
+}
 export default Home;

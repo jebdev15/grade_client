@@ -9,8 +9,7 @@ import { theme } from "./theme";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 import Index from "./routes";
-import Admin from "./routes/admin";
-import Home from "./routes/home";
+import Home, {loader as homeLoader} from "./routes/home";
 import Start from "./routes/home/start";
 import Semester, { loader as semesterLoader } from "./routes/home/semester";
 
@@ -31,6 +30,7 @@ const router = createBrowserRouter([
   {
     path: "home",
     element: <Home />,
+    loader: homeLoader,
     children: [
       { index: true, element: <Start /> },
       {
@@ -54,7 +54,17 @@ const router = createBrowserRouter([
   },
   {
     path: "admin",
-    element: <p>Admin</p>,
+    children: [
+      {
+        index: true,
+        lazy: async() => {
+          const { Component } = await import('./routes/admin/Admin')
+          return {
+            Component
+          }
+        }
+      }
+    ]
   },
 ]);
 root.render(
