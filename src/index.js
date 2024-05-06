@@ -8,16 +8,24 @@ import { theme } from "./theme";
 
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
+import ErrorPage from "./ErrorPage";
+
+// Faculty Routes
 import Index from "./routes";
 import Home, {loader as homeLoader} from "./routes/home";
+
 import Start from "./routes/home/start";
 import Semester, { loader as semesterLoader } from "./routes/home/semester";
-
-import ErrorPage from "./ErrorPage";
 import GradeTable, {
   loader as gradeTableLoader,
 } from "./routes/home/gradeTable";
 import Upload, { loader as uploadLoader } from "./routes/home/upload";
+import PrintGradeSheet, { loader as printLoader} from "./routes/home/Print";
+
+// Admin Routes
+import Admin, {loader as adminLoader} from './routes/admin/Index';
+import GradeSubmission, {loader as gradesLoader} from "./routes/admin/GradeSubmission";
+import Users, {loader as usersLoader} from "./routes/admin/Users";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -48,21 +56,31 @@ const router = createBrowserRouter([
             element: <Upload />,
             loader: uploadLoader,
           },
+          {
+            path: "/home/:code/print/:class_code",
+            element: <PrintGradeSheet />,
+            loader: printLoader,
+          },
         ],
       },
     ],
   },
   {
     path: "admin",
+    loader: adminLoader,
+    element: <Admin />,
+    errorElement: <h1>Error AdminPage</h1>,
     children: [
+      { index: true, element: <Start /> },
       {
-        index: true,
-        lazy: async() => {
-          const { Component } = await import('./routes/admin/Admin')
-          return {
-            Component
-          }
-        }
+        path: "grades",
+        element: <GradeSubmission />,
+        loader: gradesLoader,
+      },
+      {
+        path: "users",
+        element: <Users />,
+        loader: usersLoader,
       }
     ]
   },

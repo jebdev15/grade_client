@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import {
   Alert,
   Box,
@@ -20,20 +19,57 @@ import {
 import axios from "axios";
 import { Close } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { urlDecode } from "url-encode-base64";
 const GradeTable = () => {
   const navigate = useNavigate();
   const { code, class_code } = useParams();
   const theme = useTheme();
   const [semester, currentSchoolYear] = code?.split("-");
-  const canUpload = process.env.REACT_APP_CURRENT_SEMESTER === semester && process.env.REACT_APP_CURRENT_SCHOOL_YEAR === currentSchoolYear;
-  const { rows, loadInfoArr } = useLoaderData();
+  const decode = {
+    semester: urlDecode(semester),
+    currentSchoolYear: urlDecode(currentSchoolYear),
+  }
+  const { rows, loadInfoArr, status, dbSchoolYear, dbSemester, dbStatus, dbTo  } = useLoaderData();
   const [manualOpen, setManualOpen] = useOutletContext();
   const loadInfo = loadInfoArr[0];
+  const SubjectisLock = loadInfo.isLock
 
   const [toUpdate, setToUpdate] = useState([]);
   const [tableLoading, setTableLoading] = useState(false);
   const [updatedCount, setUpdatedCount] = useState(null);
+  
+  const dateFormatter = (date) => {
+    const newDateTime = new Date(date);
+    
+    const formattedDate = newDateTime.toLocaleString('en-PH', {
+      month: 'long', // Full month name
+      day: 'numeric', // Day of the month
+      year: 'numeric', // Full year
+    });
+    
+    return formattedDate;
+  }
+
+  const currentDate = 'April 25, 2024';
+  const systemScheduledDueDate = dateFormatter(dbTo);
+
+  const checkDate = systemScheduledDueDate >= currentDate;
+  const checkSchoolYear = dbSchoolYear === parseInt(decode.currentSchoolYear);
+  const checkSemester = dbSemester === decode.semester;
+  const checkSubjectIsLock = SubjectisLock === 0;
+
+  const canUpload = checkDate && checkSchoolYear && checkSemester && checkSubjectIsLock;
+  console.log('canUpload', canUpload);
+
+  console.log({'currentDate' : currentDate, 'systemScheduledDueDate': systemScheduledDueDate});
+  console.log('checkDate', checkDate);
+  console.log({'dbSchoolYear': dbSchoolYear, decodedSchoolYear: parseInt(decode.currentSchoolYear)});
+  console.log('schoolYear', dbSchoolYear === parseInt(decode.currentSchoolYear));
+  console.log({'dbSemester': dbSemester, 'decodedSemester': decode.semester});
+  console.log('semester', dbSemester === decode.semester);
+  console.log({'SubjectisLock': SubjectisLock, 'isLock': 0});
+  console.log('checkSubjectIsLock', checkSubjectIsLock);
 
   const columns = [
     {
@@ -193,7 +229,6 @@ const GradeTable = () => {
       },
     },
   ];
-
   return (
     <Dialog
       open={manualOpen}
@@ -286,29 +321,29 @@ const GradeTable = () => {
               return row;
             }}
           />
-          <Button
-            variant="contained"
-            disabled={tableLoading}
-            sx={{
-              mt: 2,
-              justifySelf: "center",
-              display: toUpdate.length ? "block" : "none",
-            }}
-            onClick={async () => {
-              setTableLoading(true);
-              const { data } = await axios.post(
-                `${process.env.REACT_APP_API_URL}/updateGrade`,
-                { grades: toUpdate, class_code, method: "Manual" }
-              );
-              if (data) {
-                setToUpdate([]);
-                setTableLoading(false);
-                setUpdatedCount(data);
-              }
-            }}
-          >
-            {tableLoading ? "Updating..." : "Update Record"}
-          </Button>
+            <Button
+              variant="contained"
+              disabled={tableLoading}
+              sx={{
+                mt: 2,
+                justifySelf: "center",
+                display: toUpdate.length ? "block" : "none",
+              }}
+              onClick={async () => {
+                setTableLoading(true);
+                const { data } = await axios.post(
+                  `${process.env.REACT_APP_API_URL}/updateGrade`,
+                  { grades: toUpdate, class_code, method: "Manual" }
+                );
+                if (data) {
+                  setToUpdate([]);
+                  setTableLoading(false);
+                  setUpdatedCount(data);
+                }
+              }}
+            >
+              {tableLoading ? "Updating..." : "Update Record"}
+            </Button>
           <Snackbar
             open={Boolean(updatedCount)}
             onClose={() => setUpdatedCount(null)}
@@ -335,10 +370,16 @@ export const loader = async ({ params }) => {
 
   const rows = data;
 
-  const { data: data2 } = await axios.get(
+  const { data: data2, status } = await axios.get(
     `${process.env.REACT_APP_API_URL}/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}&class_code=${class_code}`
   );
   const loadInfoArr = data2;
-  return { rows, loadInfoArr };
+
+  const { data: data3 } = await axios.get(
+    `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear?getYear=currentYearSetBySystem`
+  )
+  const { schoolyear:dbSchoolYear, semester:dbSemester, status:dbStatus, to:dbTo } = data3[0]
+
+  return { rows, loadInfoArr, status, dbSchoolYear, dbSemester, dbStatus, dbTo };
 };
 export default GradeTable;

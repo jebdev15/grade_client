@@ -18,6 +18,8 @@ import { useOutletContext, useLoaderData, useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { FileUploader } from "react-drag-drop-files";
 import { saveAs } from "file-saver";
+import { urlDecode } from "url-encode-base64";
+
 const Upload = () => {
   const { code, class_code } = useParams();
   const [semester, currentSchoolYear] = code?.split("-");
@@ -33,21 +35,31 @@ const Upload = () => {
   const [uploadFile, setUploadFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [errorUpload, setErrorUpload] = useState(false);
 
+  const [downloadStatus, setDownloadStatus] = useState(false)
   const download = async () => {
-    const { data } = await axios.get(
+    setDownloadStatus(true);
+    const { data, status } = await axios.get(
       `${process.env.REACT_APP_API_URL}/getExcelFile?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}&name=${cookies.name.toUpperCase()}&classSection=${loadInfo.section}`,
       {
         responseType: "arraybuffer",
       }
     );
-    let blob = new Blob([data], {
-      type: "vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8",
-    });
-    saveAs(
-      blob,
-      `${loadInfo.subject_code}-${loadInfo.section}-${class_code}.xlsx`
-    );
+    if(status === 200) {
+      let blob = new Blob([data], {
+        type: "vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8",
+      });
+      saveAs(
+        blob,
+        `${loadInfo.subject_code}-${loadInfo.section}-${urlDecode(class_code)}.xlsx`
+      )
+      setTimeout(() => {
+        setDownloadStatus(!true);
+      }, 1000)
+    } else {
+      setDownloadStatus('Error');
+    }
   };
 
   const upload = async () => {
@@ -65,10 +77,16 @@ const Upload = () => {
         },
       }
     );
-    if (data) {
+    const {isOkay, isError, updateDataContainer} = data
+    if (isOkay) {
+      
       setUploading(false);
       setOpenSnackbar(true);
       setUploadFile(null);
+      setTimeout(() => setUploadOpen(false),3500)
+      setErrorUpload(isError ? true : !true);
+      
+      console.log(updateDataContainer);
     }
   };
 
@@ -131,8 +149,9 @@ const Upload = () => {
                 <Typography>{`Section: ${loadInfo.section}`}</Typography>
                 <Typography>{`Total Students: ${loadInfo.noStudents}`}</Typography>
               </Box>
-              <Button variant="contained" onClick={download}>
-                Download Grade Sheet
+              <Button variant="contained" onClick={download} disabled={downloadStatus ? true : false}>
+                {/* Download Grade Sheet */}
+                {downloadStatus ? "Downloading..." : "Download Grade Sheet"}
               </Button>
             </Paper>
           </Box>
@@ -211,7 +230,11 @@ const Upload = () => {
             setOpenSnackbar(false);
           }}
         >
-          <Alert severity="info">Uploaded Successfully</Alert>
+          {
+            errorUpload 
+            ? <Alert severity="error">Sorry, the file you uploaded either didn't upload correctly or does not match the subject.</Alert>
+            : <Alert severity="info">Uploaded Successfully</Alert>
+          }
         </Snackbar>
       </DialogContent>
     </Dialog>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+  import React, { lazy, useState, useRef } from "react";
 import {
   Avatar,
   Box,
@@ -13,7 +13,7 @@ import {
   Divider,
   Grid,
   IconButton,
-  Typography,
+  Typography, Tooltip,
 } from "@mui/material";
 import {
   useParams,
@@ -21,31 +21,92 @@ import {
   useLoaderData,
   Outlet,
 } from "react-router-dom";
-import { Class, Download, Face, Home } from "@mui/icons-material";
+import { Class, Face, FolderOpen, Home, Keyboard, Print, Visibility } from "@mui/icons-material";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 import moment from "moment";
+import { urlEncode, urlDecode } from "url-encode-base64";
+
 const Semester = () => {
   const { code } = useParams();
   const [cookies] = useCookies(["faculty_id"]);
   const [semester, currentSchoolYear] = code.split("-");
 
   const navigate = useNavigate();
-  const { loads } = useLoaderData();
+  const { loads, dbSchoolYear, dbSemester, dbStatus, dbTo } = useLoaderData();
 
   const [manualOpen, setManualOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [printOpen, setPrintOpen] = useState(false);
+  
+  const [loading, setLoading] = useState({
+    manual: false,
+    upload: false,
+    print: false,
+  })
+
+  const manualTimer = () => {
+    setLoading((prevState) => ({ ...prevState, manual: !prevState.manual, upload: !prevState.upload, print: !prevState.print })) 
+    setTimeout(() => {
+      setLoading((prevState) => ({ ...prevState, manual: !prevState.manual, upload: !prevState.upload, print: !prevState.print })) 
+    }, 10000)
+  }
+  const uploadTimer = () => {
+    setLoading((prevState) => ({ ...prevState, manual: !prevState.manual, upload: !prevState.upload, print: !prevState.print })) 
+    setTimeout(() => {
+      setLoading((prevState) => ({ ...prevState, manual: !prevState.manual, upload: !prevState.upload, print: !prevState.print })) 
+    }, 1500)
+  }
+
+  
+
+  const decodedSemester = urlDecode(semester);
+  const decodedSchoolYear = urlDecode(currentSchoolYear);
+
+  const dateFormatter = (date) => {
+    const newDateTime = new Date(date);
+    
+    const formattedDate = newDateTime.toLocaleString('en-PH', {
+      month: 'long', // Full month name
+      day: 'numeric', // Day of the month
+      year: 'numeric', // Full year
+    });
+    
+    return formattedDate;
+  }
+  // const getcurrentDate = Date.now();
+  // const currentDate = dateFormatter(getcurrentDate)
+  const currentDate = 'April 25, 2024'
+  const systemScheduledDueDate = dateFormatter(dbTo)
+
+  const checkDate = currentDate >= systemScheduledDueDate;
+  const checkSchoolYear = dbSchoolYear === parseInt(decodedSchoolYear);
+  const checkSemester = dbSemester === decodedSemester;
+
+  const canUpload = checkDate && checkSchoolYear && checkSemester;
+  
+  // console.log({'currentDate' : currentDate, 'systemScheduledDueDate': systemScheduledDueDate});
+  console.log('canUpload', systemScheduledDueDate);
+  // console.log({'dbSchoolYear': dbSchoolYear, decodedSchoolYear: parseInt(decodedSchoolYear)});
+  // console.log('schoolYear', dbSchoolYear === parseInt(decodedSchoolYear));
+  // console.log({'dbSemester': dbSemester, 'decodedSemester': decodedSemester});
+  // console.log('semester', dbSemester === decodedSemester);
+
+
+  
 
   const LoadCard = ({
     subject_code,
+    isLock,
     section,
     noStudents,
     class_code,
     timestamp,
     method,
   }) => {
+    const encodedClassCode = urlEncode(class_code)
     return (
-      <Card variant="outlined" sx={{}}>
+      <Card variant="outlined">
         <CardHeader
           title={subject_code}
           subheader={section}
@@ -72,28 +133,6 @@ const Semester = () => {
               display: "flex",
             }}
           >
-            {/* <Box sx={{ display: "flex", flexDirection: "column", flex: 3 }}>
-              <Typography variant="body2" textAlign="center">
-                Remarks:
-              </Typography>
-              <Divider />
-              <Typography variant="caption" sx={{ ml: 1 }}>
-                <strong>Passed: 40</strong>
-              </Typography>
-              <Typography variant="caption" sx={{ ml: 1 }}>
-                Failed: 0
-              </Typography>
-              <Typography variant="caption" sx={{ ml: 1 }}>
-                INC: 0
-              </Typography>
-              <Typography variant="caption" sx={{ ml: 1 }}>
-                Dropped: 0
-              </Typography>
-              <Typography variant="caption" sx={{ ml: 1 }}>
-                No Attendance: 0
-              </Typography>
-            </Box> */}
-
             <Box
               sx={{
                 flex: 5,
@@ -111,25 +150,6 @@ const Semester = () => {
                 {" - "}
                 {method || ""}
               </Typography>
-              {/* <Box sx={{ width: 150, bgcolor: "success.light", py: 2 }}>
-                <Typography
-                  variant="body2"
-                  textAlign="center"
-                  sx={{ color: "white" }}
-                >
-                  Progress
-                </Typography>{" "}
-                <Typography
-                  variant="h4"
-                  sx={{
-                    fontWeight: 700,
-                    textAlign: "center",
-                    color: "success.dark",
-                  }}
-                >
-                  100%
-                </Typography>
-              </Box> */}
             </Box>
           </Box>
         </CardContent>
@@ -141,33 +161,65 @@ const Semester = () => {
             label={`${noStudents} students`}
           />
           <ButtonGroup>
-            <Button
-              variant="contained"
-              color="success"
-              size="small"
-              onClick={() => {
-                navigate(
-                  `/home/${semester}-${currentSchoolYear}-${cookies.faculty_id}/${class_code}`
-                );
-                setManualOpen(true);
-              }}
-            >
-              Manual
-            </Button>
-            <Button
-              color="success"
-              variant="contained"
-              size="small"
-              onClick={() => {
-                navigate(
-                  `/home/${semester}-${currentSchoolYear}-${cookies.faculty_id}/upload/${class_code}`
-                );
-                setUploadOpen(true);
-              }}
-            >
-              Upload
-            </Button>
-           
+            <Tooltip title={ (canUpload) && parseInt(isLock) === 0 ? 'Encoding of Grades' : 'View Grades'}>  
+              <span>
+                <IconButton 
+                    color="success"
+                    size="large" 
+                    aria-label="" 
+                    onClick={() => {
+                        navigate(
+                          `/home/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}`
+                        );
+                        setManualOpen(true);
+                        manualTimer()               
+                      }}
+                    disabled={loading.manual || loading.upload ? true : false}
+                >
+                  { (canUpload) && parseInt(isLock) === 0 ? <Keyboard /> : <Visibility />}
+                </IconButton>
+              </span>
+            </Tooltip>
+            {
+              ((canUpload) && parseInt(isLock) === 0) && (
+                  <Tooltip title="Grade Sheet">  
+                  <span>
+                    <IconButton 
+                      color="success"
+                      size="large" 
+                      aria-label="" 
+                      onClick={() => {
+                        navigate(
+                          `/home/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/upload/${encodedClassCode}`
+                        );
+                        setUploadOpen(true);
+                        uploadTimer()
+                      }}
+                      disabled={loading.manual || loading.upload ? true : false}
+                    >
+                      <FolderOpen />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              )
+            }
+              <Tooltip title="Print Grade Sheet">  
+                <span>  
+                  <IconButton 
+                    color="success"
+                    size="large" 
+                    aria-label="" 
+                    onClick={() => {
+                      navigate(`/home/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/print/${encodedClassCode}`);
+                      setPrintOpen(true);
+                      manualTimer()
+                    }}
+                    // disabled={loading.manual || loading.upload ? true : false}
+                  >
+                    <Print />
+                  </IconButton>
+                </span>
+              </Tooltip>
           </ButtonGroup>
         </CardActions>
       </Card>
@@ -176,8 +228,8 @@ const Semester = () => {
   return (
     <Box>
       <Typography variant="h4" fontWeight={700}>
-        {` ${semester?.toUpperCase()} ${
-          semester === "summer" ? "" : "SEMESTER"
+        {` ${decodedSemester?.toUpperCase()} ${
+          decodedSemester === "summer" ? "" : "SEMESTER"
         }`}
       </Typography>
       <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -186,18 +238,18 @@ const Semester = () => {
         </IconButton>
         <span>/</span>
         <Typography variant="caption" fontSize={12} sx={{ mx: 1 }}>
-          {`${currentSchoolYear} - ${currentSchoolYear + 1}`}
+          {`${decodedSchoolYear} - ${parseInt(decodedSchoolYear) + 1}`}
         </Typography>
         <span>/</span>
         <Typography variant="caption" fontSize={12} sx={{ mx: 1 }}>
-          {semester}
+          {decodedSemester}
         </Typography>
       </Box>
 
       <Box sx={{ mt: 2, overflowY: "auto", maxHeight: "75vh" }}>
         <Box sx={{ p: 3, width: "100%" }}>
           <Outlet
-            context={[manualOpen, setManualOpen, uploadOpen, setUploadOpen]}
+            context={[manualOpen, setManualOpen, uploadOpen, setUploadOpen, printOpen, setPrintOpen]}
           />
 
           <Container maxWidth="xl" fixed>
@@ -224,15 +276,21 @@ const Semester = () => {
     </Box>
   );
 };
+
 export const loader = async ({ params }) => {
   const { code } = params;
   const [semester, currentSchoolYear, faculty_id] = code.split("-");
-
+  
   const { data } = await axios.get(
     `${process.env.REACT_APP_API_URL}/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}`
   );
   const loads = data;
 
-  return { loads };
+  const { data: data2 } = await axios.get(
+    `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
+  )
+  const { schoolyear:dbSchoolYear, semester:dbSemester, status:dbStatus, to:dbTo } = data2[0]
+
+  return { loads, dbSchoolYear, dbSemester, dbStatus, dbTo};
 };
 export default Semester;

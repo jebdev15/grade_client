@@ -54,11 +54,12 @@ const Index = () => {
       );
       if (data.length) {
         setIndividualCookie("faculty_id", data[0].faculty_id);
+        setIndividualCookie("role", data[0].role);
         setIndividualCookie("name", name);
         setIndividualCookie("picture", picture);
         setIndividualCookie("email", email);
         setIndividualCookie("campus", campus);
-        if(email === process.env.REACT_APP_REGISTRAR_EMAIL) navigate('/admin');
+        if(data[0].role === 'Administrator') navigate('/admin');
         else navigate("/home");
       }
     } catch (err) {

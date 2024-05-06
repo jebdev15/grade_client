@@ -4,6 +4,7 @@ import {
   Avatar,
   Box,
   Button,
+  Collapse,
   IconButton,
   List,
   ListItemAvatar,
@@ -17,27 +18,32 @@ import {
   Toolbar,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import {
-  BeachAccess,
+  ExpandLess,
+  ExpandMore,
+  Home as HomeIcon,
   Logout,
-  LooksOne,
-  LooksTwo,
   Menu as MenuIcon,
+  People as PeopleIcon,
+  Tune as TuneIcon,
+  Schedule as ScheduleIcon,
+  WorkHistory as WorkHistoryIcon,
 } from "@mui/icons-material";
 import { Outlet, useNavigate, useLoaderData } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { googleLogout } from "@react-oauth/google";
 import axios from "axios";
-import { urlEncode } from 'url-encode-base64';
-const Home = () => {
-  const siteCookies = ["picture", "name", "faculty_id", "email", "campus", "role"];
+
+export default function Admin() {
+  const siteCookies = ["picture", "name", "faculty_id", "email", "campus"];
   const [cookies, , removeCookie] = useCookies(siteCookies);
   const navigate = useNavigate();
-  const {dbSchoolYear, dbSemester} = useLoaderData();
-  const [schoolyear, setSchoolYear] = useState(dbSchoolYear)
-  const [semester, setSemester] = useState(dbSemester)
+  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('sm'));
 
+  // const {schoolyear, semester, from, to} = useLoaderData() || {schoolyear: 2000, semester: '1st', from: '0000-00-00', to: '0000-00-00'};
+  const {schoolyear, semester, from, to} = useLoaderData() || {schoolyear: 2000, semester: '1st', from: '0000-00-00', to: '0000-00-00'};
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -47,25 +53,19 @@ const Home = () => {
     googleLogout();
     navigate("/");
   };
-
-  const params = (semester, schoolYear, facultyID) => {
-    const encodedSchoolYear = urlEncode(2022);
-    const encodedSemester = urlEncode(semester);
-    const encodedFacultyID = urlEncode(facultyID);
-
-    return `${encodedSemester}-${encodedSchoolYear}-${encodedFacultyID}`;
-  }
-
+  
   // const dateNow = new Date().toJSON().split('T')[0];
   // const dueDate = to.split('T')[0];
-
+  
   useEffect(() => {
-    if(!cookies.hasOwnProperty('faculty_id') && cookies.role !== 'Faculty'){
+    if(!cookies.hasOwnProperty('faculty_id')){
       navigate('/')
-      console.log('User is\'nt allowed access');
     }
   }, [cookies, navigate])
 
+  useEffect(() => {
+    setDrawerMinimize(isSmallScreen ? true : !true)
+  }, [isSmallScreen, setDrawerMinimize])
   return (
     <Box
       sx={{
@@ -164,50 +164,47 @@ const Home = () => {
             <List>
                 <ListItemButton
                   onClick={() => {
-                    setDrawerMinimize(false);
-                    navigate(`/home/${params('1st',schoolyear,cookies.faculty_id)}`);
+                    navigate(`/admin`);
                   }}
                 >
-                <Tooltip title="First Semester">
+                <Tooltip title="Home">
                   <ListItemIcon>
-                    <LooksOne />
+                    <HomeIcon />
                   </ListItemIcon>
                 </Tooltip>
-                  {drawerMinimize ? null : <ListItemText primary="First Semester" />}
+                  {drawerMinimize ? null : <ListItemText primary="Home" />}
                 </ListItemButton>
+                    <ListItemButton 
+                      onClick={() => {
+                        navigate(`/admin/grades`);
+                      }}
+                    >
+                      <Tooltip title="Grade Submission">
+                        <ListItemIcon>
+                          <ScheduleIcon />
+                        </ListItemIcon>
+                      </Tooltip>
+                      {drawerMinimize ? null : <ListItemText primary="Grade Submission" />}
+                    </ListItemButton>
+                    
+                    <ListItemButton
+                      onClick={() => {
+                        navigate(`/admin/users`);
+                      }}
+                    >
+                      <Tooltip title="Users">
+                        <ListItemIcon>
+                          <PeopleIcon />
+                        </ListItemIcon>
+                      </Tooltip>
+                      {drawerMinimize ? null : <ListItemText primary="Users" />}
+                    </ListItemButton>
 
-                <ListItemButton
-                  onClick={() => {
-                    setDrawerMinimize(false);
-                    navigate(`/home/${params('2nd',schoolyear,cookies.faculty_id)}`);
-                  }}
-                >
-                  <Tooltip title="Second Semester">
-                    <ListItemIcon>
-                      <LooksTwo />
-                    </ListItemIcon>
-                  </Tooltip>
-                  {drawerMinimize ? null : <ListItemText primary="Second Semester" />}
-                </ListItemButton>
-
-                <ListItemButton
-                  onClick={() => {
-                    setDrawerMinimize(false);
-                    navigate(`/home/${params('summer',schoolyear,cookies.faculty_id)}`);
-                  }}
-                >
-                  <Tooltip title="Summer">
-                    <ListItemIcon>
-                      <BeachAccess />
-                    </ListItemIcon>
-                  </Tooltip>
-                  {drawerMinimize ? null : <ListItemText primary="Summer" />}
-                </ListItemButton>
             </List>
           </Paper>
         </Box>
         <Box sx={{ flexGrow: 1, p: 3 }}>
-          <Outlet context={[schoolyear]} />
+          <Outlet context={[2022, '1st', from, to]}/>
         </Box>
       </Box>
     </Box>
@@ -216,9 +213,8 @@ const Home = () => {
 
 export const loader = async () => {
   const {data} = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
+    `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear?getYear=currentYearSetBySystem`
   )
-  const {schoolyear:dbSchoolYear, semester:dbSemester, from, to} = data[0]
-  return {dbSchoolYear, dbSemester, from, to}
+  const {schoolyear, semester, from, to} = data[0]
+  return {schoolyear, semester, from, to}
 }
-export default Home;
