@@ -1,5 +1,5 @@
 import { createTheme, responsiveFontSizes } from "@mui/material";
-import { blue, green, orange } from "@mui/material/colors";
+import { blue, green, orange, grey } from "@mui/material/colors";
 
 let theme = createTheme({
   palette: {
@@ -18,7 +18,17 @@ let theme = createTheme({
     },
     text: {
       primary: green[900],
-      secondary: green[50],
+      secondary: grey[500],
+      main: grey[900],
+      light: "#ffffff",
+    },
+    background: {
+      main: "#ffffff",
+      light: green[50],
+      dark: green[900],
+    },
+    placeholder: {
+      default: grey[500],
     },
   },
   components: {

@@ -29,29 +29,37 @@ const GradeTable = () => {
   const decode = {
     semester: urlDecode(semester),
     currentSchoolYear: urlDecode(currentSchoolYear),
-  }
-  const { rows, loadInfoArr, status, dbSchoolYear, dbSemester, dbStatus, dbTo  } = useLoaderData();
+  };
+  const {
+    rows,
+    loadInfoArr,
+    status,
+    dbSchoolYear,
+    dbSemester,
+    dbStatus,
+    dbTo,
+  } = useLoaderData();
   const [manualOpen, setManualOpen] = useOutletContext();
   const loadInfo = loadInfoArr[0];
-  const SubjectisLock = loadInfo.isLock
+  const SubjectisLock = loadInfo.isLock;
 
   const [toUpdate, setToUpdate] = useState([]);
   const [tableLoading, setTableLoading] = useState(false);
   const [updatedCount, setUpdatedCount] = useState(null);
-  
+
   const dateFormatter = (date) => {
     const newDateTime = new Date(date);
-    
-    const formattedDate = newDateTime.toLocaleString('en-PH', {
-      month: 'long', // Full month name
-      day: 'numeric', // Day of the month
-      year: 'numeric', // Full year
-    });
-    
-    return formattedDate;
-  }
 
-  const currentDate = 'April 25, 2024';
+    const formattedDate = newDateTime.toLocaleString("en-PH", {
+      month: "long", // Full month name
+      day: "numeric", // Day of the month
+      year: "numeric", // Full year
+    });
+
+    return formattedDate;
+  };
+
+  const currentDate = "April 25, 2024";
   const systemScheduledDueDate = dateFormatter(dbTo);
 
   const checkDate = systemScheduledDueDate >= currentDate;
@@ -59,17 +67,27 @@ const GradeTable = () => {
   const checkSemester = dbSemester === decode.semester;
   const checkSubjectIsLock = SubjectisLock === 0;
 
-  const canUpload = checkDate && checkSchoolYear && checkSemester && checkSubjectIsLock;
-  console.log('canUpload', canUpload);
+  const canUpload =
+    checkDate && checkSchoolYear && checkSemester && checkSubjectIsLock;
+  console.log("canUpload", canUpload);
 
-  console.log({'currentDate' : currentDate, 'systemScheduledDueDate': systemScheduledDueDate});
-  console.log('checkDate', checkDate);
-  console.log({'dbSchoolYear': dbSchoolYear, decodedSchoolYear: parseInt(decode.currentSchoolYear)});
-  console.log('schoolYear', dbSchoolYear === parseInt(decode.currentSchoolYear));
-  console.log({'dbSemester': dbSemester, 'decodedSemester': decode.semester});
-  console.log('semester', dbSemester === decode.semester);
-  console.log({'SubjectisLock': SubjectisLock, 'isLock': 0});
-  console.log('checkSubjectIsLock', checkSubjectIsLock);
+  console.log({
+    currentDate: currentDate,
+    systemScheduledDueDate: systemScheduledDueDate,
+  });
+  console.log("checkDate", checkDate);
+  console.log({
+    dbSchoolYear: dbSchoolYear,
+    decodedSchoolYear: parseInt(decode.currentSchoolYear),
+  });
+  console.log(
+    "schoolYear",
+    dbSchoolYear === parseInt(decode.currentSchoolYear)
+  );
+  console.log({ dbSemester: dbSemester, decodedSemester: decode.semester });
+  console.log("semester", dbSemester === decode.semester);
+  console.log({ SubjectisLock: SubjectisLock, isLock: 0 });
+  console.log("checkSubjectIsLock", checkSubjectIsLock);
 
   const columns = [
     {
@@ -241,7 +259,13 @@ const GradeTable = () => {
       maxWidth="lg"
       scroll="paper"
     >
-      <DialogTitle sx={{ bgcolor: "primary.main" }}>
+      <DialogTitle
+        sx={{
+          bgcolor: "primary.main",
+          color: "text.light",
+          padding: "8px 24px",
+        }}
+      >
         <Box
           sx={{
             display: "flex",
@@ -257,18 +281,19 @@ const GradeTable = () => {
               navigate(`/home/${code}`);
             }}
           >
-            <Close />
+            <Close sx={{ color: "text.light" }} />
           </IconButton>
         </Box>
       </DialogTitle>
       <DialogContent>
         <Box
           sx={{
-            color: "primary.main",
+            color: "primary.dark",
             display: "flex",
-            justifyContent: "space-around",
+            justifyContent: "space-between",
             alignItems: "center",
             mt: 2,
+            mb: 2,
           }}
         >
           <Typography>
@@ -278,17 +303,12 @@ const GradeTable = () => {
             Section: <strong>{loadInfo.section}</strong>
           </Typography>
         </Box>
-        <Box
-          sx={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
+        <Box>
           <DataGrid
             getRowId={(row) => row.student_id}
             columns={columns}
             rows={rows}
+            rowHeight={32}
             autoHeight
             loading={tableLoading}
             editMode="row"
@@ -300,11 +320,12 @@ const GradeTable = () => {
                 color: theme.palette.secondary.main,
               },
               "& .MuiCheckbox-root:hover": {
-                bgcolor: theme.palette.secondary.light,
+                bgcolor: theme.palette.text.main,
               },
               "& .MuiSvgIcon-root": {
-                color: theme.palette.secondary.main,
+                color: theme.palette.placeholder.default,
               },
+              color: theme.palette.text.main,
             }}
             processRowUpdate={(row, prev) => {
               const isSame = JSON.stringify(row) === JSON.stringify(prev);
@@ -321,29 +342,29 @@ const GradeTable = () => {
               return row;
             }}
           />
-            <Button
-              variant="contained"
-              disabled={tableLoading}
-              sx={{
-                mt: 2,
-                justifySelf: "center",
-                display: toUpdate.length ? "block" : "none",
-              }}
-              onClick={async () => {
-                setTableLoading(true);
-                const { data } = await axios.post(
-                  `${process.env.REACT_APP_API_URL}/updateGrade`,
-                  { grades: toUpdate, class_code, method: "Manual" }
-                );
-                if (data) {
-                  setToUpdate([]);
-                  setTableLoading(false);
-                  setUpdatedCount(data);
-                }
-              }}
-            >
-              {tableLoading ? "Updating..." : "Update Record"}
-            </Button>
+          <Button
+            variant="contained"
+            disabled={tableLoading}
+            sx={{
+              mt: 2,
+              justifySelf: "center",
+              display: toUpdate.length ? "block" : "none",
+            }}
+            onClick={async () => {
+              setTableLoading(true);
+              const { data } = await axios.post(
+                `${process.env.REACT_APP_API_URL}/updateGrade`,
+                { grades: toUpdate, class_code, method: "Manual" }
+              );
+              if (data) {
+                setToUpdate([]);
+                setTableLoading(false);
+                setUpdatedCount(data);
+              }
+            }}
+          >
+            {tableLoading ? "Updating..." : "Update Record"}
+          </Button>
           <Snackbar
             open={Boolean(updatedCount)}
             onClose={() => setUpdatedCount(null)}
@@ -377,9 +398,22 @@ export const loader = async ({ params }) => {
 
   const { data: data3 } = await axios.get(
     `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear?getYear=currentYearSetBySystem`
-  )
-  const { schoolyear:dbSchoolYear, semester:dbSemester, status:dbStatus, to:dbTo } = data3[0]
+  );
+  const {
+    schoolyear: dbSchoolYear,
+    semester: dbSemester,
+    status: dbStatus,
+    to: dbTo,
+  } = data3[0];
 
-  return { rows, loadInfoArr, status, dbSchoolYear, dbSemester, dbStatus, dbTo };
+  return {
+    rows,
+    loadInfoArr,
+    status,
+    dbSchoolYear,
+    dbSemester,
+    dbStatus,
+    dbTo,
+  };
 };
 export default GradeTable;

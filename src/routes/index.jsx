@@ -18,6 +18,7 @@ import moment from "moment";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import "../style.css";
 const Index = () => {
   const [loading, setLoading] = useState(false);
   const [campus, setCampus] = useState("");
@@ -59,7 +60,7 @@ const Index = () => {
         setIndividualCookie("picture", picture);
         setIndividualCookie("email", email);
         setIndividualCookie("campus", campus);
-        if(data[0].role === 'Administrator') navigate('/admin');
+        if (data[0].role === "Administrator") navigate("/admin");
         else navigate("/home");
       }
     } catch (err) {
@@ -72,7 +73,7 @@ const Index = () => {
   });
 
   return (
-    <Box sx={{ bgcolor: "primary.main", height: "100vh", width: "100vw" }}>
+    <Box sx={{ bgcolor: "background.light", height: "100dvh", width: "100vw" }}>
       <Container maxWidth="sm" fixed sx={{ height: "inherit" }}>
         <Box
           sx={{
@@ -82,7 +83,11 @@ const Index = () => {
             alignItems: "center",
           }}
         >
-          <Paper sx={{ width: "100%", maxWidth: 400 }} elevation={8}>
+          <Paper
+            className="signin_page"
+            sx={{ width: "100%", maxWidth: 400 }}
+            elevation={8}
+          >
             <Box
               sx={{
                 width: "inherit",
@@ -109,7 +114,7 @@ const Index = () => {
                 Signin
               </Typography>
               <FormControl fullWidth sx={{ mb: 2, mt: 1 }}>
-                <InputLabel>Campus</InputLabel>
+                <InputLabel className="login_input_label">Campus</InputLabel>
                 <Select
                   label="Campus"
                   variant="standard"

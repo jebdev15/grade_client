@@ -12,7 +12,7 @@ import ErrorPage from "./ErrorPage";
 
 // Faculty Routes
 import Index from "./routes";
-import Home, {loader as homeLoader} from "./routes/home";
+import Home, { loader as homeLoader } from "./routes/home";
 
 import Start from "./routes/home/start";
 import Semester, { loader as semesterLoader } from "./routes/home/semester";
@@ -20,12 +20,14 @@ import GradeTable, {
   loader as gradeTableLoader,
 } from "./routes/home/gradeTable";
 import Upload, { loader as uploadLoader } from "./routes/home/upload";
-import PrintGradeSheet, { loader as printLoader} from "./routes/home/Print";
+import PrintGradeSheet, { loader as printLoader } from "./routes/home/Print";
 
 // Admin Routes
-import Admin, {loader as adminLoader} from './routes/admin/Index';
-import GradeSubmission, {loader as gradesLoader} from "./routes/admin/GradeSubmission";
-import Users, {loader as usersLoader} from "./routes/admin/Users";
+import Admin, { loader as adminLoader } from "./routes/admin/Index";
+import GradeSubmission, {
+  loader as gradesLoader,
+} from "./routes/admin/GradeSubmission";
+import Users, { loader as usersLoader } from "./routes/admin/Users";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -81,8 +83,8 @@ const router = createBrowserRouter([
         path: "users",
         element: <Users />,
         loader: usersLoader,
-      }
-    ]
+      },
+    ],
   },
 ]);
 root.render(

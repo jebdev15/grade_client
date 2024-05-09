@@ -1,4 +1,4 @@
-  import React, { lazy, useState, useRef } from "react";
+import React, { lazy, useState, useRef } from "react";
 import {
   Avatar,
   Box,
@@ -13,7 +13,8 @@ import {
   Divider,
   Grid,
   IconButton,
-  Typography, Tooltip,
+  Typography,
+  Tooltip,
 } from "@mui/material";
 import {
   useParams,
@@ -21,7 +22,15 @@ import {
   useLoaderData,
   Outlet,
 } from "react-router-dom";
-import { Class, Face, FolderOpen, Home, Keyboard, Print, Visibility } from "@mui/icons-material";
+import {
+  Class,
+  Face,
+  FolderOpen,
+  Home,
+  Keyboard,
+  Print,
+  Visibility,
+} from "@mui/icons-material";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 import moment from "moment";
@@ -38,62 +47,77 @@ const Semester = () => {
   const [manualOpen, setManualOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [printOpen, setPrintOpen] = useState(false);
-  
+
   const [loading, setLoading] = useState({
     manual: false,
     upload: false,
     print: false,
-  })
+  });
 
   const manualTimer = () => {
-    setLoading((prevState) => ({ ...prevState, manual: !prevState.manual, upload: !prevState.upload, print: !prevState.print })) 
+    setLoading((prevState) => ({
+      ...prevState,
+      manual: !prevState.manual,
+      upload: !prevState.upload,
+      print: !prevState.print,
+    }));
     setTimeout(() => {
-      setLoading((prevState) => ({ ...prevState, manual: !prevState.manual, upload: !prevState.upload, print: !prevState.print })) 
-    }, 10000)
-  }
+      setLoading((prevState) => ({
+        ...prevState,
+        manual: !prevState.manual,
+        upload: !prevState.upload,
+        print: !prevState.print,
+      }));
+    }, 10000);
+  };
   const uploadTimer = () => {
-    setLoading((prevState) => ({ ...prevState, manual: !prevState.manual, upload: !prevState.upload, print: !prevState.print })) 
+    setLoading((prevState) => ({
+      ...prevState,
+      manual: !prevState.manual,
+      upload: !prevState.upload,
+      print: !prevState.print,
+    }));
     setTimeout(() => {
-      setLoading((prevState) => ({ ...prevState, manual: !prevState.manual, upload: !prevState.upload, print: !prevState.print })) 
-    }, 1500)
-  }
-
-  
+      setLoading((prevState) => ({
+        ...prevState,
+        manual: !prevState.manual,
+        upload: !prevState.upload,
+        print: !prevState.print,
+      }));
+    }, 1500);
+  };
 
   const decodedSemester = urlDecode(semester);
   const decodedSchoolYear = urlDecode(currentSchoolYear);
 
   const dateFormatter = (date) => {
     const newDateTime = new Date(date);
-    
-    const formattedDate = newDateTime.toLocaleString('en-PH', {
-      month: 'long', // Full month name
-      day: 'numeric', // Day of the month
-      year: 'numeric', // Full year
+
+    const formattedDate = newDateTime.toLocaleString("en-PH", {
+      month: "long", // Full month name
+      day: "numeric", // Day of the month
+      year: "numeric", // Full year
     });
-    
+
     return formattedDate;
-  }
+  };
   // const getcurrentDate = Date.now();
   // const currentDate = dateFormatter(getcurrentDate)
-  const currentDate = 'April 25, 2024'
-  const systemScheduledDueDate = dateFormatter(dbTo)
+  const currentDate = "April 25, 2024";
+  const systemScheduledDueDate = dateFormatter(dbTo);
 
   const checkDate = currentDate >= systemScheduledDueDate;
   const checkSchoolYear = dbSchoolYear === parseInt(decodedSchoolYear);
   const checkSemester = dbSemester === decodedSemester;
 
   const canUpload = checkDate && checkSchoolYear && checkSemester;
-  
+
   // console.log({'currentDate' : currentDate, 'systemScheduledDueDate': systemScheduledDueDate});
-  console.log('canUpload', systemScheduledDueDate);
+  console.log("canUpload", systemScheduledDueDate);
   // console.log({'dbSchoolYear': dbSchoolYear, decodedSchoolYear: parseInt(decodedSchoolYear)});
   // console.log('schoolYear', dbSchoolYear === parseInt(decodedSchoolYear));
   // console.log({'dbSemester': dbSemester, 'decodedSemester': decodedSemester});
   // console.log('semester', dbSemester === decodedSemester);
-
-
-  
 
   const LoadCard = ({
     subject_code,
@@ -104,7 +128,7 @@ const Semester = () => {
     timestamp,
     method,
   }) => {
-    const encodedClassCode = urlEncode(class_code)
+    const encodedClassCode = urlEncode(class_code);
     return (
       <Card variant="outlined">
         <CardHeader
@@ -112,11 +136,11 @@ const Semester = () => {
           subheader={section}
           avatar={
             <Avatar sx={{ bgcolor: "white" }}>
-              <Class color="success" />
+              <Class color="primary" />
             </Avatar>
           }
           sx={{
-            bgcolor: "success.main",
+            bgcolor: "primary.main",
             "& .MuiCardHeader-title": {
               fontWeight: 600,
               color: "white",
@@ -157,69 +181,86 @@ const Semester = () => {
         <CardActions sx={{ justifyContent: "space-between" }}>
           <Chip
             icon={<Face />}
-            color="success"
+            color="primary"
             label={`${noStudents} students`}
+            sx={{ color: "text.light" }}
           />
           <ButtonGroup>
-            <Tooltip title={ (canUpload) && parseInt(isLock) === 0 ? 'Encoding of Grades' : 'View Grades'}>  
+            <Tooltip
+              title={
+                canUpload && parseInt(isLock) === 0
+                  ? "Encoding of Grades"
+                  : "View Grades"
+              }
+            >
               <span>
-                <IconButton 
-                    color="success"
-                    size="large" 
-                    aria-label="" 
-                    onClick={() => {
-                        navigate(
-                          `/home/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}`
-                        );
-                        setManualOpen(true);
-                        manualTimer()               
-                      }}
-                    disabled={loading.manual || loading.upload ? true : false}
+                <IconButton
+                  color="primary"
+                  size="large"
+                  aria-label=""
+                  onClick={() => {
+                    navigate(
+                      `/home/${semester}-${currentSchoolYear}-${urlEncode(
+                        cookies.faculty_id
+                      )}/${encodedClassCode}`
+                    );
+                    setManualOpen(true);
+                    manualTimer();
+                  }}
+                  disabled={loading.manual || loading.upload ? true : false}
                 >
-                  { (canUpload) && parseInt(isLock) === 0 ? <Keyboard /> : <Visibility />}
+                  {canUpload && parseInt(isLock) === 0 ? (
+                    <Keyboard />
+                  ) : (
+                    <Visibility />
+                  )}
                 </IconButton>
               </span>
             </Tooltip>
-            {
-              ((canUpload) && parseInt(isLock) === 0) && (
-                  <Tooltip title="Grade Sheet">  
-                  <span>
-                    <IconButton 
-                      color="success"
-                      size="large" 
-                      aria-label="" 
-                      onClick={() => {
-                        navigate(
-                          `/home/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/upload/${encodedClassCode}`
-                        );
-                        setUploadOpen(true);
-                        uploadTimer()
-                      }}
-                      disabled={loading.manual || loading.upload ? true : false}
-                    >
-                      <FolderOpen />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-              )
-            }
-              <Tooltip title="Print Grade Sheet">  
-                <span>  
-                  <IconButton 
-                    color="success"
-                    size="large" 
-                    aria-label="" 
+            {canUpload && parseInt(isLock) === 0 && (
+              <Tooltip title="Grade Sheet">
+                <span>
+                  <IconButton
+                    color="primary"
+                    size="large"
+                    aria-label=""
                     onClick={() => {
-                      navigate(`/home/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/print/${encodedClassCode}`);
-                      setPrintOpen(true);
-                      manualTimer()
+                      navigate(
+                        `/home/${semester}-${currentSchoolYear}-${urlEncode(
+                          cookies.faculty_id
+                        )}/upload/${encodedClassCode}`
+                      );
+                      setUploadOpen(true);
+                      uploadTimer();
                     }}
-                    // disabled={loading.manual || loading.upload ? true : false}
+                    disabled={loading.manual || loading.upload ? true : false}
                   >
-                    <Print />
+                    <FolderOpen />
                   </IconButton>
                 </span>
               </Tooltip>
+            )}
+            <Tooltip title="Print Grade Sheet">
+              <span>
+                <IconButton
+                  color="primary"
+                  size="large"
+                  aria-label=""
+                  onClick={() => {
+                    navigate(
+                      `/home/${semester}-${currentSchoolYear}-${urlEncode(
+                        cookies.faculty_id
+                      )}/print/${encodedClassCode}`
+                    );
+                    setPrintOpen(true);
+                    manualTimer();
+                  }}
+                  // disabled={loading.manual || loading.upload ? true : false}
+                >
+                  <Print />
+                </IconButton>
+              </span>
+            </Tooltip>
           </ButtonGroup>
         </CardActions>
       </Card>
@@ -246,15 +287,27 @@ const Semester = () => {
         </Typography>
       </Box>
 
-      <Box sx={{ mt: 2, overflowY: "auto", maxHeight: "75vh" }}>
+      <Box sx={{ mt: 2, overflowY: "auto" }}>
         <Box sx={{ p: 3, width: "100%" }}>
           <Outlet
-            context={[manualOpen, setManualOpen, uploadOpen, setUploadOpen, printOpen, setPrintOpen]}
+            context={[
+              manualOpen,
+              setManualOpen,
+              uploadOpen,
+              setUploadOpen,
+              printOpen,
+              setPrintOpen,
+            ]}
           />
 
           <Container maxWidth="xl" fixed>
             {loads ? (
-              <Grid container columnSpacing={3} rowSpacing={5}>
+              <Grid
+                className="semester-grid"
+                container
+                columnSpacing={3}
+                rowSpacing={5}
+              >
                 {loads.map((load) => (
                   <Grid key={load.class_code} item xs={4} md={3}>
                     <LoadCard {...load} />
@@ -280,7 +333,7 @@ const Semester = () => {
 export const loader = async ({ params }) => {
   const { code } = params;
   const [semester, currentSchoolYear, faculty_id] = code.split("-");
-  
+
   const { data } = await axios.get(
     `${process.env.REACT_APP_API_URL}/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}`
   );
@@ -288,9 +341,14 @@ export const loader = async ({ params }) => {
 
   const { data: data2 } = await axios.get(
     `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
-  )
-  const { schoolyear:dbSchoolYear, semester:dbSemester, status:dbStatus, to:dbTo } = data2[0]
+  );
+  const {
+    schoolyear: dbSchoolYear,
+    semester: dbSemester,
+    status: dbStatus,
+    to: dbTo,
+  } = data2[0];
 
-  return { loads, dbSchoolYear, dbSemester, dbStatus, dbTo};
+  return { loads, dbSchoolYear, dbSemester, dbStatus, dbTo };
 };
 export default Semester;
