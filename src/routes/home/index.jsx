@@ -59,11 +59,6 @@ const Home = () => {
 
   const [backdropOpen, setBackdropOpen] = useState(false);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down("sm"));
-  const transitions = useTransition(navigate, {
-    from: { opacity: 0 },
-    enter: { opacity: 1 },
-    leave: { opacity: 0 },
-  });
 
   useEffect(() => {
     localStorage.setItem("activeItem", activeItem);
@@ -83,9 +78,9 @@ const Home = () => {
 
   const logout = () => {
     siteCookies.forEach((cookie) => removeCookie(cookie, { path: "/" }));
-    localStorage.removeItem("activeItem");
     googleLogout();
     navigate("/");
+    localStorage.removeItem("activeItem");
   };
 
   const params = (semester, schoolYear, facultyID) => {
@@ -109,7 +104,9 @@ const Home = () => {
   return (
     <Box
       sx={{
+        display: "flex",
         flexDirection: "column",
+        height: "100dvh",
         alignItems: "stretch",
       }}
     >
@@ -191,7 +188,7 @@ const Home = () => {
                       display: "block",
                       position: "absolute",
                       top: 0,
-                      right: 24,
+                      right: 20,
                       width: 10,
                       height: 10,
                       bgcolor: "background.paper",
@@ -207,10 +204,7 @@ const Home = () => {
                   <ListItemAvatar>
                     <Avatar
                       src={cookies.picture}
-                      sx={{
-                        width: 40,
-                        height: 40,
-                      }}
+                      sx={{ width: 40, height: 40 }}
                     />
                   </ListItemAvatar>
                   <ListItemText primary={cookies.name} />
@@ -229,6 +223,7 @@ const Home = () => {
 
       <Box
         sx={{
+          display: "flex",
           flexGrow: 1,
           position: "relative",
         }}

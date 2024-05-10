@@ -144,6 +144,14 @@ div:has(> .semester-grid) {
   padding-top: calc(24px + 67px) !important;
 }
 
+.usersTable {
+  background-color: var(--background-main);
+  padding: 24px;
+}
+
+.usersTable > div > div:nth-child(2) > div:nth-child(2) {
+}
+
 @media (min-width: 1200px) {
 }
 
