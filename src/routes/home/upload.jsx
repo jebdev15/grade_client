@@ -1,4 +1,4 @@
-import { Close, Done, UploadFile } from "@mui/icons-material";
+import { Close, Done, UploadFile, VisuallyHiddenInputIcon, CloudUpload as CloudUploadIcon } from "@mui/icons-material";
 import {
   Alert,
   Avatar,
@@ -19,12 +19,12 @@ import { useCookies } from "react-cookie";
 import { FileUploader } from "react-drag-drop-files";
 import { saveAs } from "file-saver";
 import { urlDecode } from "url-encode-base64";
+import { styled } from '@mui/material/styles';
 
 const Upload = () => {
   const { code, class_code } = useParams();
   const [semester, currentSchoolYear] = code?.split("-");
   const [cookies] = useCookies(["name"]);
-  const canUpload = process.env.REACT_APP_CURRENT_SEMESTER === semester && process.env.REACT_APP_CURRENT_SCHOOL_YEAR === currentSchoolYear;
   const { loadInfoArr } = useLoaderData();
   const loadInfo = loadInfoArr[0];
 
@@ -62,6 +62,10 @@ const Upload = () => {
     }
   };
 
+  const handleChangeFile = (e) => {
+    setUploadFile(e.target.files[0]);
+    console.log(e.target.files[0]);
+  }
   const upload = async () => {
     setUploading(true);
     const formData = new FormData();
@@ -89,7 +93,17 @@ const Upload = () => {
       console.log(updateDataContainer);
     }
   };
-
+  const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1,
+  });
   return (
     <Dialog
       open={uploadOpen}
@@ -126,7 +140,7 @@ const Upload = () => {
         <Box sx={{ display: "flex", pt: 3 }}>
           <Box sx={{ display: "flex", flexDirection: "column", flex: 1, m: 2 }}>
             <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-              <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}> 1</Avatar>
+              <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>A</Avatar>
               <Typography>
                 Download the grade sheet of the class and fill it up.
               </Typography>
@@ -164,11 +178,50 @@ const Upload = () => {
             }}
           >
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>2</Avatar>
+              <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>B</Avatar>
               <Typography>Upload the grade sheet.</Typography>
             </Box>
             <Box sx={{ width: "100%", flex: 1 }}>
-              <FileUploader
+              <Box
+                  sx={{
+                  borderColor: "primary.light",
+                  border: "2px dashed",
+                  p: 2,
+                  height: "100%",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  flexDirection: "column",
+                }}
+                disabled={uploading}
+              >
+                {uploadFile ? (
+                  <Box sx={{ textAlign: "center" }}>
+                    <Done color="primary" fontSize="large" />
+                    <Typography variant="h6" sx={{ mt: 2 }}>
+                      File Inserted!
+                    </Typography>                      <Typography>{uploadFile.name}</Typography>
+                    <Typography variant="caption">
+                      (Click or drop file to re-upload)
+                    </Typography>
+                  </Box>
+                ) : (                  
+                <Button
+                  component="label"
+                  role={undefined}
+                  variant=""
+                  tabIndex={-1}
+                  startIcon={<CloudUploadIcon />}
+                  
+                >
+                  {/* <VisuallyHiddenInput name="file" allowed="xlsx" type="file" /> */}
+                  <input hidden type="file" onChange={handleChangeFile} name="file" allowed="xlsx"/>
+                  <Typography variant="body1" color="initial">Click to Upload a file</Typography>
+                </Button>
+                  )}
+              </Box>
+              {/* <FileUploader
                 handleChange={(file) => setUploadFile(file)}
                 name="file"
                 disabled={!canUpload || uploading }
@@ -202,13 +255,13 @@ const Upload = () => {
                       <Box sx={{ textAlign: "center" }}>
                         <UploadFile color="primary" fontSize="large" />
                         <Typography variant="h6" sx={{ mt: 2 }}>
-                          Click or drop a file here to upload.
+                          Click to upload a file
                         </Typography>
                       </Box>
                     )}
                   </Box>
                 }
-              />
+              /> */}
             </Box>
             <Button
               variant="contained"

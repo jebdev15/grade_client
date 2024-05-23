@@ -29,6 +29,7 @@ import {
   Keyboard,
   Print,
   Visibility,
+  Task as TaskIcon,
 } from "@mui/icons-material";
 import axios from "axios";
 import { useCookies } from "react-cookie";
@@ -50,6 +51,7 @@ const Semester = () => {
   const [loading, setLoading] = useState({
     manual: false,
     upload: false,
+    lockGradeSheet: false,
     print: false,
   });
 
@@ -58,6 +60,7 @@ const Semester = () => {
       ...prevState,
       manual: !prevState.manual,
       upload: !prevState.upload,
+      lockGradeSheet: !prevState.lockGradeSheet,
       print: !prevState.print,
     }));
     setTimeout(() => {
@@ -65,6 +68,7 @@ const Semester = () => {
         ...prevState,
         manual: !prevState.manual,
         upload: !prevState.upload,
+        lockGradeSheet: !prevState.lockGradeSheet,
         print: !prevState.print,
       }));
     }, 1500);
@@ -74,6 +78,7 @@ const Semester = () => {
       ...prevState,
       manual: !prevState.manual,
       upload: !prevState.upload,
+      lockGradeSheet: !prevState.lockGradeSheet,
       print: !prevState.print,
     }));
     setTimeout(() => {
@@ -81,9 +86,28 @@ const Semester = () => {
         ...prevState,
         manual: !prevState.manual,
         upload: !prevState.upload,
+        lockGradeSheet: !prevState.lockGradeSheet,
         print: !prevState.print,
       }));
     }, 1500);
+  };
+  const lockGradeSheetTimer = () => {
+    setLoading((prevState) => ({
+      ...prevState,
+      manual: !prevState.manual,
+      upload: !prevState.upload,
+      lockGradeSheet: !prevState.lockGradeSheet,
+      print: !prevState.print,
+    }));
+    setTimeout(() => {
+      setLoading((prevState) => ({
+        ...prevState,
+        manual: !prevState.manual,
+        upload: !prevState.upload,
+        lockGradeSheet: !prevState.lockGradeSheet,
+        print: !prevState.print,
+      }));
+    }, 3000);
   };
 
   const decodedSemester = urlDecode(semester);
@@ -119,6 +143,33 @@ const Semester = () => {
     method,
   }) => {
     const encodedClassCode = urlEncode(class_code);
+    const submitGradeSheetConfirmation = async (classCode) => {
+      const confirmation = window.confirm(
+        "Are you sure you want to submit this grade sheet?"
+      )
+      if(!confirmation) return
+      await submitGradeSheetConfirmed(classCode)
+    }
+
+    const submitGradeSheetConfirmed = async (classCode) => {
+      lockGradeSheetTimer()
+      console.log({classCode});
+      const formData = new FormData();
+      formData.append("class_code", encodedClassCode);
+      formData.append("isLock", 0)
+      const { data } = await axios.post(
+        `${process.env.REACT_APP_API_URL}/admin/updateClassCodeStatus`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log(data);
+      navigate(".", { replace: true });
+      setTimeout(() => alert("Grade Sheet has been submitted."), 1000)
+    }
     return (
       <Card variant="outlined">
         <CardHeader
@@ -169,12 +220,14 @@ const Semester = () => {
         </CardContent>
         <Divider />
         <CardActions sx={{ justifyContent: "space-between" }}>
-          <Chip
-            icon={<Face />}
-            color="primary"
-            label={`${noStudents} students`}
-            sx={{ color: "text.light" }}
-          />
+          <Tooltip title={`${noStudents} students`}>
+            <Chip
+              icon={<Face />}
+              color="primary"
+              label={`${noStudents}`}
+              sx={{ color: "text.light" }}
+            />
+          </Tooltip>
           <ButtonGroup>
             <Tooltip
               title={
@@ -197,7 +250,7 @@ const Semester = () => {
                     setManualOpen(true);
                     manualTimer();
                   }}
-                  disabled={loading.manual || loading.upload ? true : false}
+                  disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false}
                 >
                   {canUpload && parseInt(isLock) === 0 ? (
                     <Keyboard />
@@ -223,9 +276,24 @@ const Semester = () => {
                       setUploadOpen(true);
                       uploadTimer();
                     }}
-                    disabled={loading.manual || loading.upload ? true : false}
+                    disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false}
                   >
                     <FolderOpen />
+                  </IconButton>
+                </span>
+              </Tooltip>
+            )}
+            {canUpload && parseInt(isLock) === 0 && (
+              <Tooltip title="Submit grade sheet. You may not able to edit or upload grades. To edit or upload grades, please contact your administrator.">
+                <span>
+                  <IconButton
+                    color="primary"
+                    size="large"
+                    aria-label=""
+                    onClick={() => submitGradeSheetConfirmation(encodedClassCode)}
+                    disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false}
+                  >
+                    <TaskIcon />
                   </IconButton>
                 </span>
               </Tooltip>
@@ -245,7 +313,7 @@ const Semester = () => {
                     setPrintOpen(true);
                     manualTimer();
                   }}
-                  // disabled={loading.manual || loading.upload ? true : false}
+                  disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print  ? true : false}
                 >
                   <Print />
                 </IconButton>

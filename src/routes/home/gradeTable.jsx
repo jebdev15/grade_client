@@ -331,7 +331,12 @@ const GradeTable = () => {
               display: toUpdate.length ? "block" : "none",
             }}
             onClick={async () => {
+              const confirmation = window.confirm(
+                "Are you sure you want to update?"
+              )
+              if(!confirmation) return
               setTableLoading(true);
+              console.log({toUpdate, class_code: urlDecode(class_code)});
               const { data } = await axios.post(
                 `${process.env.REACT_APP_API_URL}/updateGrade`,
                 { grades: toUpdate, class_code, method: "Manual" }

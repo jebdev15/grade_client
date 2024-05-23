@@ -208,8 +208,8 @@ class ComponentToPrint extends React.Component {
                   <td height={"auto"}>{studentName}</td>
                   <td height={"auto"}>{midTermGrade}</td>
                   <td height={"auto"}>{endTermGrade}</td>
-                  <td height={"auto"}>{finalGrade}</td>
-                  <td height={"auto"}>{getStatusOrRemark(remarks)}</td>
+                  <td height={"auto"}>{(midTermGrade > 0 && endTermGrade > 0) && finalGrade}</td>
+                  <td height={"auto"}>{(getStatusOrRemark(remarks) === "Failed" && midTermGrade > 0 && endTermGrade > 0) && getStatusOrRemark(remarks)}</td>
                 </tr>
               )
             )}
@@ -339,10 +339,6 @@ const PrintGradeSheet = () => {
         }
       `,
   });
-
-  useEffect(() => {
-    console.log("printOpen", printOpen);
-  }, [printOpen]);
   return (
     <Dialog
       open={printOpen}
