@@ -21,7 +21,6 @@ import { useEffect } from "react";
 import "../style.css";
 const Index = () => {
   const [loading, setLoading] = useState(false);
-  const [campus, setCampus] = useState("");
   const [saveCredentials, setSaveCredentials] = useState(false);
 
   const [cookies, setCookie] = useCookies([
@@ -30,6 +29,7 @@ const Index = () => {
     "campus",
     "picture",
     "email",
+    "accessLevel"
   ]);
 
   const navigate = useNavigate();
@@ -55,11 +55,12 @@ const Index = () => {
       );
       if (data.length) {
         setIndividualCookie("faculty_id", data[0].faculty_id);
-        setIndividualCookie("role", data[0].role);
+        setIndividualCookie("accessLevel", data[0].accessLevel);
         setIndividualCookie("name", name);
         setIndividualCookie("picture", picture);
         setIndividualCookie("email", email);
-        setIndividualCookie("campus", campus);
+        // setIndividualCookie("campus", campus);
+        if (data[0].accessLevel === "Administrator" || data[0].accessLevel === "Registrar") navigate("/admin");
         if (data[0].role === "Administrator") navigate("/admin");
         else navigate("/home");
       }
@@ -111,42 +112,15 @@ const Index = () => {
                 textAlign="center"
                 sx={{ mt: 1, mb: 2 }}
               >
-                Signin
+                Sign In
               </Typography>
-              <FormControl fullWidth sx={{ mb: 2, mt: 1 }}>
-                <InputLabel className="login_input_label">Campus</InputLabel>
-                <Select
-                  label="Campus"
-                  variant="standard"
-                  value={campus}
-                  placeholder="Campus"
-                  onChange={(e) => setCampus(e.target.value)}
-                >
-                  {["Alijis", "Binalbagan", "Fortune Towne", "Talisay"].map(
-                    (c) => (
-                      <MenuItem key={c} value={c}>
-                        {c}
-                      </MenuItem>
-                    )
-                  )}
-                </Select>
-              </FormControl>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    defaultChecked={false}
-                    name="save"
-                    onChange={(e) => setSaveCredentials(!saveCredentials)}
-                  />
-                }
-                label="Save Credentials"
-                sx={{ mb: 2 }}
-              />
               <Box
                 sx={{
                   width: "100%",
-                  display: campus ? "flex" : "none",
+                  display: "flex",
+                  flexDirection: "column",
                   justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
                 {loading ? (
@@ -157,6 +131,16 @@ const Index = () => {
                     onError={() => console.log("Error logging in")}
                   />
                 )}
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    defaultChecked={false}
+                    name="save"
+                    onChange={(e) => setSaveCredentials(!saveCredentials)}
+                  />
+                }
+                label="Save Credentials"
+              />
               </Box>
             </Box>
           </Paper>

@@ -59,36 +59,16 @@ const GradeTable = () => {
     return formattedDate;
   };
 
-  const currentDate = "April 25, 2024";
+  const getcurrentDate = Date.now();
+  const currentDate = dateFormatter(getcurrentDate);
   const systemScheduledDueDate = dateFormatter(dbTo);
 
-  const checkDate = systemScheduledDueDate >= currentDate;
+  const checkDate = new Date(currentDate) <= new Date(systemScheduledDueDate);
   const checkSchoolYear = dbSchoolYear === parseInt(decode.currentSchoolYear);
   const checkSemester = dbSemester === decode.semester;
-  const checkSubjectIsLock = SubjectisLock === 0;
+  const checkSubjectIsNotLock = SubjectisLock === 0;
 
-  const canUpload =
-    checkDate && checkSchoolYear && checkSemester && checkSubjectIsLock;
-  console.log("canUpload", canUpload);
-
-  console.log({
-    currentDate: currentDate,
-    systemScheduledDueDate: systemScheduledDueDate,
-  });
-  console.log("checkDate", checkDate);
-  console.log({
-    dbSchoolYear: dbSchoolYear,
-    decodedSchoolYear: parseInt(decode.currentSchoolYear),
-  });
-  console.log(
-    "schoolYear",
-    dbSchoolYear === parseInt(decode.currentSchoolYear)
-  );
-  console.log({ dbSemester: dbSemester, decodedSemester: decode.semester });
-  console.log("semester", dbSemester === decode.semester);
-  console.log({ SubjectisLock: SubjectisLock, isLock: 0 });
-  console.log("checkSubjectIsLock", checkSubjectIsLock);
-
+  const canUpload = checkDate && checkSchoolYear && checkSemester && checkSubjectIsNotLock;
   const columns = [
     {
       field: "student_id",

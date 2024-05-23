@@ -28,7 +28,7 @@ import {
   Menu as MenuIcon,
   Opacity,
 } from "@mui/icons-material";
-import { Outlet, useNavigate, useLoaderData } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { googleLogout } from "@react-oauth/google";
 import axios from "axios";
@@ -41,14 +41,23 @@ const Home = () => {
     "faculty_id",
     "email",
     "campus",
-    "role",
+    "accessLevel",
   ];
 
   const [cookies, , removeCookie] = useCookies(siteCookies);
   const navigate = useNavigate();
-  const { dbSchoolYear, dbSemester } = useLoaderData();
-  const [schoolyear, setSchoolYear] = useState(dbSchoolYear);
-  const [semester, setSemester] = useState(dbSemester);
+
+  const [schoolyear, setSchoolYear] = useState(0);
+  
+  useEffect(() => {
+    const getCurrentSchoolYear = async () => {
+        const { data } = await axios.get(
+          `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
+        );
+        setSchoolYear(data[0].schoolyear);
+    };
+    getCurrentSchoolYear();
+  }, [schoolyear]);
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -84,7 +93,7 @@ const Home = () => {
   };
 
   const params = (semester, schoolYear, facultyID) => {
-    const encodedSchoolYear = urlEncode(2022);
+    const encodedSchoolYear = urlEncode(schoolYear);
     const encodedSemester = urlEncode(semester);
     const encodedFacultyID = urlEncode(facultyID);
 
@@ -95,9 +104,9 @@ const Home = () => {
   // const dueDate = to.split('T')[0];
 
   useEffect(() => {
-    if (!cookies.hasOwnProperty("faculty_id") && cookies.role !== "Faculty") {
+    if (!cookies.hasOwnProperty("faculty_id") && cookies.accessLevel !== "Faculty") {
       navigate("/");
-      console.log("User is'nt allowed access");
+      // console.log("User is'nt allowed access");
     }
   }, [cookies, navigate]);
 
@@ -258,7 +267,7 @@ const Home = () => {
                 onClick={() => {
                   // setDrawerMinimize(false);
                   navigate(
-                    `/home/${params("1st", schoolyear, cookies.faculty_id)}`
+                    `/home/${params("1st", parseInt(schoolyear), cookies.faculty_id)}`
                   );
                   setActiveItem("1st");
                 }}
@@ -278,7 +287,7 @@ const Home = () => {
                 onClick={() => {
                   // setDrawerMinimize(false);
                   navigate(
-                    `/home/${params("2nd", schoolyear, cookies.faculty_id)}`
+                    `/home/${params("2nd", parseInt(schoolyear), cookies.faculty_id)}`
                   );
                   setActiveItem("2nd");
                 }}
@@ -298,7 +307,7 @@ const Home = () => {
                 onClick={() => {
                   // setDrawerMinimize(false);
                   navigate(
-                    `/home/${params("summer", schoolyear, cookies.faculty_id)}`
+                    `/home/${params("summer", parseInt(schoolyear), cookies.faculty_id)}`
                   );
                   setActiveItem("summer");
                 }}
@@ -340,13 +349,5 @@ const Home = () => {
       </Box>
     </Box>
   );
-};
-
-export const loader = async () => {
-  const { data } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
-  );
-  const { schoolyear: dbSchoolYear, semester: dbSemester, from, to } = data[0];
-  return { dbSchoolYear, dbSemester, from, to };
 };
 export default Home;

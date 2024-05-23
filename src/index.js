@@ -12,7 +12,7 @@ import ErrorPage from "./ErrorPage";
 
 // Faculty Routes
 import Index from "./routes";
-import Home, { loader as homeLoader } from "./routes/home";
+import Home from "./routes/home";
 
 import Start from "./routes/home/start";
 import Semester, { loader as semesterLoader } from "./routes/home/semester";
@@ -23,24 +23,21 @@ import Upload, { loader as uploadLoader } from "./routes/home/upload";
 import PrintGradeSheet, { loader as printLoader } from "./routes/home/Print";
 
 // Admin Routes
-import Admin, { loader as adminLoader } from "./routes/admin/Index";
-import GradeSubmission, {
-  loader as gradesLoader,
-} from "./routes/admin/GradeSubmission";
-import Users, { loader as usersLoader } from "./routes/admin/Users";
+import Admin from './routes/admin/Index';
+import GradeSubmission, {loader as gradesLoader} from "./routes/admin/GradeSubmission";
+import Users, {loader as usersLoader} from "./routes/admin/Users";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Index />,
     errorElement: <ErrorPage />,
+    element: <Index />,
   },
   {
     path: "home",
     element: <Home />,
-    loader: homeLoader,
     children: [
       { index: true, element: <Start /> },
       {
@@ -69,7 +66,6 @@ const router = createBrowserRouter([
   },
   {
     path: "admin",
-    loader: adminLoader,
     element: <Admin />,
     errorElement: <h1>Error AdminPage</h1>,
     children: [
@@ -89,7 +85,8 @@ const router = createBrowserRouter([
 ]);
 root.render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId="716180471328-k91kdip1kj2024jkj5tporlkehffbnb9.apps.googleusercontent.com">
+    {/* <GoogleOAuthProvider clientId="716180471328-k91kdip1kj2024jkj5tporlkehffbnb9.apps.googleusercontent.com"> */} {/* using almark chmsu email */}
+    <GoogleOAuthProvider clientId="853501125882-et0u8vs2qthqbq4vkskobqgm3mb8g91h.apps.googleusercontent.com"> {/* using johneric chmsu email */}
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <RouterProvider router={router} />

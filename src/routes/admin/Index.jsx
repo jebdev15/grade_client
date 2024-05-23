@@ -31,25 +31,27 @@ import {
   Schedule as ScheduleIcon,
   WorkHistory as WorkHistoryIcon,
 } from "@mui/icons-material";
-import { Outlet, useNavigate, useLoaderData } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { googleLogout } from "@react-oauth/google";
 import axios from "axios";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 
 export default function Admin() {
-  const siteCookies = ["picture", "name", "faculty_id", "email", "campus"];
+  const siteCookies = ["picture", "name", "faculty_id", "email", "campus", "accessLevel"];
   const [cookies, , removeCookie] = useCookies(siteCookies);
   const navigate = useNavigate();
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
-
-  // const {schoolyear, semester, from, to} = useLoaderData() || {schoolyear: 2000, semester: '1st', from: '0000-00-00', to: '0000-00-00'};
-  const { schoolyear, semester, from, to } = useLoaderData() || {
-    schoolyear: 2000,
-    semester: "1st",
+  const initialRegistrarActivity = {
+    activity: "",
+    schoolyear: 1970,
+    semester: "",
+    status: "",
     from: "0000-00-00",
     to: "0000-00-00",
-  };
+  }
+  const [registrarActivity, setRegistrarActivity] = useState(initialRegistrarActivity);
+  const { activity, schoolyear, semester, status, from, to } = registrarActivity;
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -77,6 +79,13 @@ export default function Admin() {
     [isMobile]
   );
 
+  useEffect(() => {
+    if (cookies.accessLevel !== "Administrator" || cookies.accessLevel !== "Registrar") {
+      navigate("/");
+      // console.log("User is'nt allowed access");
+    }
+  }, [cookies, navigate]);
+
   const logout = () => {
     siteCookies.forEach((cookie) => removeCookie(cookie, { path: "/" }));
     googleLogout();
@@ -84,10 +93,14 @@ export default function Admin() {
     localStorage.removeItem("activeItem");
   };
 
-  // const dateNow = new Date().toJSON().split('T')[0];
-  // const dueDate = to.split('T')[0];
-
   useEffect(() => {
+    const loader = async () => {
+      const { data } = await axios.get(
+        `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear?getYear=currentYearSetBySystem`
+      );
+      setRegistrarActivity(data[0])
+    };
+    loader();
     if (!cookies.hasOwnProperty("faculty_id")) {
       navigate("/");
     }
@@ -318,17 +331,11 @@ export default function Admin() {
               }}
             ></Backdrop>
           )}
-          <Outlet context={[2022, "1st", from, to]} />
+          <Outlet context={[activity, schoolyear, semester, status, from, to]} />
+        {/* <Box sx={{ flexGrow: 1, p: 3 }}>
+          <Outlet context={[schoolyear, semester, from, to]}/> */}
         </Box>
       </Box>
     </Box>
   );
 }
-
-export const loader = async () => {
-  const { data } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear?getYear=currentYearSetBySystem`
-  );
-  const { schoolyear, semester, from, to } = data[0];
-  return { schoolyear, semester, from, to };
-};

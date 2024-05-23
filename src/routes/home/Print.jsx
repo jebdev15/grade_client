@@ -422,18 +422,19 @@ const PrintGradeSheet = () => {
   );
 };
 
-export const loader = async ({ params }) => {
-  const { code, class_code } = params;
-  const [semester, currentSchoolYear] = code.split("-");
-  const { data } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getClassCodeDetails?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
-  );
-  console.log("data", data);
+  export const loader = async ({ params }) => {
+    const { code, class_code} = params;
+    const [semester, currentSchoolYear] = code.split("-");
+    const { data } = await axios.get(
+      `${process.env.REACT_APP_API_URL}/getClassCodeDetails?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+    );
+    // console.log('data', data);
 
-  const { data: students } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
-  );
-  console.log("students", students);
-  return { data, students };
-};
-export default PrintGradeSheet;
+    const { data: students } = await axios.get(
+      `${process.env.REACT_APP_API_URL}/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+    );
+    // console.log('students', students);
+    return { data, students };
+  };
+  export default PrintGradeSheet;
+  

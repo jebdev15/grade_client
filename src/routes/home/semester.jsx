@@ -1,8 +1,7 @@
-import React, { lazy, useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Box,
-  Button,
   ButtonGroup,
   Card,
   CardActions,
@@ -68,7 +67,7 @@ const Semester = () => {
         upload: !prevState.upload,
         print: !prevState.print,
       }));
-    }, 10000);
+    }, 1500);
   };
   const uploadTimer = () => {
     setLoading((prevState) => ({
@@ -101,23 +100,14 @@ const Semester = () => {
 
     return formattedDate;
   };
-  // const getcurrentDate = Date.now();
-  // const currentDate = dateFormatter(getcurrentDate)
-  const currentDate = "April 25, 2024";
+  const getcurrentDate = Date.now();
+  const currentDate = dateFormatter(getcurrentDate);
   const systemScheduledDueDate = dateFormatter(dbTo);
 
-  const checkDate = currentDate >= systemScheduledDueDate;
+  const checkDate = new Date(currentDate) <= new Date(systemScheduledDueDate);
   const checkSchoolYear = dbSchoolYear === parseInt(decodedSchoolYear);
   const checkSemester = dbSemester === decodedSemester;
-
   const canUpload = checkDate && checkSchoolYear && checkSemester;
-
-  // console.log({'currentDate' : currentDate, 'systemScheduledDueDate': systemScheduledDueDate});
-  console.log("canUpload", systemScheduledDueDate);
-  // console.log({'dbSchoolYear': dbSchoolYear, decodedSchoolYear: parseInt(decodedSchoolYear)});
-  // console.log('schoolYear', dbSchoolYear === parseInt(decodedSchoolYear));
-  // console.log({'dbSemester': dbSemester, 'decodedSemester': decodedSemester});
-  // console.log('semester', dbSemester === decodedSemester);
 
   const LoadCard = ({
     subject_code,

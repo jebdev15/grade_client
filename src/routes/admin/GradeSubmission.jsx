@@ -94,8 +94,12 @@ const styleForSmallScreenForLogs = {
 
 const GradeSubmission = () => {
     const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('sm'));
+    const [activity, schoolyear, semester, status, from, to] = useOutletContext();
+    const { data } = useLoaderData();
+
     const [openSubjectLoad, setOpenSubjectLoad] = useState(false);
-    const [openLogs, setOpenLogs] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [openLockConfirmation, setOpenLockConfirmation] = useState(false);
     const [openConfirmation, setOpenConfirmation] = useState(false);
     const [subjectInfo, setSubjectInfo] = useState({
       isLock: 0,
@@ -105,14 +109,32 @@ const GradeSubmission = () => {
       noOfStudents: 0,
     });
     const [openScheduler, setOpenScheduler] = useState(false);
-    const [scheduleDueDate, setScheduleDueDate] = useState({
-      activity: '',
-      schoolyear: '',
-      semester: '',
-      status: '',
-      from: '0000-00-00',
-      to: '0000-00-00'
-    })
+    const dateOnlyFormatter = (date) => {
+      const newDateTime = new Date(date);
+  
+      const year = newDateTime.getFullYear();
+      const month = String(newDateTime.getMonth() + 1).padStart(2, '0');
+      const day = String(newDateTime.getDate()).padStart(2, '0');
+  
+      return `${year}-${month}-${day}`;
+    };
+    const initialScheduleDueDate = {
+      activity: activity ? activity : '',
+      schoolyear: schoolyear ? schoolyear : 1970,
+      semester: semester ? semester : '',
+      status: status ? status : '',
+      from: from ? dateOnlyFormatter(from) : '',
+      to: to ? dateOnlyFormatter(to) : '',
+    }
+    const [scheduleDueDate, setScheduleDueDate] = useState(initialScheduleDueDate)
+    // function getCurrentDateFormatted(plus) {
+    //     const date = new Date();
+    //     const year = date.getFullYear();
+    //     const month = String(date.getMonth() + 1 + plus).padStart(2, '0');
+    //     const day = String(date.getDate()).padStart(2, '0');
+    
+    //     return `${year}-${month}-${day}`;
+    // }
 
     const [subjectLoad, setSubjectLoad] = useState({
       rows: [],
@@ -140,19 +162,6 @@ const GradeSubmission = () => {
                   isLock: params.row.isLock,
                 }
               ))
-            }
-
-            const checkLogsHandler = async () => {
-              setOpenLogs(true)
-              const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getGradeSubmissionLogs?class_code=${urlEncode(params.row.id)}`)
-              // setLogs((prevState) => ({...prevState, rows: 
-              //   {
-              //     id: data.id,
-              //     timestamp: dateFormatter(data.timestamp),
-              //     method: data.method,
-              //   }
-              // }))
-              console.log(data);
             }
 
             return (
@@ -185,11 +194,7 @@ const GradeSubmission = () => {
         { field: 'method', headerName: 'Method', width: 200 },
         { field: 'timestamp', headerName: 'Timestamp', width: 200 },
       ]
-    })
-
-    const [schoolyear, semester, from, to] = useOutletContext();
-    const { data } = useLoaderData();
-    
+    })    
     
     const dateFormatter = (date) => {
       const newDateTime = new Date(date);
@@ -225,10 +230,6 @@ const GradeSubmission = () => {
       setOpenSubjectLoad(false)
     };
 
-    const handleCloseLogs = () => {
-      setOpenLogs(false)
-    };
-
     const handleCloseConfirmation= () => {
       setOpenConfirmation(false)
     };
@@ -254,13 +255,36 @@ const GradeSubmission = () => {
         });
         saveAs(
           blob,
-          `Test.xlsx`
+          `Logs.xlsx`
         )
       } else {
         console.log('Error');
       }
     };
 
+    const handleOpenLock = () => setOpen(true);
+    const handleCloseLock = () => setOpen(!true);
+    const handleOpenLockConfirmation = () => lockAction !== '' ? setOpenLockConfirmation(true) : alert('Please select a Status')
+    const handleCloseLockConfirmation = () => setOpenLockConfirmation(!true)
+
+    const [lockAction, setLockAction] = useState('');
+    const handleChangeAction = (e) => { setLockAction(e.target.value);console.log(e.target.name, e.target.value) }
+    const handleUpdateLock = async () => {
+      const formData = new FormData();
+      formData.append('action', lockAction)
+      
+      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/updateClassStatus`, formData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      console.log(data);
+      if (data.message === "Updated") {
+        alert("Successfully Updated")
+        handleCloseLock()
+        setOpenLockConfirmation()
+      } 
+    }
 
 
     const handleUpdateSchedule = async () => {
@@ -277,7 +301,10 @@ const GradeSubmission = () => {
           'Content-Type': 'application/json'
         }
       })
-      data.Message && handleCloseScheduler()
+      if(data.updated > 0){
+        alert(data.message)
+        handleCloseScheduler()
+      }
     }
 
     const handleCloseScheduler = () => {
@@ -368,17 +395,17 @@ const GradeSubmission = () => {
         <Grid container spacing={0}>
           <Grid item>
             <ButtonGroup variant="text" color="primary" aria-label="">
-              <Tooltip title="Set Schedule of Grade Submission">  
+              <Tooltip title="Set Deadline for Grade Submission">  
                 <Button
                   variant="text"
                   color="inherit"
                   startIcon={<Schedule />}
                   onClick={handleOpenScheduler}
                 >
-                  Set Schedule
+                  Set Deadline
                 </Button>
               </Tooltip>  
-              <Tooltip title="Set Schedule of Grade Submission">  
+              <Tooltip title="Download a Report">  
                 <Button
                   variant="text"
                   color="inherit"
@@ -388,18 +415,17 @@ const GradeSubmission = () => {
                   Download Report
                 </Button>
               </Tooltip>
+              <Tooltip title="Lock/Unlock All Subject Load">  
+                <Button
+                  variant="text"
+                  color="inherit"
+                  startIcon={<Lock />}
+                  onClick={handleOpenLock}
+                >
+                  Lock/Unlock All
+                </Button>
+              </Tooltip>
             </ButtonGroup>
-          </Grid>
-        </Grid>
-        <Grid container spacing={0}>
-          <Grid item xs={5} md={3}>
-            <Typography variant='body1' color="initial">CURRENT SCHOOL YEAR: {schoolyear}</Typography>
-          </Grid>
-          <Grid item xs={5} md={3}>
-            <Typography variant='body1'  color="initial">CURRENT SEMESTER: {semester}</Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Typography variant='body1'  color="initial">GRADE SUBMISSION PERIOD: {gradeSubmissionDueDate}</Typography>
           </Grid>
         </Grid>
         <Box sx={isSmallScreen ? {height: '100%', width: '100%'} : {height: 600, width: '100%'}}>
@@ -421,7 +447,7 @@ const GradeSubmission = () => {
         {/* Dialog to Create/Extend/Adjust Schedule of Submission of Grades */}
         <Dialog open={openScheduler} onClose={handleCloseScheduler} aria-labelledby={"dialog-confirmation"}>
           <DialogTitle id={"dialog-confirmation-title"}>
-            SET SCHEDULE
+            SET Deadline
           </DialogTitle>
           <IconButton 
             aria-label="close" 
@@ -437,7 +463,7 @@ const GradeSubmission = () => {
           <DialogContent sx={isSmallScreen ? { width: '100%' } : { width: 500 }} dividers>
             <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 1 }}>
               <FormControl fullWidth>
-                <InputLabel id="select-activity-label">Activity</InputLabel>
+                {/* <InputLabel id="select-activity-label">Activity</InputLabel> */}
                 <TextField
                   labelId="select-activity-label"
                   id="select-activity"
@@ -449,17 +475,21 @@ const GradeSubmission = () => {
                   fullWidth
                 />
               </FormControl>
-              <FormControl fullWidth>
-                <InputLabel id="select-schoolyear-label">School Year</InputLabel>
+              <FormControl sx={{ display: 'flex', flexDirection: 'row' }} fullWidth>
+                {/* <InputLabel id="select-schoolyear-label">School Year</InputLabel> */}
                 <TextField
                   labelId="select-schoolyear-label"
                   id="select-schoolyear"
                   name="schoolyear"
                   label="School Year"
-                  type='text'
+                  type='number'
                   value={scheduleDueDate.schoolyear}
-                  onChange={handleChangeSchedule}
-                  fullWidth
+                  onChange={handleChangeSchedule}       
+                />
+                <TextField
+                  label="School Year"
+                  type='number'
+                  value={`${parseInt(scheduleDueDate.schoolyear)+1}`}
                 />
               </FormControl>
               <FormControl fullWidth>
@@ -489,11 +519,10 @@ const GradeSubmission = () => {
                 >
                   <MenuItem value="Open">Open</MenuItem>
                   <MenuItem value="Close">Close</MenuItem>
-                  <MenuItem value="Extend">Extend</MenuItem>
                 </Select>
               </FormControl>
               <FormControl fullWidth>
-                <InputLabel id="select-from-label">From</InputLabel>
+                {/* <InputLabel id="select-from-label">From</InputLabel> */}
                 <TextField
                   id="select-from-label"
                   name="from"
@@ -505,7 +534,7 @@ const GradeSubmission = () => {
                 />
               </FormControl>
               <FormControl fullWidth>
-                <InputLabel id="select-to-label">To</InputLabel>
+                {/* <InputLabel id="select-to-label">To</InputLabel> */}
                 <TextField
                   id="select-to-label"
                   name="to"
@@ -569,39 +598,117 @@ const GradeSubmission = () => {
           </Fade>
         </Modal>
 
-        {/* Modal for Grade Submission Logs */}
-        <Modal
-          name="gradeSubmissionLogs"
-          aria-labelledby="transition-modal-title"
-          aria-describedby="transition-modal-description"
-          open={openLogs}
-          onClose={handleCloseLogs}
-          closeAfterTransition
-          slots={{ backdrop: Backdrop }}
-          slotProps={{
-            backdrop: {
-              timeout: 500,
-            },
-          }}
-        >
-          <Fade in={openLogs}>
-            <Box sx={isSmallScreen ? styleForSmallScreenForLogs : styleDefaultForLogs}>
-              <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
-                Logs
-              </Typography>
-              <DataGrid
-                  rows={logs.rows}
-                  columns={logs.columns}
-                  initialState={{ 
-                      pagination: {
-                          paginationModel: { page: 0, pageSize: 5 },
-                      }
-                  }}
-                  pageSizeOptions={[5, 10]}
-              />
+        {/* Modal for Updating Class into Lock/Unlock Status */}
+        <Dialog open={open} onClose={handleCloseLock} aria-labelledby={"dialog-confirmation"}>
+          <DialogTitle id={"dialog-confirmation-title"}>
+              Lock/Unlock All Subject Load
+          </DialogTitle>
+          <IconButton 
+            aria-label="close" 
+            onClick={handleCloseLock}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+            }}
+          >
+            <Close />
+          </IconButton>
+          <DialogContent sx={isSmallScreen ? { width: '100%' } : { width: 500 }} dividers>
+            <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 1 }}>
+            <FormControl sx={{ display: 'flex', flexDirection: 'row' }} fullWidth>
+                {/* <InputLabel id="select-schoolyear-label">School Year</InputLabel> */}
+                <TextField
+                  label="School Year"
+                  type='text'
+                  value={`${scheduleDueDate.schoolyear}-${parseInt(scheduleDueDate.schoolyear)+1}`}   
+                  disabled
+                  fullWidth
+                />
+              </FormControl>
+              <FormControl sx={{ display: 'flex', flexDirection: 'row' }} fullWidth>
+                {/* <InputLabel id="select-schoolyear-label">School Year</InputLabel> */}
+                <TextField
+                  label="Semester"
+                  type='text'
+                  value={scheduleDueDate.semester}   
+                  disabled
+                  fullWidth
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="select-action-label">ACTION</InputLabel>
+                <Select
+                  labelId="select-action-label"
+                  id="select-status"
+                  label="ACTION"
+                  name="action"
+                  value={lockAction}
+                  onChange={handleChangeAction}
+                  required
+                >
+                  <MenuItem value="Close">Lock</MenuItem>
+                  <MenuItem value="Open">Unlock</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
-          </Fade>
-        </Modal>
+          </DialogContent>
+          <DialogActions>
+            <ButtonGroup variant="text" color="primary" aria-label="">
+              <Button
+                variant='standard'
+                color="primary"
+                onClick={handleOpenLockConfirmation}
+              >
+                Update
+              </Button>
+              <Button
+                onClick={handleCloseLock}
+              >
+                Cancel
+              </Button>
+            </ButtonGroup>
+          </DialogActions>
+        </Dialog>
+
+        {/* Dialog for Confirmation of Locking/Unlocking all Subject Load */}
+        <Dialog open={openLockConfirmation} onClose={handleCloseLockConfirmation} aria-labelledby={"dialog-confirmation"}>
+          <DialogTitle id={"dialog-confirmation-title"}>
+            Confirmation Dialog
+          </DialogTitle>
+          <IconButton 
+            aria-label="close" 
+            onClick={handleCloseLockConfirmation}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+            }}
+          >
+            <Close />
+          </IconButton>
+          <DialogContent dividers>
+            <DialogContentText color={"initial"}>
+              Please click <strong>CONFIRM</strong> button to update
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <ButtonGroup variant="text" color="primary" aria-label="">
+              <Button
+                onClick={handleUpdateLock}
+                variant='standard'
+                color="primary"
+              >
+                Confirm
+              </Button>
+              <Button
+                onClick={handleCloseLockConfirmation}
+              >
+                Cancel
+              </Button>
+            </ButtonGroup>
+          </DialogActions>
+        </Dialog>
 
         {/* Dialog for Confirmation of Locking/Unlocking a Subject */}
         <Dialog open={openConfirmation} onClose={handleCloseConfirmation} aria-labelledby={"dialog-confirmation"}>
