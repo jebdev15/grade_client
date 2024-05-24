@@ -60,18 +60,12 @@ const Index = () => {
         setIndividualCookie("picture", picture);
         setIndividualCookie("email", email);
         // setIndividualCookie("campus", campus);
-        if (data[0].accessLevel === "Administrator" || data[0].accessLevel === "Registrar") navigate("/admin");
-        if (data[0].role === "Administrator") navigate("/admin");
-        else navigate("/home");
+        navigate(data[1].url);
       }
     } catch (err) {
       console.log(err);
     }
   };
-
-  useEffect(() => {
-    if (cookies.faculty_id) navigate("/home");
-  });
 
   return (
     <Box sx={{ bgcolor: "background.light", height: "100dvh", width: "100vw" }}>

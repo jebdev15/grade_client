@@ -1,4 +1,4 @@
-import { Close, Done, UploadFile, VisuallyHiddenInputIcon, CloudUpload as CloudUploadIcon } from "@mui/icons-material";
+import { Close, Done, UploadFile, CloudUpload as CloudUploadIcon } from "@mui/icons-material";
 import {
   Alert,
   Avatar,
@@ -16,7 +16,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useOutletContext, useLoaderData, useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
-import { FileUploader } from "react-drag-drop-files";
+// import { FileUploader } from "react-drag-drop-files";
 import { saveAs } from "file-saver";
 import { urlDecode } from "url-encode-base64";
 import { styled } from '@mui/material/styles';
@@ -93,17 +93,17 @@ const Upload = () => {
       console.log(updateDataContainer);
     }
   };
-  const VisuallyHiddenInput = styled('input')({
-    clip: 'rect(0 0 0 0)',
-    clipPath: 'inset(50%)',
-    height: 1,
-    overflow: 'hidden',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    whiteSpace: 'nowrap',
-    width: 1,
-  });
+  // const VisuallyHiddenInput = styled('input')({
+  //   clip: 'rect(0 0 0 0)',
+  //   clipPath: 'inset(50%)',
+  //   height: 1,
+  //   overflow: 'hidden',
+  //   position: 'absolute',
+  //   bottom: 0,
+  //   left: 0,
+  //   whiteSpace: 'nowrap',
+  //   width: 1,
+  // });
   return (
     <Dialog
       open={uploadOpen}
@@ -163,7 +163,7 @@ const Upload = () => {
                 <Typography>{`Section: ${loadInfo.section}`}</Typography>
                 <Typography>{`Total Students: ${loadInfo.noStudents}`}</Typography>
               </Box>
-              <Button variant="contained" onClick={download} disabled={downloadStatus ? true : false}>
+              <Button variant="contained" onClick={download} disabled={downloadStatus || uploading ? true : false}>
                 {/* Download Grade Sheet */}
                 {downloadStatus ? "Downloading..." : "Download Grade Sheet"}
               </Button>
@@ -201,10 +201,11 @@ const Upload = () => {
                     <Done color="primary" fontSize="large" />
                     <Typography variant="h6" sx={{ mt: 2 }}>
                       File Inserted!
-                    </Typography>                      <Typography>{uploadFile.name}</Typography>
-                    <Typography variant="caption">
+                    </Typography>                      
+                    <Typography>{uploadFile.name}</Typography>
+                    {/* <Typography variant="caption">
                       (Click or drop file to re-upload)
-                    </Typography>
+                    </Typography> */}
                   </Box>
                 ) : (                  
                 <Button

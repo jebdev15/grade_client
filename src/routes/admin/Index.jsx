@@ -80,9 +80,8 @@ export default function Admin() {
   );
 
   useEffect(() => {
-    if (cookies.accessLevel !== "Administrator" || cookies.accessLevel !== "Registrar") {
+    if (!cookies.hasOwnProperty("accessLevel") || ["Administrator", "Registrar"].includes((accessLevel) => cookies.accessLevel !== accessLevel)) {
       navigate("/");
-      // console.log("User is'nt allowed access");
     }
   }, [cookies, navigate]);
 
@@ -101,10 +100,7 @@ export default function Admin() {
       setRegistrarActivity(data[0])
     };
     loader();
-    if (!cookies.hasOwnProperty("faculty_id")) {
-      navigate("/");
-    }
-  }, [cookies, navigate]);
+  }, []);
 
   useEffect(() => {
     setDrawerMinimize(isSmallScreen ? true : !true);

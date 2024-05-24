@@ -208,8 +208,17 @@ class ComponentToPrint extends React.Component {
                   <td height={"auto"}>{studentName}</td>
                   <td height={"auto"}>{midTermGrade}</td>
                   <td height={"auto"}>{endTermGrade}</td>
-                  <td height={"auto"}>{(midTermGrade > 0 && endTermGrade > 0) && finalGrade}</td>
-                  <td height={"auto"}>{(getStatusOrRemark(remarks) === "Failed" && midTermGrade > 0 && endTermGrade > 0) && getStatusOrRemark(remarks)}</td>
+                  <td height={"auto"}>{(midTermGrade > 50 && endTermGrade > 50) && finalGrade}</td>
+                  <td height={"auto"}>
+                    {
+                      (midTermGrade > 50 && endTermGrade > 50) 
+                      ? getStatusOrRemark(remarks) 
+                      : (midTermGrade < 50 && endTermGrade < 50 && getStatusOrRemark(remarks) === "Failed") 
+                        ? "" 
+                        : getStatusOrRemark(remarks)
+                    }
+                    
+                    </td>
                 </tr>
               )
             )}
