@@ -41,6 +41,7 @@ const Start = () => {
       <Box sx={{ mt: 4 }}>
         <Typography>Navigate on the sidebar to start.</Typography><br />
         <Typography variant="body1" color="initial"><strong>{registrarActivity.activity}</strong></Typography>
+        <Typography variant="body1" color="initial">Current Status <strong>{registrarActivity.status}</strong></Typography>
         <Typography variant="body1" color="initial">Current School Year: <strong>{`${registrarActivity.schoolyear} - ${registrarActivity.schoolyear + 1}`}</strong></Typography>
         <Typography variant="body1" color="initial">Current Semester: <strong>{registrarActivity.semester === "summer" ? "Summer" : registrarActivity.semester }</strong></Typography>
         <Typography variant="body1" color="initial">From: <strong>{dateFormatter(registrarActivity.from)}</strong></Typography>

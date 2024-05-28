@@ -302,6 +302,20 @@ export default function Admin() {
                 </Tooltip>
                 {drawerMinimize ? null : <ListItemText primary="Users" />}
               </ListItemButton>
+              <ListItemButton
+                className={activeItem === "reports" ? "navbtn active" : "navbtn"}
+                onClick={() => {
+                  setActiveItem("reports");
+                  navigate(`/admin/reports`);
+                }}
+              >
+                <Tooltip title="Reports">
+                  <ListItemIcon>
+                    <WorkHistoryIcon />
+                  </ListItemIcon>
+                </Tooltip>
+                {drawerMinimize ? null : <ListItemText primary="Reports" />}
+              </ListItemButton>
             </List>
           </Paper>
         </Box>

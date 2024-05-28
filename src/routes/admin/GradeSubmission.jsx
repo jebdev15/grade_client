@@ -1,5 +1,5 @@
 import { DataGrid } from '@mui/x-data-grid'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   Backdrop,
   Box,
@@ -17,8 +17,6 @@ import {
   DialogContent, 
   DialogContentText, 
   DialogActions, 
-  List, 
-  ListItem,
   Select,
   TextField, MenuItem, FormControl, InputLabel,
 } from '@mui/material'
@@ -29,7 +27,6 @@ import {
   LockOpen,
   Schedule,
   Visibility as VisibilityIcon,
-  WorkHistory as WorkHistoryIcon,
 } from '@mui/icons-material'
 import axios from 'axios'
 import { 
@@ -59,32 +56,6 @@ const styleForSmallScreen = {
   left: '50%',
   height: '75%', 
   width: '100%',
-  transform: 'translate(-50%, -50%)',
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-};
-
-const styleDefaultForLogs = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  height: 350, 
-  width: '50%',
-  transform: 'translate(-50%, -50%)',
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-};
-
-const styleForSmallScreenForLogs = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  height: '60%', 
-  width: '80%',
   transform: 'translate(-50%, -50%)',
   bgcolor: 'background.paper',
   border: '2px solid #000',
@@ -185,46 +156,7 @@ const GradeSubmission = () => {
           }
         },
       ]
-    })
-
-    const [logs, setLogs] = useState({
-      rows: [],
-      columns: [
-        { field: 'id', headerName: 'ID', width: 150, hide: true },
-        { field: 'method', headerName: 'Method', width: 200 },
-        { field: 'timestamp', headerName: 'Timestamp', width: 200 },
-      ]
-    })    
-    
-    const dateFormatter = (date) => {
-      const newDateTime = new Date(date);
-      
-      const formattedDate = newDateTime.toLocaleString('en-PH', {
-        timeZone: 'UTC', // Set the time zone to UTC
-        month: 'long', // Full month name
-        day: 'numeric', // Day of the month
-        year: 'numeric', // Full year
-        hour: 'numeric', // Hour in 12-hour format
-        minute: 'numeric', // Minute
-        hour12: true // Use 12-hour format
-      });
-      
-      return formattedDate;
-    }
-
-    const dateFormat = (date) => {
-      const newDateTime = new Date(date);
-      
-      const formattedDate = newDateTime.toLocaleString('en-PH', {
-        month: 'long', // Full month name
-        day: 'numeric', // Day of the month
-        year: 'numeric', // Full year
-      });
-      
-      return formattedDate;
-    }
-
-    const gradeSubmissionDueDate = `${dateFormat(from)} - ${dateFormat(to)}`
+    }) 
 
     const handleCloseSubjectLoad = () => {
       setOpenSubjectLoad(false)
@@ -242,25 +174,6 @@ const GradeSubmission = () => {
         console.log(e.target.name, e.target.value);
         setScheduleDueDate((prevState) => ({...prevState, [e.target.name]: e.target.value}))
     }
-
-    const handleDownloadReport = async () => {
-      const {data, status} = await axios.get(`${process.env.REACT_APP_API_URL}/admin/downloadLogs`,
-      {
-        responseType: 'arraybuffer',
-      }
-    )
-      if(status === 200) {
-        let blob = new Blob([data], {
-          type: "vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8",
-        });
-        saveAs(
-          blob,
-          `Logs.xlsx`
-        )
-      } else {
-        console.log('Error');
-      }
-    };
 
     const handleOpenLock = () => setOpen(true);
     const handleCloseLock = () => setOpen(!true);
@@ -387,9 +300,8 @@ const GradeSubmission = () => {
         },
     ];
     
-    
-    const rows = data;
-    
+  const rows = data;
+  
   return (
     <>
         <Grid container spacing={0}>
@@ -410,7 +322,7 @@ const GradeSubmission = () => {
                   variant="text"
                   color="inherit"
                   startIcon={<CloudDownloadIcon />}
-                  onClick={handleDownloadReport}
+                  // onClick={handleOpenDownloadReportDialog}
                 >
                   Download Report
                 </Button>
@@ -616,7 +528,7 @@ const GradeSubmission = () => {
           </IconButton>
           <DialogContent sx={isSmallScreen ? { width: '100%' } : { width: 500 }} dividers>
             <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 1 }}>
-            <FormControl sx={{ display: 'flex', flexDirection: 'row' }} fullWidth>
+              <FormControl sx={{ display: 'flex', flexDirection: 'row' }} fullWidth>
                 {/* <InputLabel id="select-schoolyear-label">School Year</InputLabel> */}
                 <TextField
                   label="School Year"

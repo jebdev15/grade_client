@@ -213,7 +213,7 @@ class ComponentToPrint extends React.Component {
                     {
                       (midTermGrade > 50 && endTermGrade > 50) 
                       ? getStatusOrRemark(remarks) 
-                      : (midTermGrade < 50 && endTermGrade < 50 && getStatusOrRemark(remarks) === "Failed") 
+                      : ((midTermGrade < 50 && getStatusOrRemark(remarks) === "Failed") || (endTermGrade < 50 && getStatusOrRemark(remarks) === "Failed")) 
                         ? "" 
                         : getStatusOrRemark(remarks)
                     }

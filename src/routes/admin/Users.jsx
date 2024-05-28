@@ -126,15 +126,6 @@ const Users = () => {
                 >
                   Create User
                 </Button>
-              </Tooltip>  
-              <Tooltip title="Download a Report">  
-                <Button
-                  variant="text"
-                  color="inherit"
-                  startIcon={<CloudDownloadIcon />}
-                >
-                  Download Report
-                </Button>
               </Tooltip>
             </ButtonGroup>
           </Grid>
@@ -168,7 +159,8 @@ const Users = () => {
           // checkboxSelection
         />
       </Box>
-      {/* Modal for Updating Class into Lock/Unlock Status */}
+
+      {/* Modal for Creating New User Account in the System*/}
       <Dialog open={openCreateUsersDialog} onClose={handleCloseCreateUsersDialog} aria-labelledby={"dialog-confirmation"}>
           <DialogTitle id={"dialog-confirmation-title"}>
               Create New User

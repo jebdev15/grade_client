@@ -26,6 +26,7 @@ import PrintGradeSheet, { loader as printLoader } from "./routes/home/Print";
 import Admin from './routes/admin/Index';
 import GradeSubmission, {loader as gradesLoader} from "./routes/admin/GradeSubmission";
 import Users, {loader as usersLoader} from "./routes/admin/Users";
+import GenerateReport from "./routes/admin/GenerateReport";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
         element: <Users />,
         loader: usersLoader,
       },
+      {
+        path: "reports",
+        element: <GenerateReport />,
+      }
     ],
   },
 ]);
