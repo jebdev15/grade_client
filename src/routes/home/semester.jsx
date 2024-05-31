@@ -135,7 +135,7 @@ const Semester = () => {
 
   const LoadCard = ({
     subject_code,
-    isLock,
+    status,
     section,
     noStudents,
     class_code,
@@ -153,10 +153,9 @@ const Semester = () => {
 
     const submitGradeSheetConfirmed = async (classCode) => {
       lockGradeSheetTimer()
-      console.log({classCode});
       const formData = new FormData();
       formData.append("class_code", encodedClassCode);
-      formData.append("isLock", 0)
+      formData.append("status", 0)
       const { data } = await axios.post(
         `${process.env.REACT_APP_API_URL}/admin/updateClassCodeStatus`,
         formData,
@@ -166,7 +165,6 @@ const Semester = () => {
           },
         }
       );
-      console.log(data);
       navigate(".", { replace: true });
       setTimeout(() => alert("Grade Sheet has been submitted."), 1000)
     }
@@ -231,7 +229,7 @@ const Semester = () => {
           <ButtonGroup>
             <Tooltip
               title={
-                canUpload && parseInt(isLock) === 0
+                canUpload && parseInt(status) === 0
                   ? "Encoding of Grades"
                   : "View Grades"
               }
@@ -252,7 +250,7 @@ const Semester = () => {
                   }}
                   disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false}
                 >
-                  {canUpload && parseInt(isLock) === 0 ? (
+                  {canUpload && parseInt(status) === 0 ? (
                     <Keyboard />
                   ) : (
                     <Visibility />
@@ -260,7 +258,7 @@ const Semester = () => {
                 </IconButton>
               </span>
             </Tooltip>
-            {canUpload && parseInt(isLock) === 0 && (
+            {canUpload && parseInt(status) === 0 && (
               <Tooltip title="Grade Sheet">
                 <span>
                   <IconButton
@@ -283,7 +281,7 @@ const Semester = () => {
                 </span>
               </Tooltip>
             )}
-            {canUpload && parseInt(isLock) === 0 && (
+            {canUpload && parseInt(status) === 0 && (
               <Tooltip title="Submit grade sheet. You may not able to edit or upload grades. To edit or upload grades, please contact your administrator.">
                 <span>
                   <IconButton

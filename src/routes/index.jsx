@@ -50,23 +50,39 @@ const Index = () => {
     const jsonObj = jwt_decode(credential);
     const { name, picture, email } = jsonObj;
     try {
-      const { data } = await axios.get(
+      const { data, status } = await axios.get(
         `${process.env.REACT_APP_API_URL}/login?email=${email}`
       );
-      if (data.length) {
+      if (status === 200 && data.length) {
         setIndividualCookie("faculty_id", data[0].faculty_id);
         setIndividualCookie("accessLevel", data[0].accessLevel);
         setIndividualCookie("name", name);
         setIndividualCookie("picture", picture);
         setIndividualCookie("email", email);
         // setIndividualCookie("campus", campus);
+        console.log(data);
         navigate(data[1].url);
+      } else {
+        console.log(data);
       }
     } catch (err) {
-      console.log(err);
+      alert("Invalid Credentials");
+      // console.log(err);
+      setLoading(!true)
     }
   };
 
+  useEffect(() => {
+    if (cookies.faculty_id) {
+      const checkUser = async () => {
+        const { data } = await axios.get(
+          `${process.env.REACT_APP_API_URL}/login?email=${cookies.email}`
+        );
+        navigate(data[1].url);
+      };
+      checkUser();
+    }
+  }, [cookies, navigate]);
   return (
     <Box sx={{ bgcolor: "background.light", height: "100dvh", width: "100vw" }}>
       <Container maxWidth="sm" fixed sx={{ height: "inherit" }}>

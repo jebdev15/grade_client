@@ -1,4 +1,4 @@
-import { Close, Done, UploadFile, CloudUpload as CloudUploadIcon } from "@mui/icons-material";
+import { Close, Done, CloudUpload as CloudUploadIcon } from "@mui/icons-material";
 import {
   Alert,
   Avatar,
@@ -19,7 +19,6 @@ import { useCookies } from "react-cookie";
 // import { FileUploader } from "react-drag-drop-files";
 import { saveAs } from "file-saver";
 import { urlDecode } from "url-encode-base64";
-import { styled } from '@mui/material/styles';
 
 const Upload = () => {
   const { code, class_code } = useParams();
@@ -64,7 +63,6 @@ const Upload = () => {
 
   const handleChangeFile = (e) => {
     setUploadFile(e.target.files[0]);
-    console.log(e.target.files[0]);
   }
   const upload = async () => {
     setUploading(true);
@@ -81,7 +79,7 @@ const Upload = () => {
         },
       }
     );
-    const {isOkay, isError, updateDataContainer} = data
+    const { isOkay, isError } = data
     if (isOkay) {
       
       setUploading(false);
@@ -89,21 +87,8 @@ const Upload = () => {
       setUploadFile(null);
       setTimeout(() => setUploadOpen(false),3500)
       setErrorUpload(isError ? true : !true);
-      
-      console.log(updateDataContainer);
     }
   };
-  // const VisuallyHiddenInput = styled('input')({
-  //   clip: 'rect(0 0 0 0)',
-  //   clipPath: 'inset(50%)',
-  //   height: 1,
-  //   overflow: 'hidden',
-  //   position: 'absolute',
-  //   bottom: 0,
-  //   left: 0,
-  //   whiteSpace: 'nowrap',
-  //   width: 1,
-  // });
   return (
     <Dialog
       open={uploadOpen}

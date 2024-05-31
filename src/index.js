@@ -24,7 +24,7 @@ import PrintGradeSheet, { loader as printLoader } from "./routes/home/Print";
 
 // Admin Routes
 import Admin from './routes/admin/Index';
-import GradeSubmission, {loader as gradesLoader} from "./routes/admin/GradeSubmission";
+import GradeSubmission from "./routes/admin/GradeSubmission";
 import Users, {loader as usersLoader} from "./routes/admin/Users";
 import GenerateReport from "./routes/admin/GenerateReport";
 
@@ -74,7 +74,6 @@ const router = createBrowserRouter([
       {
         path: "grades",
         element: <GradeSubmission />,
-        loader: gradesLoader,
       },
       {
         path: "users",

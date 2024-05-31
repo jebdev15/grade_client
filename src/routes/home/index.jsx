@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useTransition } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Avatar,
@@ -26,7 +26,6 @@ import {
   LooksOne,
   LooksTwo,
   Menu as MenuIcon,
-  Opacity,
 } from "@mui/icons-material";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
@@ -100,13 +99,9 @@ const Home = () => {
     return `${encodedSemester}-${encodedSchoolYear}-${encodedFacultyID}`;
   };
 
-  // const dateNow = new Date().toJSON().split('T')[0];
-  // const dueDate = to.split('T')[0];
-
   useEffect(() => {
     if (!cookies.hasOwnProperty("faculty_id") && cookies.accessLevel !== "Faculty") {
       navigate("/");
-      // console.log("User is'nt allowed access");
     }
   }, [cookies, navigate]);
 

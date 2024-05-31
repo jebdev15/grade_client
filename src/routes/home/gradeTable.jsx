@@ -19,7 +19,7 @@ import {
 import axios from "axios";
 import { Close } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { urlDecode } from "url-encode-base64";
 const GradeTable = () => {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ const GradeTable = () => {
   } = useLoaderData();
   const [manualOpen, setManualOpen] = useOutletContext();
   const loadInfo = loadInfoArr[0];
-  const SubjectisLock = loadInfo.isLock;
+  const SubjectisLock = loadInfo.status;
 
   const [toUpdate, setToUpdate] = useState([]);
   const [tableLoading, setTableLoading] = useState(false);
@@ -336,7 +336,6 @@ const GradeTable = () => {
               )
               if(!confirmation) return
               setTableLoading(true);
-              console.log({toUpdate, class_code: urlDecode(class_code)});
               const { data } = await axios.post(
                 `${process.env.REACT_APP_API_URL}/updateGrade`,
                 { grades: toUpdate, class_code, method: "Manual" }

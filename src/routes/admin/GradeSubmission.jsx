@@ -1,5 +1,5 @@
 import { DataGrid } from '@mui/x-data-grid'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Backdrop,
   Box,
@@ -22,7 +22,6 @@ import {
 } from '@mui/material'
 import {
   Close,
-  CloudDownload as CloudDownloadIcon,
   Lock,
   LockOpen,
   Schedule,
@@ -30,12 +29,10 @@ import {
 } from '@mui/icons-material'
 import axios from 'axios'
 import { 
-  useLoaderData,
   useOutletContext, 
 } from 'react-router-dom'
 import { urlEncode } from 'url-encode-base64'
-import { saveAs } from "file-saver";
-
+import { useCookies } from 'react-cookie'
 
 const styleDefault = {
   position: 'absolute',
@@ -64,16 +61,16 @@ const styleForSmallScreen = {
 };
 
 const GradeSubmission = () => {
+    const [cookies, ,] = useCookies(['picture', 'name', 'faculty_id', 'email', 'campus', 'accessLevel']);
     const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('sm'));
     const [activity, schoolyear, semester, status, from, to] = useOutletContext();
-    const { data } = useLoaderData();
-
+    
     const [openSubjectLoad, setOpenSubjectLoad] = useState(false);
     const [open, setOpen] = useState(false);
     const [openLockConfirmation, setOpenLockConfirmation] = useState(false);
     const [openConfirmation, setOpenConfirmation] = useState(false);
     const [subjectInfo, setSubjectInfo] = useState({
-      isLock: 0,
+      status: 0,
       classCode: '',
       code: '',
       section: '',
@@ -98,14 +95,6 @@ const GradeSubmission = () => {
       to: to ? dateOnlyFormatter(to) : '',
     }
     const [scheduleDueDate, setScheduleDueDate] = useState(initialScheduleDueDate)
-    // function getCurrentDateFormatted(plus) {
-    //     const date = new Date();
-    //     const year = date.getFullYear();
-    //     const month = String(date.getMonth() + 1 + plus).padStart(2, '0');
-    //     const day = String(date.getDate()).padStart(2, '0');
-    
-    //     return `${year}-${month}-${day}`;
-    // }
 
     const [subjectLoad, setSubjectLoad] = useState({
       rows: [],
@@ -130,7 +119,7 @@ const GradeSubmission = () => {
                   code: params.row.subject_code,
                   section: params.row.section,
                   noOfStudents: params.row.noStudents,
-                  isLock: params.row.isLock,
+                  status: params.row.status,
                 }
               ))
             }
@@ -139,17 +128,11 @@ const GradeSubmission = () => {
               <>
               <ButtonGroup variant="text" color="primary" aria-label="">
                 
-                  <Tooltip title={`Currently ${params.row.isLock ? 'Locked' : 'Unlocked'}. Click to ${params.row.isLock ? 'Unlock' : 'Lock'} Subject`}>  
+                  <Tooltip title={`Currently ${params.row.status ? 'Locked' : 'Unlocked'}. Click to ${params.row.status ? 'Unlock' : 'Lock'} Subject`}>  
                     <IconButton aria-label="view" variant="text" color="primary" onClick={handleOpenConfirmation}>
-                      { params.row.isLock ? <Lock /> : <LockOpen /> }
+                      { params.row.status ? <Lock /> : <LockOpen /> }
                     </IconButton>
                   </Tooltip>
-                
-                  {/* <Tooltip title="View Grade Submission Logs">  
-                    <IconButton aria-label="view" variant="text" color="primary" onClick={checkLogsHandler}>
-                      <WorkHistoryIcon />
-                    </IconButton>
-                  </Tooltip> */}
               </ButtonGroup>
               </>
             )
@@ -185,18 +168,16 @@ const GradeSubmission = () => {
     const handleUpdateLock = async () => {
       const formData = new FormData();
       formData.append('action', lockAction)
-      
+      formData.append('email_used', cookies.email)
+
       const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/updateClassStatus`, formData, {
         headers: {
           'Content-Type': 'application/json'
         }
       })
       console.log(data);
-      if (data.message === "Updated") {
-        alert("Successfully Updated")
-        handleCloseLock()
-        setOpenLockConfirmation()
-      } 
+      handleCloseLock()
+      setOpenLockConfirmation()
     }
 
 
@@ -224,11 +205,12 @@ const GradeSubmission = () => {
       setOpenScheduler(!true)
     };
 
-    const lockSubjectHandler = async (id, isLock) => {
-      console.log("data sent",{"subjectInfo.id": subjectInfo.id, "subjectInfo.isLock": subjectInfo.isLock});
+    const lockSubjectHandler = async (id, status) => {
       const formData = new FormData();
       formData.append('class_code', urlEncode(id))
-      formData.append('isLock', isLock)
+      formData.append('status', status)
+      formData.append('email_used', cookies.email)
+      let response;
       try {
         const { data, status } = await axios.post(
           `${process.env.REACT_APP_API_URL}/admin/updateClassCodeStatus`, 
@@ -238,20 +220,21 @@ const GradeSubmission = () => {
           },
         )
         if(status === 200) {
-          if(data.Message) {
-            setSubjectInfo((prevState) => ({...prevState, isLock: data.isLock}))
-            console.log({"Message: ": "Has Been Updated", "isLock": data.isLock, "subjectInfo.isLock": subjectInfo.isLock});
+          if(data.success) {
+            setSubjectInfo((prevState) => ({...prevState, status: data.status}))
+            response=data.message;
             handleCloseSubjectLoad()
             handleCloseConfirmation()
           } else {
-            console.log({"Message: ": "No Changes", "isLock": data.isLock});
+            response=data.message;
           }
         } else {
-          console.log("Status :", status);
+          response=data.message;
         }
       } catch (error) {
-        console.error('Error', error);
+        response="Error Occured. Contact Administrator";
       }
+      alert(response)
     }
 
     const columns = [
@@ -299,34 +282,34 @@ const GradeSubmission = () => {
           }
         },
     ];
-    
-  const rows = data;
   
+  const [rows, setRows] = useState([]);
+  const [loadingDataGrid, setLoadingDataGrid] = useState(true);
+  useEffect(() => {
+    const loader = async () => {
+      const { data, status } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getEmails`);
+      setRows(data);
+      status === 200 && setLoadingDataGrid(false);
+    }
+    loader();
+  },[])
   return (
     <>
         <Grid container spacing={0}>
           <Grid item>
             <ButtonGroup variant="text" color="primary" aria-label="">
-              <Tooltip title="Set Deadline for Grade Submission">  
-                <Button
-                  variant="text"
-                  color="inherit"
-                  startIcon={<Schedule />}
-                  onClick={handleOpenScheduler}
-                >
-                  Set Deadline
-                </Button>
-              </Tooltip>  
-              <Tooltip title="Download a Report">  
-                <Button
-                  variant="text"
-                  color="inherit"
-                  startIcon={<CloudDownloadIcon />}
-                  // onClick={handleOpenDownloadReportDialog}
-                >
-                  Download Report
-                </Button>
-              </Tooltip>
+              {cookies.accessLevel === "Administrator" && (  
+                <Tooltip title="Set Deadline for Grade Submission">  
+                  <Button
+                    variant="text"
+                    color="inherit"
+                    startIcon={<Schedule />}
+                    onClick={handleOpenScheduler}
+                  >
+                    Set Deadline
+                  </Button>
+                </Tooltip>  
+              )}
               <Tooltip title="Lock/Unlock All Subject Load">  
                 <Button
                   variant="text"
@@ -353,6 +336,7 @@ const GradeSubmission = () => {
                 },
               }}
               pageSizeOptions={[5]}
+              loading={loadingDataGrid}
           />
         </Box>
 
@@ -510,7 +494,7 @@ const GradeSubmission = () => {
           </Fade>
         </Modal>
 
-        {/* Modal for Updating Class into Lock/Unlock Status */}
+        {/* Modal for Updating Class into Locked/Unlocked Status */}
         <Dialog open={open} onClose={handleCloseLock} aria-labelledby={"dialog-confirmation"}>
           <DialogTitle id={"dialog-confirmation-title"}>
               Lock/Unlock All Subject Load
@@ -559,8 +543,8 @@ const GradeSubmission = () => {
                   onChange={handleChangeAction}
                   required
                 >
-                  <MenuItem value="Close">Lock</MenuItem>
-                  <MenuItem value="Open">Unlock</MenuItem>
+                  <MenuItem value={"Lock"}>Lock</MenuItem>
+                  <MenuItem value={"Unlock"}>Unlock</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -625,7 +609,7 @@ const GradeSubmission = () => {
         {/* Dialog for Confirmation of Locking/Unlocking a Subject */}
         <Dialog open={openConfirmation} onClose={handleCloseConfirmation} aria-labelledby={"dialog-confirmation"}>
           <DialogTitle id={"dialog-confirmation-title"}>
-            Confirmation to {Boolean(subjectInfo.isLock) ? 'Unlock' : 'Lock'} this Subject
+            Confirmation to {Boolean(subjectInfo.status) ? 'Unlock' : 'Lock'} this Subject
           </DialogTitle>
           <IconButton 
             aria-label="close" 
@@ -640,8 +624,8 @@ const GradeSubmission = () => {
           </IconButton>
           <DialogContent dividers>
             <DialogContentText color={"initial"}>
-              Do you really want to {Boolean(subjectInfo.isLock) ? 'Unlock' : 'Lock'} <br />
-            </DialogContentText>
+              Do you really want to update the status as {Boolean(subjectInfo.status) ? 'Unlock' : 'Lock'}? <br />
+            </DialogContentText><br />
             <DialogContentText color={"initial"}>
             Subject Code: {subjectInfo.code} <br />
             </DialogContentText>
@@ -655,7 +639,7 @@ const GradeSubmission = () => {
           <DialogActions>
             <ButtonGroup variant="text" color="primary" aria-label="">
               <Button
-                onClick={() => lockSubjectHandler(subjectInfo.id, subjectInfo.isLock)}
+                onClick={() => lockSubjectHandler(subjectInfo.id, subjectInfo.status)}
                 variant='standard'
                 color="primary"
               >
@@ -671,10 +655,5 @@ const GradeSubmission = () => {
         </Dialog>
     </>
   )
-}
-
-export const loader = async () => {
-    const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getEmails`);
-    return { data }
 }
 export default GradeSubmission

@@ -15,7 +15,7 @@ import {
   useParams,
 } from "react-router-dom";
 import { Close } from "@mui/icons-material";
-import React, { useEffect } from "react";
+import React from "react";
 import { urlDecode } from "url-encode-base64";
 import { useReactToPrint } from "react-to-print";
 import chmsuLogo from "../../assets/chmsu.png";
@@ -433,12 +433,10 @@ const PrintGradeSheet = () => {
     const { data } = await axios.get(
       `${process.env.REACT_APP_API_URL}/getClassCodeDetails?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
     );
-    // console.log('data', data);
 
     const { data: students } = await axios.get(
       `${process.env.REACT_APP_API_URL}/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
     );
-    // console.log('students', students);
     return { data, students };
   };
   export default PrintGradeSheet;
