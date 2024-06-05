@@ -154,7 +154,6 @@ const GradeSubmission = () => {
     };
 
     const handleChangeSchedule = (e) => {
-        console.log(e.target.name, e.target.value);
         setScheduleDueDate((prevState) => ({...prevState, [e.target.name]: e.target.value}))
     }
 
@@ -164,7 +163,7 @@ const GradeSubmission = () => {
     const handleCloseLockConfirmation = () => setOpenLockConfirmation(!true)
 
     const [lockAction, setLockAction] = useState('');
-    const handleChangeAction = (e) => { setLockAction(e.target.value);console.log(e.target.name, e.target.value) }
+    const handleChangeAction = (e) => setLockAction(e.target.value)
     const handleUpdateLock = async () => {
       const formData = new FormData();
       formData.append('action', lockAction)
@@ -175,7 +174,6 @@ const GradeSubmission = () => {
           'Content-Type': 'application/json'
         }
       })
-      console.log(data);
       handleCloseLock()
       setOpenLockConfirmation()
     }
@@ -183,6 +181,7 @@ const GradeSubmission = () => {
 
     const handleUpdateSchedule = async () => {
       const formData = new FormData();
+      formData.append('email_used', cookies.email)
       formData.append('activity', scheduleDueDate.activity)
       formData.append('schoolyear', scheduleDueDate.schoolyear)
       formData.append('semester', scheduleDueDate.semester)
@@ -195,10 +194,9 @@ const GradeSubmission = () => {
           'Content-Type': 'application/json'
         }
       })
-      if(data.updated > 0){
-        alert(data.message)
-        handleCloseScheduler()
-      }
+      console.log(data);
+      alert(data.message)
+      handleCloseScheduler()
     }
 
     const handleCloseScheduler = () => {

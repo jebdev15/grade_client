@@ -55,6 +55,10 @@ const GenerateReport = () => {
     {
       value: "accountLogs",
       label: "User Account Logs",
+    },
+    {
+      value: "deadlineLogs",
+      label: "Grade Sheet Submission Deadline Logs",
     }
   ]
   const semesterOptions = [
@@ -83,16 +87,19 @@ const GenerateReport = () => {
     case "accountLogs":
       url="downloadAccountLogs"
       break;
+    case "deadlineLogs":
+      url="downloadDeadlineLogs"
+      break;
     default:
       break;
   }
+  const toGenerateValueInURL = generateReportOptions.find(({value}) => value === typeOfReport.toGenerate)?.label;
   const downloadLogs = async () => {
     if(typeOfReport.toGenerate === "" || typeOfReport.toGenerate === null){
       alert("Select Report to Generate") 
       return
     }
-    const toGenerateValueInURL = generateReportOptions.find(({value}) => value === typeOfReport.toGenerate)?.label;
-    const params = typeOfReport.toGenerate === "gradeSheetSubmission" ? `schoolYear=${typeOfReport.schoolYear}&semester=${typeOfReport.semester}` : `from=${typeOfReport.from}&to=${typeOfReport.to}`
+    const params = ["gradeSheetSubmission","deadlineLogs"].includes(typeOfReport.toGenerate) ? `schoolYear=${typeOfReport.schoolYear}&semester=${typeOfReport.semester}` : `from=${typeOfReport.from}&to=${typeOfReport.to}`
     const {data, status} = await axios.get(`${process.env.REACT_APP_API_URL}/download/${url}?toGenerate=${toGenerateValueInURL}&${params}`,
       {
         responseType: 'arraybuffer',
@@ -104,10 +111,10 @@ const GenerateReport = () => {
         });
         saveAs(
           blob,
-          `Logs.xlsx`
+          `${toGenerateValueInURL}.xlsx`
         )
       } else {
-        console.log('Error');
+        alert('Something went wrong');
       }
   }
   const handleChangeParams = (e) => {
@@ -143,7 +150,7 @@ const GenerateReport = () => {
                 ))}
               </Select>
             </FormControl>
-            {typeOfReport.toGenerate === "gradeSheetSubmission" 
+            {["gradeSheetSubmission","deadlineLogs"].includes(typeOfReport.toGenerate) 
             ? (
               <>
                 <FormControl sx={{ display: 'flex', flexDirection: 'row' }} fullWidth>

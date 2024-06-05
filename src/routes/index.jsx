@@ -60,14 +60,12 @@ const Index = () => {
         setIndividualCookie("picture", picture);
         setIndividualCookie("email", email);
         // setIndividualCookie("campus", campus);
-        console.log(data);
         navigate(data[1].url);
       } else {
-        console.log(data);
+        alert("Invalid Credentials");
       }
     } catch (err) {
-      alert("Invalid Credentials");
-      // console.log(err);
+      alert("Something went wrong. Please try again later.");
       setLoading(!true)
     }
   };
@@ -138,7 +136,6 @@ const Index = () => {
                 ) : (
                   <GoogleLogin
                     onSuccess={login}
-                    onError={() => console.log("Error logging in")}
                   />
                 )}
               <FormControlLabel

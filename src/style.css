@@ -149,8 +149,8 @@ div:has(> .semester-grid) {
   padding: 24px;
 }
 
-.usersTable > div > div:nth-child(2) > div:nth-child(2) {
-}
+/* .usersTable > div > div:nth-child(2) > div:nth-child(2) {
+} */
 
 @media (min-width: 1200px) {
 }
