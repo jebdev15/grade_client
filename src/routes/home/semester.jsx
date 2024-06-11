@@ -38,11 +38,11 @@ import { urlEncode, urlDecode } from "url-encode-base64";
 
 const Semester = () => {
   const { code } = useParams();
-  const [cookies] = useCookies(["faculty_id"]);
+  const [cookies] = useCookies(["faculty_id", "email"]);
   const [semester, currentSchoolYear] = code.split("-");
 
   const navigate = useNavigate();
-  const { loads, dbSchoolYear, dbSemester, dbStatus, dbTo } = useLoaderData();
+  const { loads, dbSchoolYear, dbSemester, dbTo } = useLoaderData();
 
   const [manualOpen, setManualOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -144,9 +144,15 @@ const Semester = () => {
   }) => {
     const encodedClassCode = urlEncode(class_code);
     const submitGradeSheetConfirmation = async (classCode) => {
-      const confirmation = window.confirm(
-        "Are you sure you want to submit this grade sheet?"
-      )
+      const { data } = await axios.get(
+        `${process.env.REACT_APP_API_URL}/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${encodedClassCode}`
+      );
+      const filterNoMidtermGrade = data.filter(student => ['',0,'null'].includes(student.midTermGrade))
+      const filterNoEndtermGrade = data.filter(student => ['',0,'null'].includes(student.endTermGrade))
+      const midTermAlert = filterNoMidtermGrade.length > 0 ? `There are ${filterNoMidtermGrade.length} students without a midterm grade` : "";
+      const endTermAlert = filterNoEndtermGrade.length > 0 ? `There are ${filterNoEndtermGrade.length} students without an endterm grade` : "";
+      const alertMessage = `Are you sure you want to submit this grade sheet?\n${midTermAlert}\n${endTermAlert}`
+      const confirmation = window.confirm(alertMessage)
       if(!confirmation) return
       await submitGradeSheetConfirmed(classCode)
     }
@@ -156,7 +162,8 @@ const Semester = () => {
       const formData = new FormData();
       formData.append("class_code", encodedClassCode);
       formData.append("status", 0)
-      const { data } = await axios.post(
+      formData.append("email_used", cookies.email)
+      await axios.post(
         `${process.env.REACT_APP_API_URL}/admin/updateClassCodeStatus`,
         formData,
         {
@@ -401,10 +408,9 @@ export const loader = async ({ params }) => {
   const {
     schoolyear: dbSchoolYear,
     semester: dbSemester,
-    status: dbStatus,
     to: dbTo,
   } = data2[0];
 
-  return { loads, dbSchoolYear, dbSemester, dbStatus, dbTo };
+  return { loads, dbSchoolYear, dbSemester, dbTo };
 };
 export default Semester;

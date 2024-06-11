@@ -95,7 +95,7 @@ export default function Admin() {
   useEffect(() => {
     const loader = async () => {
       const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear?getYear=currentYearSetBySystem`
+        `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
       );
       setRegistrarActivity(data[0])
     };
@@ -278,13 +278,13 @@ export default function Admin() {
                   navigate(`/admin/grades`);
                 }}
               >
-                <Tooltip title="Grade Submission">
+                <Tooltip title="Faculty">
                   <ListItemIcon>
                     <ScheduleIcon />
                   </ListItemIcon>
                 </Tooltip>
                 {drawerMinimize ? null : (
-                  <ListItemText primary="Grade Submission" />
+                  <ListItemText primary="Faculty" />
                 )}
               </ListItemButton>
 

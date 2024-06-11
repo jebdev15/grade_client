@@ -18,8 +18,10 @@ import {
 } from "react-router-dom";
 import axios from "axios";
 import { Close } from "@mui/icons-material";
-import { DataGrid } from "@mui/x-data-grid";
-import { useState } from "react";
+import { 
+  DataGrid
+} from "@mui/x-data-grid";
+import React, { useEffect, useState } from "react";
 import { urlDecode } from "url-encode-base64";
 const GradeTable = () => {
   const navigate = useNavigate();
@@ -227,6 +229,54 @@ const GradeTable = () => {
       },
     },
   ];
+
+  const handleProcessRowUpdate = (row, prev) => {
+    const isSame = JSON.stringify(row) === JSON.stringify(prev);
+    if (!isSame) {
+      const duplicate = toUpdate.find((r) => r.sg_id === row.sg_id);
+      let newArr = null;
+      if (duplicate) {
+        newArr = toUpdate.filter((r) => r.sg_id !== duplicate.sg_id);
+        setToUpdate([...newArr, row]);
+      } else {
+        setToUpdate((prev) => [...prev, row]);
+      }
+    } 
+    return row;
+  }
+  const handleCheckNotUpdated = async () => {
+    const filterRowsByMidTermGrade = rows.filter(row => !(['',0].includes(row.mid_grade)));
+    const filterToUpdateByMidTermGrade = toUpdate.filter(row => !(['',0].includes(row.mid_grade)));
+
+    const combineFilteredDataByMidTermGrade = [...filterRowsByMidTermGrade, ...filterToUpdateByMidTermGrade];
+    const filterMidtermRows = rows.filter(row => !combineFilteredDataByMidTermGrade.find(r => row.sg_id === r.sg_id));
+    const midTermRows = filterMidtermRows.map(row => row);
+    console.log(midTermRows);
+    
+    const filterRowsByEndTermGrade = rows.filter(row => !(['',0].includes(row.final_grade)));
+    const filterToUpdateByEndTermGrade = toUpdate.filter(row => !(['',0].includes(row.final_grade)));
+
+    const combineFilteredDataByEndTermGrade = [...filterRowsByEndTermGrade, ...filterToUpdateByEndTermGrade];
+    const filterEndtermRows = rows.filter(row => !combineFilteredDataByEndTermGrade.find(r => row.sg_id === r.sg_id));
+    const endTermRows = filterEndtermRows.map(row => row);
+
+    let message = `Are you sure you want to update?`;
+    midTermRows.length > 0 && (message += `\n There are  ${midTermRows.length} ${midTermRows.length > 0 ? 'students' : 'student'} in midterm that have no grade`)
+    endTermRows.length > 0 && (message += `\n There are  ${endTermRows.length} ${endTermRows.length > 0 ? 'students' : 'student'} in endterm that have no grade`)
+    
+    const confirmation = window.confirm(message)
+    if(!confirmation) return
+    setTableLoading(true);
+    const { data } = await axios.post(
+                    `${process.env.REACT_APP_API_URL}/updateGrade`,
+                    { grades: toUpdate, class_code, method: "Manual" }
+                  );
+    if (data) {
+      setToUpdate([]);
+      setTableLoading(false);
+      setUpdatedCount(data);
+    }
+  }
   return (
     <Dialog
       open={manualOpen}
@@ -307,20 +357,7 @@ const GradeTable = () => {
               },
               color: theme.palette.text.main,
             }}
-            processRowUpdate={(row, prev) => {
-              const isSame = JSON.stringify(row) === JSON.stringify(prev);
-              if (!isSame) {
-                const duplicate = toUpdate.find((r) => r.sg_id === row.sg_id);
-                let newArr = null;
-                if (duplicate) {
-                  newArr = toUpdate.filter((r) => r.sg_id !== duplicate.sg_id);
-                  setToUpdate([...newArr, row]);
-                } else {
-                  setToUpdate((prev) => [...prev, row]);
-                }
-              }
-              return row;
-            }}
+            processRowUpdate={handleProcessRowUpdate}
           />
           <Button
             variant="contained"
@@ -330,22 +367,7 @@ const GradeTable = () => {
               justifySelf: "center",
               display: toUpdate.length ? "block" : "none",
             }}
-            onClick={async () => {
-              const confirmation = window.confirm(
-                "Are you sure you want to update?"
-              )
-              if(!confirmation) return
-              setTableLoading(true);
-              const { data } = await axios.post(
-                `${process.env.REACT_APP_API_URL}/updateGrade`,
-                { grades: toUpdate, class_code, method: "Manual" }
-              );
-              if (data) {
-                setToUpdate([]);
-                setTableLoading(false);
-                setUpdatedCount(data);
-              }
-            }}
+            onClick={handleCheckNotUpdated}
           >
             {tableLoading ? "Updating..." : "Update Record"}
           </Button>
@@ -381,7 +403,7 @@ export const loader = async ({ params }) => {
   const loadInfoArr = data2;
 
   const { data: data3 } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear?getYear=currentYearSetBySystem`
+    `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
   );
   const {
     schoolyear: dbSchoolYear,

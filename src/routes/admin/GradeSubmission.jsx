@@ -296,7 +296,7 @@ const GradeSubmission = () => {
         <Grid container spacing={0}>
           <Grid item>
             <ButtonGroup variant="text" color="primary" aria-label="">
-              {cookies.accessLevel === "Administrator" && (  
+              {(cookies.accessLevel === "Administrator" || cookies.accessLevel === "Registrar") && (  
                 <Tooltip title="Set Deadline for Grade Submission">  
                   <Button
                     variant="text"
@@ -322,7 +322,13 @@ const GradeSubmission = () => {
           </Grid>
         </Grid>
         <Box sx={isSmallScreen ? {height: '100%', width: '100%'} : {height: 600, width: '100%'}}>
-          <Typography variant="body1" color="initial">List of Faculty</Typography>
+          <Typography 
+          variant="h4"
+          fontWeight={700}
+          component="div"
+          marginBottom={3}
+          sx={{ flexGrow: 1 }}
+          >LIST OF FACULTY</Typography>
           <DataGrid
               rows={rows}
               columns={columns}

@@ -89,7 +89,6 @@ const router = createBrowserRouter([
 ]);
 root.render(
   <React.StrictMode>
-    {/* <GoogleOAuthProvider clientId="716180471328-k91kdip1kj2024jkj5tporlkehffbnb9.apps.googleusercontent.com"> */} {/* using almark chmsu email */}
     <GoogleOAuthProvider clientId="853501125882-et0u8vs2qthqbq4vkskobqgm3mb8g91h.apps.googleusercontent.com"> {/* using johneric chmsu email */}
       <ThemeProvider theme={theme}>
         <CssBaseline />

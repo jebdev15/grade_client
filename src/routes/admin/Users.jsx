@@ -7,7 +7,7 @@ import { useNavigate, useLoaderData } from "react-router-dom";
 import { useCookies } from "react-cookie";
 
 const Users = () => {
-  const [cookies, ,] = useCookies(['email']);
+  const [cookies, ,] = useCookies(['email', 'accessLevel']);
   const { data, status:dataStatus } = useLoaderData();
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
@@ -34,14 +34,9 @@ const Users = () => {
   const [updateDataToCheck, setUpdateDataToCheck] = useState({});
   const [openEditAccountDialog, setOpenEditAccountDialog] = useState(false);
 
-  const handleOpenCreateUsersDialog = () => {
-    loadAccessLevels();
-    loadNoAccounts();
-    setTimeout(() => setOpenCreateUsersDialog(true), 1000)
-  }
+  const handleOpenCreateUsersDialog = () => setOpenCreateUsersDialog(true)
   const handleCloseCreateUsersDialog = () => setOpenCreateUsersDialog(!true);
   const handleChange = (e) => {
-    // if(e.target.name === 'emailAddress' && e.target.name.split('@')[1] !== 'chmsu.edu.ph')
     setCreateUserData((prevState) => (
       {...prevState, [e.target.name]: e.target.value}
     ))
@@ -65,23 +60,26 @@ const Users = () => {
       }
   }
 
-  const handleOpenEditAccountDialog = async (id) => {
-    const formData = new FormData();
-    formData.append('id', id)
-    const { data } = await axios.post(
-      `${process.env.REACT_APP_API_URL}/admin/getAccountDetails`, 
-      formData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
-    )
-    const { data:accessLevels } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getAccessLevels`);
-    setAccessLevelData(accessLevels);
-    setUpdateAccountData(data);
-    setUpdateDataToCheck(data);
-    setTargetCurrentStatusOfAccount(data.status);
-    loadNoAccounts();
+  const handleOpenEditAccountDialog = async (params) => {
+    const toEditRowData = params.row;
+    const findStatus = toEditRowData.status === 'Active' ? 1 : 0;
+    const updatedToEditRowData = {...toEditRowData, status: findStatus};
+    console.log(updatedToEditRowData);
+    // const formData = new FormData();
+    // formData.append('id', id)
+    // const { data } = await axios.post(
+    //   `${process.env.REACT_APP_API_URL}/admin/getAccountDetails`, 
+    //   formData, {
+    //     headers: {
+    //       'Content-Type': 'application/json'
+    //     }
+    //   }
+    // )
+    
+    setUpdateAccountData(updatedToEditRowData);
+    setUpdateDataToCheck(updatedToEditRowData);
+    setTargetCurrentStatusOfAccount(findStatus);
+    // loadNoAccounts();
     setOpenEditAccountDialog(true);
   }
   const handleCloseEditAccountDialog = () => setOpenEditAccountDialog(!true);
@@ -119,16 +117,16 @@ const Users = () => {
   }
 
   const columns = [
-    { field: "id", headerName: "ID", flex: 1, minWidth: 68 },
+    { field: "id", headerName: "ID", flex: 1, minWidth: 68, hide: true },
     {
       field: "fullName",
       headerName: "Full name",
       description: "This column has a value getter and is not sortable.",
-      sortable: false,
+      sortable: true,
       flex: 5,
       minWidth: 200,
-      valueGetter: (value, row) =>
-        `${value?.row?.firstName || ""} ${value?.row?.lastName || ""}`,
+      valueGetter: (value, row) => 
+       ['Administrator', 'Registrar'].includes(value?.row?.accessLevel) ? value?.row?.accessLevel || "" : `${value?.row?.lastName || ""}, ${value?.row?.firstName || ""}`,
     },
     {
       field: "email",
@@ -158,42 +156,53 @@ const Users = () => {
       flex: 2,
       minWidth: 68,
       renderCell: (params) => {
-        const handleEditAccount = () => handleOpenEditAccountDialog(params.row.faculty_id)
-
-        return (
-          <ButtonGroup variant="text" color="primary" aria-label="">
-            <Tooltip title="Edit Account">
-              <IconButton
-                aria-label="Edit"
-                size="small"
-                color="primary"
-                onClick={handleEditAccount}
-              >
-                <ModeEdit />
-              </IconButton>
-            </Tooltip>
-          </ButtonGroup>
-            
-        );
+        const handleEditAccount = () => handleOpenEditAccountDialog(params)
+        return(
+          <>
+             <ButtonGroup variant="text" color="primary" aria-label="">
+               <Tooltip title="Edit Account">
+                 <IconButton
+                   aria-label="Edit"
+                   size="small"
+                   color="primary"
+                   onClick={handleEditAccount}
+                 >
+                   <ModeEdit />
+                 </IconButton>
+               </Tooltip>
+             </ButtonGroup>
+          </>
+        )
       },
     },
   ];
 
-  const loadAccessLevels = async () => {
-    const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getAccessLevels`);
-    setAccessLevelData(data);
-  }
 
-  const loadNoAccounts = async () => {
-    const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getAllNoAccounts`);
-    setNoAccountData(data.rows);
-  }
 
   useEffect(() => {
+    const loadAccessLevels = async () => {
+      const { data:accessLevels } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getAccessLevels`);
+      const checkAccessLevelData = cookies.accessLevel === 'Administrator' ? accessLevels : accessLevels.filter(accessLevel => accessLevel !== 'Administrator');
+      setAccessLevelData(checkAccessLevelData);
+    }
+    loadAccessLevels()
+    const loadNoAccounts = async () => {
+      const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getAllNoAccounts`);
+      setNoAccountData(data.rows);
+    }
+    loadNoAccounts()
+  },[cookies])
+  useEffect(() => {
     if(dataStatus === 200){
-      setRows(data) 
+      
+      if(cookies.accessLevel !== 'Administrator') {
+        const filteredData = data.filter(user => user.accessLevel !== 'Administrator')
+        setRows(filteredData)
+      } else {
+        setRows(data) 
+      }
     }  
-  }, [data, dataStatus])
+  }, [data, dataStatus, cookies])
   return (
     <>
         <Grid container spacing={0}>

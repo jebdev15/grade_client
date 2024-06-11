@@ -53,7 +53,7 @@ const Index = () => {
       const { data, status } = await axios.get(
         `${process.env.REACT_APP_API_URL}/login?email=${email}`
       );
-      if (status === 200 && data.length) {
+      if (status === 200 && data.length > 0) {
         setIndividualCookie("faculty_id", data[0].faculty_id);
         setIndividualCookie("accessLevel", data[0].accessLevel);
         setIndividualCookie("name", name);
@@ -63,9 +63,10 @@ const Index = () => {
         navigate(data[1].url);
       } else {
         alert("Invalid Credentials");
+        setLoading(!true)
       }
     } catch (err) {
-      alert("Something went wrong. Please try again later.");
+      alert("Something went wrong. Please contact Administrator");
       setLoading(!true)
     }
   };
