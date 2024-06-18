@@ -24,13 +24,13 @@ import chmsuLogo from "../../assets/chmsu-small.jpg";
 import registrarUDC from "../../assets/registrar_udc.jpg";
 import axios from "axios";
 
-const DialogTitleInPrint = styled("DialogTitle")({
+const DialogTitleInPrint = styled("div")({
   '@media print': {
     display: "none",
   },
 })
 
-const DialogActionsInPrint = styled("DialogActions")({
+const DialogActionsInPrint = styled("div")({
   '@media print': {
     display: "none",
   },
@@ -96,11 +96,13 @@ class ComponentToPrint extends React.Component {
       }
       return remark || status;
     };
-    const pages = Math.ceil(students.length / 25);
+    const addTableIds = (students) => students.map((student, index) => ({ ...student, id: ++index }));
+    const studentsWithTableId = addTableIds(students)
+    const pages = Math.ceil(studentsWithTableId.length / 25);
     const studentsPerPage = 25;
     const renderPage = (pageNumber) => {
       const startIndex = pageNumber * studentsPerPage;
-      const pageStudents = students.slice(startIndex, startIndex + studentsPerPage);
+      const pageStudents = studentsWithTableId.slice(startIndex, startIndex + studentsPerPage);
 
       return (
         <div 
@@ -109,7 +111,6 @@ class ComponentToPrint extends React.Component {
           style={{ 
             width: "100%",
             height: "100%",
-            transform: "scale(.95)",
             size: "auto",
             margin: "0",
            }}
@@ -204,6 +205,7 @@ class ComponentToPrint extends React.Component {
                       {pageStudents.map(
                         (
                           {
+                            id,
                             studentID,
                             studentName,
                             midTermGrade,
@@ -213,8 +215,8 @@ class ComponentToPrint extends React.Component {
                           },
                           index
                         ) => (
-                          <tr key={++index}>
-                            <td>{++index}</td>
+                          <tr key={id}>
+                            <td>{id}</td>
                             <td height={"auto"}>{studentID}</td>
                             <td style={{ paddingLeft: '8px' }} align="left" height={"auto"}>{studentName}</td>
                             <td height={"auto"}>{midTermGrade}</td>
@@ -416,7 +418,7 @@ const PrintGradeSheet = () => {
           </Box>
         </DialogContent>
         <DialogActionsInPrint>
-          <DialogActions sx={{ backgroundColor: "var(--primary-color-light)" }} displayPrint={'none'}>
+          <DialogActions sx={{ backgroundColor: "var(--primary-color-light)" }}>
             <Button
               sx={{
                 backgroundColor: "var(--background-main)",

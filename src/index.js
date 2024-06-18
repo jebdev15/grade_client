@@ -20,7 +20,7 @@ import GradeTable, {
   loader as gradeTableLoader,
 } from "./routes/home/gradeTable";
 import Upload, { loader as uploadLoader } from "./routes/home/upload";
-import PrintGradeSheet, { loader as printLoader } from "./routes/home/Print";
+import PrintGradeSheet, { loader as printLoader } from "./routes/home/PrintNew";
 
 // Admin Routes
 import Admin from './routes/admin/Index';
@@ -56,14 +56,19 @@ const router = createBrowserRouter([
             element: <Upload />,
             loader: uploadLoader,
           },
-          {
-            path: "/home/:code/print/:class_code",
-            element: <PrintGradeSheet />,
-            loader: printLoader,
-          },
+          // {
+          //   path: "/home/:code/print/:class_code",
+          //   element: <PrintGradeSheet />,
+          //   loader: printLoader,
+          // },
         ],
       },
     ],
+  },
+  {
+    path: "/print/:code/:class_code",
+    element: <PrintGradeSheet />,
+    loader: printLoader,
   },
   {
     path: "admin",

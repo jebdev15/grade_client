@@ -21,7 +21,7 @@ import { Close } from "@mui/icons-material";
 import { 
   DataGrid
 } from "@mui/x-data-grid";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { urlDecode } from "url-encode-base64";
 const GradeTable = () => {
   const navigate = useNavigate();
@@ -35,10 +35,8 @@ const GradeTable = () => {
   const {
     rows,
     loadInfoArr,
-    status,
     dbSchoolYear,
     dbSemester,
-    dbStatus,
     dbTo,
   } = useLoaderData();
   const [manualOpen, setManualOpen] = useOutletContext();
@@ -245,27 +243,27 @@ const GradeTable = () => {
     return row;
   }
   const handleCheckNotUpdated = async () => {
-    const filterRowsByMidTermGrade = rows.filter(row => !(['',0].includes(row.mid_grade)));
-    const filterToUpdateByMidTermGrade = toUpdate.filter(row => !(['',0].includes(row.mid_grade)));
+    // const filterRowsByMidTermGrade = rows.filter(row => !(['',0].includes(row.mid_grade)));
+    // const filterToUpdateByMidTermGrade = toUpdate.filter(row => !(['',0].includes(row.mid_grade)));
 
-    const combineFilteredDataByMidTermGrade = [...filterRowsByMidTermGrade, ...filterToUpdateByMidTermGrade];
-    const filterMidtermRows = rows.filter(row => !combineFilteredDataByMidTermGrade.find(r => row.sg_id === r.sg_id));
-    const midTermRows = filterMidtermRows.map(row => row);
-    console.log(midTermRows);
+    // const combineFilteredDataByMidTermGrade = [...filterRowsByMidTermGrade, ...filterToUpdateByMidTermGrade];
+    // const filterMidtermRows = rows.filter(row => !combineFilteredDataByMidTermGrade.find(r => row.sg_id === r.sg_id));
+    // const midTermRows = filterMidtermRows.map(row => row);
+    // console.log(midTermRows);
     
-    const filterRowsByEndTermGrade = rows.filter(row => !(['',0].includes(row.final_grade)));
-    const filterToUpdateByEndTermGrade = toUpdate.filter(row => !(['',0].includes(row.final_grade)));
+    // const filterRowsByEndTermGrade = rows.filter(row => !(['',0].includes(row.final_grade)));
+    // const filterToUpdateByEndTermGrade = toUpdate.filter(row => !(['',0].includes(row.final_grade)));
 
-    const combineFilteredDataByEndTermGrade = [...filterRowsByEndTermGrade, ...filterToUpdateByEndTermGrade];
-    const filterEndtermRows = rows.filter(row => !combineFilteredDataByEndTermGrade.find(r => row.sg_id === r.sg_id));
-    const endTermRows = filterEndtermRows.map(row => row);
+    // const combineFilteredDataByEndTermGrade = [...filterRowsByEndTermGrade, ...filterToUpdateByEndTermGrade];
+    // const filterEndtermRows = rows.filter(row => !combineFilteredDataByEndTermGrade.find(r => row.sg_id === r.sg_id));
+    // const endTermRows = filterEndtermRows.map(row => row);
 
-    let message = `Are you sure you want to update?`;
-    midTermRows.length > 0 && (message += `\n There are  ${midTermRows.length} ${midTermRows.length > 0 ? 'students' : 'student'} in midterm that have no grade`)
-    endTermRows.length > 0 && (message += `\n There are  ${endTermRows.length} ${endTermRows.length > 0 ? 'students' : 'student'} in endterm that have no grade`)
+    // let message = `Are you sure you want to update?`;
+    // midTermRows.length > 0 && (message += `\n There are  ${midTermRows.length} ${midTermRows.length > 0 ? 'students' : 'student'} without a midterm grade`)
+    // endTermRows.length > 0 && (message += `\n There are  ${endTermRows.length} ${endTermRows.length > 0 ? 'students' : 'student'} without an enterm grade`)
     
-    const confirmation = window.confirm(message)
-    if(!confirmation) return
+    // const confirmation = window.confirm(message)
+    // if(!confirmation) return
     setTableLoading(true);
     const { data } = await axios.post(
                     `${process.env.REACT_APP_API_URL}/updateGrade`,
@@ -408,7 +406,6 @@ export const loader = async ({ params }) => {
   const {
     schoolyear: dbSchoolYear,
     semester: dbSemester,
-    status: dbStatus,
     to: dbTo,
   } = data3[0];
 
@@ -418,7 +415,6 @@ export const loader = async ({ params }) => {
     status,
     dbSchoolYear,
     dbSemester,
-    dbStatus,
     dbTo,
   };
 };

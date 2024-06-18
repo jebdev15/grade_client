@@ -309,16 +309,19 @@ const Semester = () => {
                   color="primary"
                   size="large"
                   aria-label=""
-                  onClick={() => {
-                    navigate(
-                      `/home/${semester}-${currentSchoolYear}-${urlEncode(
-                        cookies.faculty_id
-                      )}/print/${encodedClassCode}`
-                    );
-                    setPrintOpen(true);
-                    manualTimer();
-                  }}
-                  disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print  ? true : false}
+                  // onClick={() => {
+                  //   navigate(
+                  //     `/home/${semester}-${currentSchoolYear}-${urlEncode(
+                  //       cookies.faculty_id
+                  //     )}/print/${encodedClassCode}`
+                  //   );
+                  //   setPrintOpen(true);
+                  //   manualTimer();
+                  // }}
+                  // disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print  ? true : false}
+                  // onClick={() => navigate(`/print/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}`)}
+                  href={`/print/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}`}
+                  target="_blank"
                 >
                   <Print />
                 </IconButton>

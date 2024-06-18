@@ -1,29 +1,2 @@
-@media print {
-  #printArea {
-    margin: 0;
-    padding: 0;
-  }
 
-  .printPage {
-    page-break-after: always;
-    width: 8.5in;
-    height: 14in;
-  }
-  .printPage:last-child {
-      page-break-after: auto;
-  }
-  .hideOnPrint {
-    display: none;
-  }
-}
-
-.printPage {
-  width: 210mm;
-  height: 297mm;
-  display: 'flex';
-  flex-direction: 'column';
-  justify-content: 'center';
-  align-items: 'center';
-  background-color: "#333"
-}
 

@@ -169,7 +169,7 @@ const GradeSubmission = () => {
       formData.append('action', lockAction)
       formData.append('email_used', cookies.email)
 
-      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/updateClassStatus`, formData, {
+      await axios.post(`${process.env.REACT_APP_API_URL}/admin/updateClassStatus`, formData, {
         headers: {
           'Content-Type': 'application/json'
         }

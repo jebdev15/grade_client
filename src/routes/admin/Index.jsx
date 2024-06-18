@@ -21,13 +21,10 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import {
-  ExpandLess,
-  ExpandMore,
   Home as HomeIcon,
   Logout,
   Menu as MenuIcon,
   People as PeopleIcon,
-  Tune as TuneIcon,
   Schedule as ScheduleIcon,
   WorkHistory as WorkHistoryIcon,
 } from "@mui/icons-material";

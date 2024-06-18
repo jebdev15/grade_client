@@ -135,7 +135,8 @@ div:has(> .semester-grid) {
 .systemName span:last-child::before {
   display: block;
   white-space: nowrap;
-  content: "GRADING SYSTEM";
+  /* content: "GRADING SYSTEM"; */
+  content: "GRADING PORTAL";
   font-size: 16px;
   letter-spacing: 1px;
 }
@@ -185,7 +186,8 @@ div:has(> .semester-grid) {
 
   .systemName span:last-child::before {
     white-space: nowrap;
-    content: "GRADING SYSTEM";
+    /* content: "GRADING SYSTEM"; */
+    content: "GRADING PORTAL";
     letter-spacing: 0px;
     display: inline-flex;
   }
@@ -197,7 +199,8 @@ div:has(> .semester-grid) {
 
 @media (max-width: 899px) {
   .systemName span:last-child::before {
-    content: "GRADING SYST.";
+    /* content: "GRADING SYST."; */
+    content: "GRADING PORTAL";
   }
   .semester-grid {
     grid-template-columns: repeat(auto-fill, minmax(275px, 1fr)) !important;

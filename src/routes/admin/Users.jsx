@@ -47,7 +47,7 @@ const Users = () => {
       formData.append('facultyId', createUserData.facultyId)
       formData.append('accessLevel', createUserData.accessLevel)
       formData.append('emailUsed', cookies.email)
-      const { data, status } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/createUser`, formData, {
+      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/createUser`, formData, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -103,7 +103,7 @@ const Users = () => {
       formData.append('dataToCheck', JSON.stringify(updateDataToCheck))
 
 
-      const { data, status } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/updateAccount`, formData, {
+      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/updateAccount`, formData, {
         headers: {
           'Content-Type': 'application/json'
         }

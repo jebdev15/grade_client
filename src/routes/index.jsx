@@ -3,12 +3,8 @@ import {
   Box,
   Checkbox,
   Container,
-  FormControl,
   FormControlLabel,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   Typography,
 } from "@mui/material";
 import { GoogleLogin } from "@react-oauth/google";
@@ -18,6 +14,7 @@ import moment from "moment";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import "../assets/custom.css";
 import "../style.css";
 const Index = () => {
   const [loading, setLoading] = useState(false);
