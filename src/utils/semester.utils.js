@@ -1,0 +1,16 @@
+import { urlEncode } from "url-encode-base64";
+
+export const identifyGraduateStudiesLoad = (subject_codes, subject_code) => subject_codes.includes(subject_code) ? true : false
+
+export const extractSubjectCode = (subject_codes) => subject_codes.map((subject) => subject?.subject_code);
+
+export const identifyPrintLink = (checkIfGraduateStudiesLoad, semester, currentSchoolYear, cookies, encodedClassCode) => {
+    return checkIfGraduateStudiesLoad ? `/print/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}/graduateStudies` : `/print/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}`
+}
+
+// Function to extract a cookie value by name
+export const getCookieValue = (cookies, name) => {
+  const value = `; ${cookies}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+};

@@ -33,6 +33,8 @@ import { googleLogout } from "@react-oauth/google";
 import axios from "axios";
 import { urlEncode } from "url-encode-base64";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
+import { checkRegistrarActivityDueDate } from "../../services/index.services";
+
 const Home = () => {
   const siteCookies = [
     "picture",
@@ -54,6 +56,7 @@ const Home = () => {
           `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
         );
         setSchoolYear(data[0].schoolyear);
+        checkRegistrarActivityDueDate(data[0].to);
     };
     getCurrentSchoolYear();
   }, [schoolyear]);
@@ -83,6 +86,8 @@ const Home = () => {
     [drawerMinimize],
     [isMobile]
   );
+
+
 
   const logout = () => {
     siteCookies.forEach((cookie) => removeCookie(cookie, { path: "/" }));

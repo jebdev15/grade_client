@@ -23,7 +23,7 @@ import { urlDecode } from "url-encode-base64";
 const Upload = () => {
   const { code, class_code } = useParams();
   const [semester, currentSchoolYear] = code?.split("-");
-  const [cookies] = useCookies(["name"]);
+  const [cookies,,] = useCookies(["name", "email"]);
   const { loadInfoArr } = useLoaderData();
   const loadInfo = loadInfoArr[0];
 
@@ -70,6 +70,7 @@ const Upload = () => {
     formData.append("uploadFile", uploadFile);
     formData.append("class_code", class_code);
     formData.append("method", "Upload");
+    formData.append("email_used", cookies.email);
     const { data } = await axios.post(
       `${process.env.REACT_APP_API_URL}/uploadGradeSheet`,
       formData,

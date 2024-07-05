@@ -54,7 +54,7 @@ const GenerateReport = () => {
     },
     {
       value: "accountLogs",
-      label: "User Account Logs",
+      label: "Account Logs",
     },
     {
       value: "deadlineLogs",

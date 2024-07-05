@@ -25,9 +25,8 @@ import React, { useState } from "react";
 import { urlDecode } from "url-encode-base64";
 import { useCookies } from "react-cookie";
 import { dateFormatter } from "../../utils/formatDate";
-import { getCookieValue } from "../../utils/semester.utils";
 
-const GradeTable = () => {
+const GraduateStudiesTable = () => {
   const [cookies, , ] = useCookies(["email"]);
   const navigate = useNavigate();
   const { code, class_code } = useParams();
@@ -85,80 +84,39 @@ const GradeTable = () => {
       headerName: "Mid Term",
       width: 90,
       editable: canUpload,
-      type: "number",
-      hideable: false,
       sortable: true,
-      preProcessEditCellProps: ({ props }) => {
-        const hasError = props.value < 0 || props.value > 100;
-        return { ...props, error: hasError };
-      },
-      valueSetter: ({ row, value }) => {
-        // Old way to fetch mid term grade
-        // const average = Math.round(
-        //   (parseFloat(value) + parseFloat(row.final_grade)) / 2
-        // );
-        // fix to fetch mid term grade
-        const ave =  (parseFloat(value) + parseFloat(row.final_grade)) / 2;
-        let status = "";
-        const average = (ave >= 1 && ave <= 3) ? ave : Math.round(ave);
-        const final = average >= 1 && average <= 3 ? 0 : average;
-        if (average > 74) status = "Passed";
-        else if (average >= 3) status = "Failed";
-        else if (average >= 1) status = "Passed";
-        // console.log({ ...row, average, status, mid_grade: value });
-        return { ...row, average: final, status, mid_grade: value };
-      },
+      type: "number",
+      valueGetter: ({ row }) => row.mid_grade,
     },
     {
-      field: "final_grade",
+      field: "end_grade",
       headerName: "End Term",
       width: 90,
       editable: canUpload,
       sortable: true,
       type: "number",
-      hideable: false,
-      preProcessEditCellProps: ({ props }) => {
-        const hasError = props.value < 0 || props.value > 100;
-        return { ...props, error: hasError };
-      },
-      valueSetter: ({ row, value }) => {
-        const ave =  (parseFloat(row.mid_grade) + parseFloat(value)) / 2;
-        const average = (ave >= 1 && ave <= 3) ? ave : Math.round(ave);
-        const final = average >= 1 && average <= 3 ? 0 : average;
-        let status = "";
-        if (average > 74) status = "Passed";
-        else if (average >= 3) status = "Failed";
-        else if (average >= 1) status = "Passed";
-
-        return { ...row, average:final, status, final_grade: value };
-      },
+      valueGetter: ({ row }) => row.end_grade,
     },
     {
-      field: "average",
+      field: "grade",
       headerName: "Grade",
       width: 90,
+      editable: canUpload,
       sortable: true,
       type: "number",
-      valueGetter: ({ row }) => {
-        if (row.mid_grade && row.final_grade) {
-          const average = (parseFloat(row.mid_grade) + parseFloat(row.final_grade)) / 2;
-          return (average >= 1 && average <= 3) ? average : Math.round(average);
-        } else return "";
-      },
+      valueGetter: ({ row }) => row.grade,
     },
     {
       field: "status",
       headerName: "Status",
       valueGetter: ({ row }) => {
-        if (row.mid_grade && row.final_grade) {
-          const average = Math.round(
-            (parseFloat(row.mid_grade) + parseFloat(row.final_grade)) / 2
-          );
-          if (average > 74) return "Passed";
-          else if (average >= 3) return "Failed";
-          else if (average >= 1) return "Passed";
-        } else return "";
-      },
+        if(row.grade) {
+
+          return (row.grade >= 1 && row.grade <= 2 ) ? "Passed" : "Failed";
+        } else {
+          return ""
+        }
+      }
     },
     {
       field: "dbRemark",
@@ -244,7 +202,7 @@ const GradeTable = () => {
     if(!confirmation) return
     setTableLoading(true);
     const { data } = await axios.post(
-                    `${process.env.REACT_APP_API_URL}/updateGrade`,
+                    `${process.env.REACT_APP_API_URL}/updateGraduateStudiesGrade`,
                     { grades: toUpdate, class_code, method: "Manual", email_used: cookies.email }
                   );
     if (data) {
@@ -252,6 +210,7 @@ const GradeTable = () => {
       setTableLoading(false);
       setUpdatedCount(data);
     }
+    console.log({toUpdate});
   }
   return (
     <Dialog
@@ -303,7 +262,7 @@ const GradeTable = () => {
           }}
         >
           <Typography>
-            Subject Code: <strong>{loadInfo.subject_code}</strong>
+            Subject Code: <strong>{`${loadInfo.subject_code}(Graduate Studies)`}</strong>
           </Typography>
           <Typography>
             Section: <strong>{loadInfo.section}</strong>
@@ -364,14 +323,11 @@ const GradeTable = () => {
     </Dialog>
   );
 };
-export const loader = async ({ request, params }) => {
-  const cookiesString = request.headers.get('cookie');
-  const email = getCookieValue(cookiesString, 'email');
-  console.log(email);
+export const loader = async ({ params }) => {
   const { code, class_code } = params;
   const [semester, currentSchoolYear, faculty_id] = code.split("-");
   const { data } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getGradeTable?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+    `${process.env.REACT_APP_API_URL}/getGraduateStudiesTable?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
   );
 
   const rows = data;
@@ -399,4 +355,5 @@ export const loader = async ({ request, params }) => {
     dbTo,
   };
 };
-export default GradeTable;
+
+export default GraduateStudiesTable;

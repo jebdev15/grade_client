@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -35,6 +35,9 @@ import axios from "axios";
 import { useCookies } from "react-cookie";
 import moment from "moment";
 import { urlEncode, urlDecode } from "url-encode-base64";
+import { dateFormatter } from "../../utils/formatDate";
+import { useFetch } from "../../hooks/useFetch";
+import { extractSubjectCode, identifyGraduateStudiesLoad, identifyPrintLink } from "../../utils/semester.utils";
 
 const Semester = () => {
   const { code } = useParams();
@@ -47,7 +50,7 @@ const Semester = () => {
   const [manualOpen, setManualOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [printOpen, setPrintOpen] = useState(false);
-
+  const [graduateStudies, setGraduateStudies] = useState([]);
   const [loading, setLoading] = useState({
     manual: false,
     upload: false,
@@ -113,17 +116,6 @@ const Semester = () => {
   const decodedSemester = urlDecode(semester);
   const decodedSchoolYear = urlDecode(currentSchoolYear);
 
-  const dateFormatter = (date) => {
-    const newDateTime = new Date(date);
-
-    const formattedDate = newDateTime.toLocaleString("en-PH", {
-      month: "long", // Full month name
-      day: "numeric", // Day of the month
-      year: "numeric", // Full year
-    });
-
-    return formattedDate;
-  };
   const getcurrentDate = Date.now();
   const currentDate = dateFormatter(getcurrentDate);
   const systemScheduledDueDate = dateFormatter(dbTo);
@@ -132,7 +124,11 @@ const Semester = () => {
   const checkSchoolYear = dbSchoolYear === parseInt(decodedSchoolYear);
   const checkSemester = dbSemester === decodedSemester;
   const canUpload = checkDate && checkSchoolYear && checkSemester;
-
+  const graduateStudiesLoads = useFetch('getGraduateStudiesLoad');
+  useEffect(() => {
+    const graduateStudiesSubjectCodes = extractSubjectCode(graduateStudiesLoads);
+    setGraduateStudies(graduateStudiesSubjectCodes);
+  }, [graduateStudiesLoads]);
   const LoadCard = ({
     subject_code,
     status,
@@ -141,6 +137,7 @@ const Semester = () => {
     class_code,
     timestamp,
     method,
+    submittedLog,
   }) => {
     const encodedClassCode = urlEncode(class_code);
     const submitGradeSheetConfirmation = async (classCode) => {
@@ -151,7 +148,7 @@ const Semester = () => {
       const filterNoEndtermGrade = data.filter(student => ['',0,'null'].includes(student.endTermGrade))
       const midTermAlert = filterNoMidtermGrade.length > 0 ? `There are ${filterNoMidtermGrade.length} students without a midterm grade` : "";
       const endTermAlert = filterNoEndtermGrade.length > 0 ? `There are ${filterNoEndtermGrade.length} students without an endterm grade` : "";
-      const alertMessage = `Are you sure you want to submit this grade sheet?\n${midTermAlert}\n${endTermAlert}`
+      const alertMessage = `Are you sure you want to submit this grade sheet? Once submitted, it cannot be edited. \n #Contact Registrar for Grades Revision\n${midTermAlert}\n${endTermAlert}`
       const confirmation = window.confirm(alertMessage)
       if(!confirmation) return
       await submitGradeSheetConfirmed(classCode)
@@ -175,10 +172,13 @@ const Semester = () => {
       navigate(".", { replace: true });
       setTimeout(() => alert("Grade Sheet has been submitted."), 1000)
     }
+    const checkIfGraduateStudiesLoad = identifyGraduateStudiesLoad(graduateStudies, subject_code);
+    const printLink = identifyPrintLink(checkIfGraduateStudiesLoad, semester, currentSchoolYear, cookies, encodedClassCode);
+    
     return (
       <Card variant="outlined">
         <CardHeader
-          title={subject_code}
+          title={checkIfGraduateStudiesLoad ? `${subject_code}(Graduate Studies)` : subject_code}
           subheader={section}
           avatar={
             <Avatar sx={{ bgcolor: "white" }}>
@@ -208,18 +208,19 @@ const Semester = () => {
                 flex: 5,
                 display: "flex",
                 flexDirection: "column",
-                alignItems: "center",
+                alignItems: "flex-start",
                 justifyContent: "center",
               }}
             >
-              <Typography variant="body2">Last Update</Typography>
-              <Typography variant="body2" fontWeight={600}>
-                {timestamp
+              <Typography variant="caption"><b>Encoded:</b> {timestamp
                   ? moment(timestamp).format("MMM DD, YYYY hh:mm A")
                   : "-"}
                 {" - "}
-                {method || ""}
-              </Typography>
+                {method || ""}</Typography>
+              <Typography variant="caption"><b>Submitted:</b> {timestamp
+                  // ? moment(submittedLog).format("MMM DD, YYYY hh:mm A")
+                  ? moment(submittedLog).format("MMM DD, YYYY hh:mm A")
+                  : "- -"}</Typography>
             </Box>
           </Box>
         </CardContent>
@@ -247,25 +248,22 @@ const Semester = () => {
                   size="large"
                   aria-label=""
                   onClick={() => {
-                    navigate(
-                      `/home/${semester}-${currentSchoolYear}-${urlEncode(
-                        cookies.faculty_id
-                      )}/${encodedClassCode}`
-                    );
+                    const url = checkIfGraduateStudiesLoad ? `/home/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}/graduateStudies` : `/home/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}` ;
+                    navigate(url);
                     setManualOpen(true);
                     manualTimer();
                   }}
                   disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false}
                 >
-                  {canUpload && parseInt(status) === 0 ? (
-                    <Keyboard />
-                  ) : (
-                    <Visibility />
-                  )}
+                  {
+                    (canUpload && parseInt(status) === 0)
+                      ? ( <Keyboard /> ) 
+                      : ( <Visibility /> )
+                  }
                 </IconButton>
               </span>
             </Tooltip>
-            {canUpload && parseInt(status) === 0 && (
+            {(canUpload && parseInt(status) === 0 && (!checkIfGraduateStudiesLoad)) && (
               <Tooltip title="Grade Sheet">
                 <span>
                   <IconButton
@@ -303,30 +301,19 @@ const Semester = () => {
                 </span>
               </Tooltip>
             )}
-            <Tooltip title="Print Grade Sheet">
-              <span>
-                <IconButton
-                  color="primary"
-                  size="large"
-                  aria-label=""
-                  // onClick={() => {
-                  //   navigate(
-                  //     `/home/${semester}-${currentSchoolYear}-${urlEncode(
-                  //       cookies.faculty_id
-                  //     )}/print/${encodedClassCode}`
-                  //   );
-                  //   setPrintOpen(true);
-                  //   manualTimer();
-                  // }}
-                  // disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print  ? true : false}
-                  // onClick={() => navigate(`/print/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}`)}
-                  href={`/print/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}`}
-                  target="_blank"
-                >
-                  <Print />
-                </IconButton>
-              </span>
-            </Tooltip>
+              <Tooltip title="Print Grade Sheet">
+                <span>
+                  <IconButton
+                    color="primary"
+                    size="large"
+                    aria-label=""
+                    href={printLink}
+                    target="_blank"
+                  >
+                    <Print />
+                  </IconButton>
+                </span>
+              </Tooltip>
           </ButtonGroup>
         </CardActions>
       </Card>

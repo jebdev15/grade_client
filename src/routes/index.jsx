@@ -79,6 +79,7 @@ const Index = () => {
       checkUser();
     }
   }, [cookies, navigate]);
+
   return (
     <Box sx={{ bgcolor: "background.light", height: "100dvh", width: "100vw" }}>
       <Container maxWidth="sm" fixed sx={{ height: "inherit" }}>

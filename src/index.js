@@ -19,8 +19,12 @@ import Semester, { loader as semesterLoader } from "./routes/home/semester";
 import GradeTable, {
   loader as gradeTableLoader,
 } from "./routes/home/gradeTable";
+import GraduateStudiesTable, {
+  loader as graduateStudiesTableLoader,
+} from "./routes/home/graduateStudiesTable";
 import Upload, { loader as uploadLoader } from "./routes/home/upload";
 import PrintGradeSheet, { loader as printLoader } from "./routes/home/PrintNew";
+import PrintGraduateStudiesGradeSheet, { loader as printGSLoader } from "./routes/home/PrintGS";
 
 // Admin Routes
 import Admin from './routes/admin/Index';
@@ -52,6 +56,11 @@ const router = createBrowserRouter([
             loader: gradeTableLoader,
           },
           {
+            path: "/home/:code/:class_code/graduateStudies",
+            element: <GraduateStudiesTable />,
+            loader: graduateStudiesTableLoader,
+          },
+          {
             path: "/home/:code/upload/:class_code",
             element: <Upload />,
             loader: uploadLoader,
@@ -69,6 +78,11 @@ const router = createBrowserRouter([
     path: "/print/:code/:class_code",
     element: <PrintGradeSheet />,
     loader: printLoader,
+  },
+  {
+    path: "/print/:code/:class_code/graduateStudies",
+    element: <PrintGraduateStudiesGradeSheet />,
+    loader: printGSLoader,
   },
   {
     path: "admin",

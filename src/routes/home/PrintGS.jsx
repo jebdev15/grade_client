@@ -206,7 +206,7 @@ class ComponentToPrint extends React.Component {
                             <td style={{ paddingLeft: '8px' }} align="left" height={"auto"}>{studentName}</td>
                             <td height={"auto"}>{midTermGrade}</td>
                             <td height={"auto"}>{endTermGrade}</td>
-                            <td height={"auto"}>{((midTermGrade > 50 && endTermGrade > 50) || (finalGrade >= 1 && finalGrade <= 3)) && finalGrade}</td>
+                            <td height={"auto"}>{finalGrade}</td>
                             <td height={"auto"}>
                               {
                                 (midTermGrade > 50 && endTermGrade > 50) 
@@ -294,7 +294,7 @@ class ComponentToPrint extends React.Component {
   }
 }
 
-const PrintGradeSheet = () => {
+const PrintGraduateStudiesGradeSheet = () => {
   const handlePrint = () => {
     window.print();
   };
@@ -399,9 +399,9 @@ const PrintGradeSheet = () => {
     );
 
     const { data: students } = await axios.get(
-      `${process.env.REACT_APP_API_URL}/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+      `${process.env.REACT_APP_API_URL}/getClassGraduateStudiesStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
     );
     return { data, students };
   };
-  export default PrintGradeSheet;
+  export default PrintGraduateStudiesGradeSheet;
   
