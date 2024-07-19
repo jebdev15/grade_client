@@ -204,19 +204,10 @@ class ComponentToPrint extends React.Component {
                             <td>{id}</td>
                             <td height={"auto"}>{studentID}</td>
                             <td style={{ paddingLeft: '8px' }} align="left" height={"auto"}>{studentName}</td>
-                            <td height={"auto"}>{midTermGrade}</td>
-                            <td height={"auto"}>{endTermGrade}</td>
-                            <td height={"auto"}>{finalGrade}</td>
-                            <td height={"auto"}>
-                              {
-                                (midTermGrade > 50 && endTermGrade > 50) 
-                                ? getStatusOrRemark(remarks) 
-                                : ((midTermGrade < 50 && getStatusOrRemark(remarks) === "Failed") || (endTermGrade < 50 && getStatusOrRemark(remarks) === "Failed")) 
-                                  ? "" 
-                                  : getStatusOrRemark(remarks)
-                              }
-                              
-                              </td>
+                            <td height={"auto"}>{midTermGrade === 0 ? "" : midTermGrade}</td>
+                            <td height={"auto"}>{endTermGrade === 0 ? "" : endTermGrade}</td>
+                            <td height={"auto"}>{finalGrade === 0 ? "" : finalGrade}</td>
+                            <td height={"auto"}> { getStatusOrRemark(remarks) }</td>
                           </tr>
                         )
                       )}

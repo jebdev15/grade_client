@@ -219,7 +219,8 @@ const Semester = () => {
                 {method || ""}</Typography>
               <Typography variant="caption"><b>Submitted:</b> {timestamp
                   // ? moment(submittedLog).format("MMM DD, YYYY hh:mm A")
-                  ? moment(submittedLog).format("MMM DD, YYYY hh:mm A")
+                  ? moment(submittedLog).format("MMM DD, YYYY hh:mm A") === 'Invalid date' 
+                    ? '- -' : moment(submittedLog).format("MMM DD, YYYY hh:mm A")
                   : "- -"}</Typography>
             </Box>
           </Box>

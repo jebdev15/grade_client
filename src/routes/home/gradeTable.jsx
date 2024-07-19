@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
   IconButton,
@@ -76,7 +77,7 @@ const GradeTable = () => {
     {
       field: "name",
       headerName: "Student Name",
-      minWidth: 150,
+      minWidth: 100,
       flex: 1,
       hideable: false,
     },
@@ -98,13 +99,15 @@ const GradeTable = () => {
         //   (parseFloat(value) + parseFloat(row.final_grade)) / 2
         // );
         // fix to fetch mid term grade
-        const ave =  (parseFloat(value) + parseFloat(row.final_grade)) / 2;
+        const midTermGrade = parseFloat(value);
+        const endTermGrade = parseFloat(row.final_grade);
+        const ave = (midTermGrade + endTermGrade) / 2;
         let status = "";
-        const average = (ave >= 1 && ave <= 3) ? ave : Math.round(ave);
+        const average = Math.round(ave);
         const final = average >= 1 && average <= 3 ? 0 : average;
         if (average > 74) status = "Passed";
         else if (average >= 3) status = "Failed";
-        else if (average >= 1) status = "Passed";
+        else if (average >= 1 && average <= 2) status = "Passed";
         // console.log({ ...row, average, status, mid_grade: value });
         return { ...row, average: final, status, mid_grade: value };
       },
@@ -122,14 +125,12 @@ const GradeTable = () => {
         return { ...props, error: hasError };
       },
       valueSetter: ({ row, value }) => {
-        const ave =  (parseFloat(row.mid_grade) + parseFloat(value)) / 2;
-        const average = (ave >= 1 && ave <= 3) ? ave : Math.round(ave);
+        const midTermGrade = parseFloat(row.mid_grade);
+        const endTermGrade = parseFloat(value);
+        const ave =  (midTermGrade + endTermGrade) / 2;
+        const average = Math.round(ave);
         const final = average >= 1 && average <= 3 ? 0 : average;
-        let status = "";
-        if (average > 74) status = "Passed";
-        else if (average >= 3) status = "Failed";
-        else if (average >= 1) status = "Passed";
-
+        const status = average > 74 ? "Passed" : "Failed";
         return { ...row, average:final, status, final_grade: value };
       },
     },
@@ -142,7 +143,7 @@ const GradeTable = () => {
       valueGetter: ({ row }) => {
         if (row.mid_grade && row.final_grade) {
           const average = (parseFloat(row.mid_grade) + parseFloat(row.final_grade)) / 2;
-          return (average >= 1 && average <= 3) ? average : Math.round(average);
+          return Math.round(average);
         } else return "";
       },
     },
@@ -154,9 +155,7 @@ const GradeTable = () => {
           const average = Math.round(
             (parseFloat(row.mid_grade) + parseFloat(row.final_grade)) / 2
           );
-          if (average > 74) return "Passed";
-          else if (average >= 3) return "Failed";
-          else if (average >= 1) return "Passed";
+          return average > 74 ? "Passed" : "Failed";
         } else return "";
       },
     },
@@ -238,19 +237,24 @@ const GradeTable = () => {
     return row;
   }
   const handleCheckNotUpdated = async () => {
-    let message = `Are you sure you want to update?`;
-    
-    const confirmation = window.confirm(message)
-    if(!confirmation) return
-    setTableLoading(true);
-    const { data } = await axios.post(
-                    `${process.env.REACT_APP_API_URL}/updateGrade`,
-                    { grades: toUpdate, class_code, method: "Manual", email_used: cookies.email }
-                  );
-    if (data) {
-      setToUpdate([]);
-      setTableLoading(false);
-      setUpdatedCount(data);
+    if(toUpdate.length > 0) {
+      let message = `Are you sure you want to update?`;
+      
+      const confirmation = window.confirm(message)
+      if(!confirmation) return
+      setTableLoading(true);
+      const { data } = await axios.post(
+                      `${process.env.REACT_APP_API_URL}/updateGrade`,
+                      { grades: toUpdate, class_code, method: "Manual", email_used: cookies.email }
+                    );
+      if (data) {
+        setToUpdate([]);
+        setTableLoading(false);
+        setUpdatedCount(data);
+      }
+      console.log(toUpdate);
+    } else {
+      alert("No rows to update")
     }
   }
   return (
@@ -309,6 +313,7 @@ const GradeTable = () => {
             Section: <strong>{loadInfo.section}</strong>
           </Typography>
         </Box>
+        <Typography variant="body1" color="initial" sx={{ alignSelf: "flex-end" }}>*Double Click to Select Remark</Typography>
         <Box>
           <DataGrid
             getRowId={(row) => row.student_id}
@@ -335,18 +340,7 @@ const GradeTable = () => {
             }}
             processRowUpdate={handleProcessRowUpdate}
           />
-          <Button
-            variant="contained"
-            disabled={tableLoading}
-            sx={{
-              mt: 2,
-              justifySelf: "center",
-              display: toUpdate.length ? "block" : "none",
-            }}
-            onClick={handleCheckNotUpdated}
-          >
-            {tableLoading ? "Updating..." : "Update Record"}
-          </Button>
+          
           <Snackbar
             open={Boolean(updatedCount)}
             onClose={() => setUpdatedCount(null)}
@@ -361,6 +355,23 @@ const GradeTable = () => {
           </Snackbar>
         </Box>
       </DialogContent>
+      {(canUpload && checkSubjectIsNotLock) && (    
+      <DialogActions>
+        <Button
+            variant="contained"
+            disabled={tableLoading}
+            sx={{
+              mt: 2,
+              justifySelf: "center",
+              alignSelf: "left"
+              // display: toUpdate.length ? "block" : "none",
+            }}
+            onClick={handleCheckNotUpdated}
+          >
+            {tableLoading ? "Updating..." : "Update Record"}
+        </Button>
+      </DialogActions>
+      )}
     </Dialog>
   );
 };

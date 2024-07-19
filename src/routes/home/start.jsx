@@ -27,7 +27,7 @@ const Start = () => {
   return (
     <Box>
       <Typography variant="h3" fontWeight={700}>
-        Welcome to the CHMSU Grading System
+        Welcome to the {process.env.REACT_APP_TITLE}
       </Typography>
       <Box sx={{ mt: 4 }}>
         <Typography>Navigate on the sidebar to start.</Typography><br />

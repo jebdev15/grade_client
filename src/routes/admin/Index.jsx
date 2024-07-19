@@ -26,6 +26,7 @@ import {
   Menu as MenuIcon,
   People as PeopleIcon,
   Schedule as ScheduleIcon,
+  Settings,
   WorkHistory as WorkHistoryIcon,
 } from "@mui/icons-material";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -33,6 +34,7 @@ import { useCookies } from "react-cookie";
 import { googleLogout } from "@react-oauth/google";
 import axios from "axios";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
+import { getCampus } from "../../utils/header.util";
 
 export default function Admin() {
   const siteCookies = ["picture", "name", "faculty_id", "email", "campus", "accessLevel"];
@@ -102,6 +104,7 @@ export default function Admin() {
   useEffect(() => {
     setDrawerMinimize(isSmallScreen ? true : !true);
   }, [isSmallScreen, setDrawerMinimize]);
+  const campusAccessing = getCampus();
   return (
     <Box
       sx={{
@@ -148,6 +151,7 @@ export default function Admin() {
               <span></span>
               <span></span>
             </Typography>
+            <Typography variant="body1" color="initial" sx={{ mr: 2 }}>{campusAccessing}</Typography>
             <Button
               color="primary"
               onClick={(e) => setMenuAnchor(e.currentTarget)}
@@ -269,10 +273,10 @@ export default function Admin() {
                 {drawerMinimize ? null : <ListItemText primary="Home" />}
               </ListItemButton>
               <ListItemButton
-                className={activeItem === "grades" ? "navbtn active" : "navbtn"}
+                className={activeItem === "faculty" ? "navbtn active" : "navbtn"}
                 onClick={() => {
-                  setActiveItem("grades");
-                  navigate(`/admin/grades`);
+                  setActiveItem("faculty");
+                  navigate(`/admin/faculty`);
                 }}
               >
                 <Tooltip title="Faculty">
@@ -312,6 +316,20 @@ export default function Admin() {
                   </ListItemIcon>
                 </Tooltip>
                 {drawerMinimize ? null : <ListItemText primary="Reports" />}
+              </ListItemButton>
+              <ListItemButton
+                className={activeItem === "settings" ? "navbtn active" : "navbtn"}
+                onClick={() => {
+                  setActiveItem("settings");
+                  navigate(`/admin/settings`);
+                }}
+              >
+                <Tooltip title="Settings">
+                  <ListItemIcon>
+                    <Settings />
+                  </ListItemIcon>
+                </Tooltip>
+                {drawerMinimize ? null : <ListItemText primary="Settings" />}
               </ListItemButton>
             </List>
           </Paper>

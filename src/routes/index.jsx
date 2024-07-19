@@ -11,11 +11,11 @@ import { GoogleLogin } from "@react-oauth/google";
 import jwt_decode from "jwt-decode";
 import { useCookies } from "react-cookie";
 import moment from "moment";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import "../assets/custom.css";
 import "../style.css";
+import { authenticationProcess } from "../services/index.services";
 const Index = () => {
   const [loading, setLoading] = useState(false);
   const [saveCredentials, setSaveCredentials] = useState(false);
@@ -46,34 +46,28 @@ const Index = () => {
     const { credential } = res;
     const jsonObj = jwt_decode(credential);
     const { name, picture, email } = jsonObj;
-    try {
-      const { data, status } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/login?email=${email}`
-      );
-      if (status === 200 && data.length > 0) {
-        setIndividualCookie("faculty_id", data[0].faculty_id);
-        setIndividualCookie("accessLevel", data[0].accessLevel);
-        setIndividualCookie("name", name);
-        setIndividualCookie("picture", picture);
-        setIndividualCookie("email", email);
-        // setIndividualCookie("campus", campus);
-        navigate(data[1].url);
-      } else {
-        alert("Invalid Credentials");
-        setLoading(!true)
+    
+      try {
+        const { data, status } = await authenticationProcess(email);
+        if (status === 200 && data.length > 0) {
+          setIndividualCookie("faculty_id", data[0].faculty_id);
+          setIndividualCookie("accessLevel", data[0].accessLevel);
+          setIndividualCookie("name", name);
+          setIndividualCookie("picture", picture);
+          setIndividualCookie("email", email);
+          // setIndividualCookie("campus", campus);
+          navigate(data[1].url);
+        } 
+      } catch (error) {
+        alert("Something went wrong. Please contact Administrator");
+        setLoading(false);
       }
-    } catch (err) {
-      alert("Something went wrong. Please contact Administrator");
-      setLoading(!true)
-    }
   };
 
   useEffect(() => {
     if (cookies.faculty_id) {
       const checkUser = async () => {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/login?email=${cookies.email}`
-        );
+        const { data } = await authenticationProcess(cookies.email);
         navigate(data[1].url);
       };
       checkUser();
@@ -111,7 +105,7 @@ const Index = () => {
                 color="primary"
                 textAlign="center"
               >
-                CHMSU GRADING SYSTEM
+                {process.env.REACT_APP_TITLE}
               </Typography>
               <Typography
                 variant="h5"

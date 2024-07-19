@@ -31,6 +31,7 @@ import Admin from './routes/admin/Index';
 import GradeSubmission from "./routes/admin/GradeSubmission";
 import Users, {loader as usersLoader} from "./routes/admin/Users";
 import GenerateReport from "./routes/admin/GenerateReport";
+import Settings from "./routes/admin/Settings";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -91,7 +92,7 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Start /> },
       {
-        path: "grades",
+        path: "faculty",
         element: <GradeSubmission />,
       },
       {
@@ -102,6 +103,10 @@ const router = createBrowserRouter([
       {
         path: "reports",
         element: <GenerateReport />,
+      },
+      {
+        path: "settings",
+        element: <Settings />,
       }
     ],
   },

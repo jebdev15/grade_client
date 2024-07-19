@@ -23,3 +23,11 @@ export const checkRegistrarActivityDueDate = (dueDate) => {
     }
 }
 
+export const authenticationProcess = async (email) => {
+    const { data, status } = await axios.get(
+        `${process.env.REACT_APP_API_URL}/login?email=${email}`
+    );
+    return { data, status };
+}
+
+

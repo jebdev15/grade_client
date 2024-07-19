@@ -34,6 +34,7 @@ import axios from "axios";
 import { urlEncode } from "url-encode-base64";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 import { checkRegistrarActivityDueDate } from "../../services/index.services";
+import { getCampus } from "../../utils/header.util";
 
 const Home = () => {
   const siteCookies = [
@@ -109,7 +110,7 @@ const Home = () => {
       navigate("/");
     }
   }, [cookies, navigate]);
-
+  const campusAccessing = getCampus();
   return (
     <Box
       sx={{
@@ -156,6 +157,7 @@ const Home = () => {
               <span></span>
               <span></span>
             </Typography>
+            <Typography variant="body1" color="initial" sx={{ mr: 2 }}>{campusAccessing}</Typography>
             <Button
               color="primary"
               onClick={(e) => setMenuAnchor(e.currentTarget)}
