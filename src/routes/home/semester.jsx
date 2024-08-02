@@ -37,7 +37,7 @@ import moment from "moment";
 import { urlEncode, urlDecode } from "url-encode-base64";
 import { dateFormatter } from "../../utils/formatDate";
 import { useFetch } from "../../hooks/useFetch";
-import { extractSubjectCode, identifyGraduateStudiesLoad, identifyPrintLink } from "../../utils/semester.utils";
+import { extractSubjectCode, identifyGraduateStudiesLoad, identifyPrintLink, submittedGradeSheetMessage } from "../../utils/semester.utils";
 
 const Semester = () => {
   const { code } = useParams();
@@ -144,11 +144,7 @@ const Semester = () => {
       const { data } = await axios.get(
         `${process.env.REACT_APP_API_URL}/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${encodedClassCode}`
       );
-      const filterNoMidtermGrade = data.filter(student => ['',0,'null'].includes(student.midTermGrade))
-      const filterNoEndtermGrade = data.filter(student => ['',0,'null'].includes(student.endTermGrade))
-      const midTermAlert = filterNoMidtermGrade.length > 0 ? `There are ${filterNoMidtermGrade.length} students without a midterm grade` : "";
-      const endTermAlert = filterNoEndtermGrade.length > 0 ? `There are ${filterNoEndtermGrade.length} students without an endterm grade` : "";
-      const alertMessage = `Are you sure you want to submit this grade sheet? Once submitted, it cannot be edited. \n #Contact Registrar for Grades Revision\n${midTermAlert}\n${endTermAlert}`
+      const alertMessage = submittedGradeSheetMessage(data)
       const confirmation = window.confirm(alertMessage)
       if(!confirmation) return
       await submitGradeSheetConfirmed(classCode)
@@ -161,7 +157,7 @@ const Semester = () => {
       formData.append("status", 0)
       formData.append("email_used", cookies.email)
       await axios.post(
-        `${process.env.REACT_APP_API_URL}/admin/updateClassCodeStatus`,
+        `${process.env.REACT_APP_API_URL}/submitGradeSheet`,
         formData,
         {
           headers: {
@@ -170,7 +166,7 @@ const Semester = () => {
         }
       );
       navigate(".", { replace: true });
-      setTimeout(() => alert("Grade Sheet has been submitted."), 1000)
+      alert("Grade Sheet has been submitted.");
     }
     const checkIfGraduateStudiesLoad = identifyGraduateStudiesLoad(graduateStudies, subject_code);
     const printLink = identifyPrintLink(checkIfGraduateStudiesLoad, semester, currentSchoolYear, cookies, encodedClassCode);

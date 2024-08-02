@@ -12,7 +12,7 @@ const SubjectLoadDialog = ({
             open={open} 
             onClose={close} 
             aria-labelledby={"dialog-confirmation"}
-            maxWidth={"lg"}
+            maxWidth={"xl"}
         >
           <DialogTitle id={"dialog-confirmation-title"}>
             SUBJECT LOAD
@@ -33,7 +33,7 @@ const SubjectLoadDialog = ({
           fullWidth
             sx={{ 
               height: 500,
-              width: 1000
+              width: 1500
              }}
             >
                 <DataGrid

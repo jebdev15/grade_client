@@ -106,12 +106,13 @@ const GenerateReport = () => {
       }
     )
       if(status === 200) {
+        const dateToday = getTodayDate();
         let blob = new Blob([data], {
           type: "vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8",
         });
         saveAs(
           blob,
-          `${toGenerateValueInURL}.xlsx`
+          `${toGenerateValueInURL}-${dateToday}.xlsx`
         )
       } else {
         alert('Something went wrong');

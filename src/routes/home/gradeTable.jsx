@@ -99,17 +99,17 @@ const GradeTable = () => {
         //   (parseFloat(value) + parseFloat(row.final_grade)) / 2
         // );
         // fix to fetch mid term grade
-        const midTermGrade = parseFloat(value);
-        const endTermGrade = parseFloat(row.final_grade);
+        const midTermGrade = (value === "" || isNaN(value)) ? 0 : parseFloat(value);
+        const endTermGrade = (row.final_grade === "" || isNaN(row.final_grade)) ? 0 : parseFloat(row.final_grade);
         const ave = (midTermGrade + endTermGrade) / 2;
         let status = "";
-        const average = Math.round(ave);
-        const final = average >= 1 && average <= 3 ? 0 : average;
-        if (average > 74) status = "Passed";
-        else if (average >= 3) status = "Failed";
-        else if (average >= 1 && average <= 2) status = "Passed";
+        const checkGrades = midTermGrade > 0 && endTermGrade > 0;
+        const average = checkGrades ? Math.round(ave) : 0;
+        if (checkGrades) {
+          status = average > 74 ? "passed" :'failed';
+        }
         // console.log({ ...row, average, status, mid_grade: value });
-        return { ...row, average: final, status, mid_grade: value };
+        return { ...row, average, status, mid_grade: midTermGrade };
       },
     },
     {
@@ -125,13 +125,16 @@ const GradeTable = () => {
         return { ...props, error: hasError };
       },
       valueSetter: ({ row, value }) => {
-        const midTermGrade = parseFloat(row.mid_grade);
-        const endTermGrade = parseFloat(value);
+        const midTermGrade = (row.mid_grade === "" || isNaN(row.mid_grade)) ? 0 : parseFloat(row.mid_grade);
+        const endTermGrade = (value === "" || isNaN(value)) ? 0 : parseFloat(value);
         const ave =  (midTermGrade + endTermGrade) / 2;
-        const average = Math.round(ave);
-        const final = average >= 1 && average <= 3 ? 0 : average;
-        const status = average > 74 ? "Passed" : "Failed";
-        return { ...row, average:final, status, final_grade: value };
+        const checkGrades = midTermGrade > 0 && endTermGrade > 0;
+        const average = checkGrades ? Math.round(ave) : 0;
+        let status = "";
+        if(checkGrades) { 
+          status = average > 74 ? "passed" : "failed"; 
+        }
+        return { ...row, average, status, final_grade: endTermGrade };
       },
     },
     {
@@ -141,7 +144,7 @@ const GradeTable = () => {
       sortable: true,
       type: "number",
       valueGetter: ({ row }) => {
-        if (row.mid_grade && row.final_grade) {
+        if (row.mid_grade > 0 && row.final_grade > 0) {
           const average = (parseFloat(row.mid_grade) + parseFloat(row.final_grade)) / 2;
           return Math.round(average);
         } else return "";
@@ -151,7 +154,7 @@ const GradeTable = () => {
       field: "status",
       headerName: "Status",
       valueGetter: ({ row }) => {
-        if (row.mid_grade && row.final_grade) {
+        if (row.mid_grade > 0 && row.final_grade > 0) {
           const average = Math.round(
             (parseFloat(row.mid_grade) + parseFloat(row.final_grade)) / 2
           );
@@ -216,7 +219,6 @@ const GradeTable = () => {
           default:
             dbRemark = "";
         }
-
         return { ...params.row, dbRemark };
       },
     },

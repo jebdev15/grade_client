@@ -5,6 +5,7 @@ import { Close, PersonAddAlt1 as PersonAddAlt1Icon, ModeEdit } from "@mui/icons-
 import axios from "axios";
 import { useNavigate, useLoaderData } from "react-router-dom";
 import { useCookies } from "react-cookie";
+import { getColleges } from "../../services/admin-users.services";
 
 const Users = () => {
   const [cookies, ,] = useCookies(['email', 'accessLevel']);
@@ -12,25 +13,31 @@ const Users = () => {
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [accessLevelData, setAccessLevelData] = useState([]);
+  const [collegeCodes, setCollegeCodes] = useState({
+    data: [],
+    loading: true
+  });
   const [noAccountData, setNoAccountData] = useState([]);
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('sm'));
   const initialCreateUserData = {
     facultyId: '',
     emailAddress: '',
+    college_code: '',
     accessLevel: '',
   }
   const [createUserData, setCreateUserData] = useState(initialCreateUserData);
   const [openCreateUsersDialog, setOpenCreateUsersDialog] = useState(false);
 
-  const initialUpdateAccountrData = {
+  const initialUpdateAccountData = {
     id: '',
     faculty_id: '',
     email: '',
+    college_code: '',
     accessLevel: '',
     status: '',
   }
   const [targetCurrentStatusOfAccount, setTargetCurrentStatusOfAccount] = useState(0);
-  const [updateAccountData, setUpdateAccountData] = useState(initialUpdateAccountrData);
+  const [updateAccountData, setUpdateAccountData] = useState(initialUpdateAccountData);
   const [updateDataToCheck, setUpdateDataToCheck] = useState({});
   const [openEditAccountDialog, setOpenEditAccountDialog] = useState(false);
 
@@ -44,6 +51,7 @@ const Users = () => {
   const handleCreateUser = async () => {
       const formData = new FormData();
       formData.append('emailAddress', createUserData.emailAddress)
+      formData.append('college_code', createUserData.college_code)
       formData.append('facultyId', createUserData.facultyId)
       formData.append('accessLevel', createUserData.accessLevel)
       formData.append('emailUsed', cookies.email)
@@ -65,17 +73,6 @@ const Users = () => {
     const findStatus = toEditRowData.status === 'Active' ? 1 : 0;
     const updatedToEditRowData = {...toEditRowData, status: findStatus};
     console.log(updatedToEditRowData);
-    // const formData = new FormData();
-    // formData.append('id', id)
-    // const { data } = await axios.post(
-    //   `${process.env.REACT_APP_API_URL}/admin/getAccountDetails`, 
-    //   formData, {
-    //     headers: {
-    //       'Content-Type': 'application/json'
-    //     }
-    //   }
-    // )
-    
     setUpdateAccountData(updatedToEditRowData);
     setUpdateDataToCheck(updatedToEditRowData);
     setTargetCurrentStatusOfAccount(findStatus);
@@ -96,6 +93,7 @@ const Users = () => {
     const formData = new FormData();
       formData.append('id', updateAccountData.id)
       formData.append('email', updateAccountData.email)
+      formData.append('college_code', updateAccountData.college_code)
       formData.append('faculty_id', updateAccountData.faculty_id)
       formData.append('accessLevel', updateAccountData.accessLevel)
       formData.append('status', updateAccountData.status)
@@ -112,7 +110,7 @@ const Users = () => {
       if (data.success) {
         navigate(".", { replace: true })
         handleCloseEditAccountDialog()
-        setUpdateAccountData(initialUpdateAccountrData)
+        setUpdateAccountData(initialUpdateAccountData)
       }
   }
 
@@ -126,7 +124,7 @@ const Users = () => {
       flex: 5,
       minWidth: 200,
       valueGetter: (value, row) => 
-       ['Administrator', 'Registrar'].includes(value?.row?.accessLevel) ? value?.row?.accessLevel || "" : `${value?.row?.lastName || ""}, ${value?.row?.firstName || ""}`,
+       ['Administrator', 'Registrar', 'Dean', 'Chairperson'].includes(value?.row?.accessLevel) ? value?.row?.accessLevel || "" : `${value?.row?.lastName || ""}, ${value?.row?.firstName || ""}`,
     },
     {
       field: "email",
@@ -135,6 +133,13 @@ const Users = () => {
       sortable: false,
       flex: 5,
       minWidth: 200,
+    },
+    {
+      field: "college_code",
+      headerName: "College",
+      description: "This column has a value getter and is not sortable.",
+      sortable: false,
+      minWidth: 100,
     },
     {
       field: "accessLevel",
@@ -203,6 +208,15 @@ const Users = () => {
       }
     }  
   }, [data, dataStatus, cookies])
+  useEffect(() => {
+      const getAxiosColleges = async () => {
+        const { data, status } = await getColleges();
+        if(status === 200) {
+          setCollegeCodes((prevState) => ({...prevState, data: data}));
+        }
+      } 
+      getAxiosColleges()
+  },[])
   return (
     <>
         <Grid container spacing={0}>
@@ -234,19 +248,18 @@ const Users = () => {
         borderRadius={"10px"}
         border={"1px solid var(--border-default)"}
         className="usersTable"
+        height={600}
       >
         <DataGrid
-          autoHeight={"true"}
-          rowHeight={40}
           sx={{ borderRadius: "5px" }}
           rows={rows}
           columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 5 },
-            },
-          }}
-          pageSizeOptions={[5, 10]}
+          // initialState={{
+          //   pagination: {
+          //     paginationModel: { page: 0, pageSize: 5 },
+          //   },
+          // }}
+          pageSizeOptions={[5, 10, 25]}
           // checkboxSelection
         />
       </Box>
@@ -269,7 +282,7 @@ const Users = () => {
           </IconButton>
           <DialogContent sx={isSmallScreen ? { width: '100%' } : { width: 500 }} dividers>
             <Box sx={{ display: 'flex', flexDirection: 'column', rowGap: 1 }}>
-            <FormControl sx={{ display: 'flex', flexDirection: 'row' }} fullWidth>
+              <FormControl sx={{ display: 'flex', flexDirection: 'row' }} fullWidth>
                 <TextField
                   label="CHMSU Email Address"
                   type='text'
@@ -296,6 +309,23 @@ const Users = () => {
                   ))}
                 </Select>
               </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="select-accessLevel-college">College</InputLabel>
+                <Select
+                  labelId="select-accessLevel-college"
+                  id="select-college"
+                  label="College"
+                  name="college_code"
+                  value={createUserData.college_code}
+                  onChange={handleChange}
+                  disabled={["Administrator", "Registrar", "Dean", "Chairperson"].includes(createUserData?.accessLevel) ? true : false}
+                  required
+                >
+                  {collegeCodes.data.map(({college_code}) => (
+                    <MenuItem key={college_code} value={college_code}>{college_code}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <FormControl sx={{ display: 'flex', flexDirection: 'row' }} fullWidth>
                 <InputLabel id="select-faculty-label">Faculty</InputLabel>
                 <Select
@@ -306,7 +336,7 @@ const Users = () => {
                   value={createUserData.facultyId}
                   onChange={handleChange}
                   required
-                  disabled={createUserData?.accessLevel === "Registrar" ? true : false}
+                  disabled={["Administrator", "Registrar", "Dean", "Chairperson"].includes(createUserData?.accessLevel) ? true : false}
                   fullWidth
                 >
                   {noAccountData?.map((
@@ -387,6 +417,23 @@ const Users = () => {
                   ))}
                 </Select>
               </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="select-updateCollege-label">College</InputLabel>
+                <Select
+                  labelId="select-updateCollege-label"
+                  id="select-updateCollege"
+                  label="College"
+                  name="college_code"
+                  value={updateAccountData.college_code}
+                  onChange={handleChangeUpdateAccount}
+                  disabled={["Administrator", "Registrar", "Dean", "Chairperson"].includes(updateAccountData.accessLevel) ? true : false}
+                  required
+                >
+                  {collegeCodes.data.map(({college_code}) => (
+                    <MenuItem key={college_code} defaultChecked={college_code === updateAccountData.college_code ? true : false} value={college_code}>{college_code}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <FormControl sx={{ display: 'flex', flexDirection: 'row' }}>
                 <InputLabel id="select-updateFaculty-label">Faculty</InputLabel>
                 <Select
@@ -397,7 +444,7 @@ const Users = () => {
                   value={updateAccountData.faculty_id}
                   onChange={handleChangeUpdateAccount}
                   required
-                  disabled={updateAccountData.accessLevel === "Registrar" ? true : false}
+                  disabled={["Administrator", "Registrar", "Dean", "Chairperson"].includes(updateAccountData.accessLevel) ? true : false}
                   fullWidth
                 >
                   {noAccountData?.map((
@@ -424,8 +471,8 @@ const Users = () => {
                     onChange={handleChangeUpdateAccount}
                     required
                   >
-                      <MenuItem value={1} defaultChecked={ updateAccountData.status === 1 ? true : false }>Activate{targetCurrentStatusOfAccount === 1 && `(current status)`}</MenuItem>
-                      <MenuItem value={0} defaultChecked={ updateAccountData.status === 0 ? true : false }>Deactivate{targetCurrentStatusOfAccount === 0 && `(current status)`}</MenuItem>
+                      <MenuItem value={1} defaultChecked={ updateAccountData.status === 1 ? true : false }>ACTIVE{targetCurrentStatusOfAccount === 1 && `(current status)`}</MenuItem>
+                      <MenuItem value={0} defaultChecked={ updateAccountData.status === 0 ? true : false }>INACTIVE{targetCurrentStatusOfAccount === 0 && `(current status)`}</MenuItem>
                   </Select>
                 </FormControl>
             </Box>

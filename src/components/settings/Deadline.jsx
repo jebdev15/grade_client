@@ -33,12 +33,8 @@ const Deadline = ({
         e.preventDefault();
         const formData = new FormData(e.target);
         formData.append('email_used', cookies.email);
-        // for(const pair of formData.entries()) {
-        //     console.log(pair[0], pair[1]);
-        // }
         const { data, status } = await saveDeadlineServices(formData);
         alert(data.message, status);
-        console.log(data, status);
     }
     return (
         <>

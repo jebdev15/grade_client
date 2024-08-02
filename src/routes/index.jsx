@@ -26,6 +26,7 @@ const Index = () => {
     "campus",
     "picture",
     "email",
+    "college_code",
     "accessLevel"
   ]);
 
@@ -55,6 +56,7 @@ const Index = () => {
           setIndividualCookie("name", name);
           setIndividualCookie("picture", picture);
           setIndividualCookie("email", email);
+          setIndividualCookie("college_code", data[0].college_code);
           // setIndividualCookie("campus", campus);
           navigate(data[1].url);
         } 
@@ -65,7 +67,7 @@ const Index = () => {
   };
 
   useEffect(() => {
-    if (cookies.faculty_id) {
+    if (cookies.faculty_id && cookies.accessLevel) {
       const checkUser = async () => {
         const { data } = await authenticationProcess(cookies.email);
         navigate(data[1].url);

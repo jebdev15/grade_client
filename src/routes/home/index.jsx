@@ -35,6 +35,7 @@ import { urlEncode } from "url-encode-base64";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 import { checkRegistrarActivityDueDate } from "../../services/index.services";
 import { getCampus } from "../../utils/header.util";
+import { checkHomeAccessLevel } from "../../utils/home-index.util";
 
 const Home = () => {
   const siteCookies = [
@@ -43,6 +44,7 @@ const Home = () => {
     "faculty_id",
     "email",
     "campus",
+    "college_code",
     "accessLevel",
   ];
 
@@ -106,7 +108,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (!cookies.hasOwnProperty("faculty_id") && cookies.accessLevel !== "Faculty") {
+    if (!checkHomeAccessLevel(cookies)) {
       navigate("/");
     }
   }, [cookies, navigate]);
@@ -157,7 +159,7 @@ const Home = () => {
               <span></span>
               <span></span>
             </Typography>
-            <Typography variant="body1" color="initial" sx={{ mr: 2 }}>{campusAccessing}</Typography>
+            <Typography variant="body1" color="initial" sx={{ mr: 2 }}>{`${campusAccessing}(${cookies.accessLevel})`}</Typography>
             <Button
               color="primary"
               onClick={(e) => setMenuAnchor(e.currentTarget)}

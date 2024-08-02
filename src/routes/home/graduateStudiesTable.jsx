@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Dialog,
+  DialogActions,
   DialogContent,
   DialogTitle,
   IconButton,
@@ -86,7 +87,7 @@ const GraduateStudiesTable = () => {
       editable: canUpload,
       sortable: true,
       type: "number",
-      valueGetter: ({ row }) => row.mid_grade,
+      valueGetter: ({ row }) => parseFloat(row.mid_grade),
     },
     {
       field: "end_grade",
@@ -95,7 +96,7 @@ const GraduateStudiesTable = () => {
       editable: canUpload,
       sortable: true,
       type: "number",
-      valueGetter: ({ row }) => row.end_grade,
+      valueGetter: ({ row }) => parseFloat(row.end_grade),
     },
     {
       field: "grade",
@@ -104,14 +105,13 @@ const GraduateStudiesTable = () => {
       editable: canUpload,
       sortable: true,
       type: "number",
-      valueGetter: ({ row }) => row.grade,
+      valueGetter: ({ row }) => parseFloat(row.grade),
     },
     {
       field: "status",
       headerName: "Status",
       valueGetter: ({ row }) => {
-        if(row.grade) {
-
+        if(row.grade > 0) {
           return (row.grade >= 1 && row.grade <= 2 ) ? "Passed" : "Failed";
         } else {
           return ""
@@ -196,21 +196,26 @@ const GraduateStudiesTable = () => {
     return row;
   }
   const handleCheckNotUpdated = async () => {
-    let message = `Are you sure you want to update?`;
-    
-    const confirmation = window.confirm(message)
-    if(!confirmation) return
-    setTableLoading(true);
-    const { data } = await axios.post(
-                    `${process.env.REACT_APP_API_URL}/updateGraduateStudiesGrade`,
-                    { grades: toUpdate, class_code, method: "Manual", email_used: cookies.email }
-                  );
-    if (data) {
-      setToUpdate([]);
-      setTableLoading(false);
-      setUpdatedCount(data);
+    if(toUpdate.length > 0) {
+
+      let message = `Are you sure you want to update?`;
+      
+      const confirmation = window.confirm(message)
+      if(!confirmation) return
+      setTableLoading(true);
+      const { data } = await axios.post(
+                      `${process.env.REACT_APP_API_URL}/updateGraduateStudiesGrade`,
+                      { grades: toUpdate, class_code, method: "Manual", email_used: cookies.email }
+                    );
+      if (data) {
+        setToUpdate([]);
+        setTableLoading(false);
+        setUpdatedCount(data);
+      }
+      console.log({toUpdate});
+    } else {
+      alert("No rows to update")
     }
-    console.log({toUpdate});
   }
   return (
     <Dialog
@@ -268,6 +273,7 @@ const GraduateStudiesTable = () => {
             Section: <strong>{loadInfo.section}</strong>
           </Typography>
         </Box>
+        <Typography variant="body1" color="initial" sx={{ alignSelf: "flex-end" }}>*Double Click to Select Remark</Typography>
         <Box>
           <DataGrid
             getRowId={(row) => row.student_id}
@@ -294,18 +300,6 @@ const GraduateStudiesTable = () => {
             }}
             processRowUpdate={handleProcessRowUpdate}
           />
-          <Button
-            variant="contained"
-            disabled={tableLoading}
-            sx={{
-              mt: 2,
-              justifySelf: "center",
-              display: toUpdate.length ? "block" : "none",
-            }}
-            onClick={handleCheckNotUpdated}
-          >
-            {tableLoading ? "Updating..." : "Update Record"}
-          </Button>
           <Snackbar
             open={Boolean(updatedCount)}
             onClose={() => setUpdatedCount(null)}
@@ -320,6 +314,19 @@ const GraduateStudiesTable = () => {
           </Snackbar>
         </Box>
       </DialogContent>
+      <DialogActions>
+      <Button
+            variant="contained"
+            disabled={tableLoading}
+            sx={{
+              mt: 2,
+              justifySelf: "center",
+            }}
+            onClick={handleCheckNotUpdated}
+          >
+            {tableLoading ? "Updating..." : "Update Record"}
+          </Button>
+      </DialogActions>
     </Dialog>
   );
 };

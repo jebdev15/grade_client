@@ -7,8 +7,9 @@ export const getAllData = async () => {
     return data;
 }
 
-export const getEmailsService = async () => {
-    const { data, status } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getEmails`);
+export const getEmailsService = async (cookies) => {
+    const { college_code, accessLevel } = cookies;
+    const { data, status } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getEmails?college_code=${college_code}&accessLevel=${accessLevel}`);
     return { data, status }
 }
 

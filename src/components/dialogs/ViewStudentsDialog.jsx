@@ -12,8 +12,7 @@ const ViewStudentsDialog = ({
           open={open} 
           onClose={close} 
           aria-labelledby={"dialog-confirmation"}
-          fullScreen
-          fullWidth
+          maxWidth={"xl"}
         >
           <DialogTitle id={"dialog-confirmation-title"}>
               View Students
@@ -34,6 +33,7 @@ const ViewStudentsDialog = ({
             
             sx={{ 
               height: 500,
+              width: 1500,
              }}
             >
                 <DataGrid

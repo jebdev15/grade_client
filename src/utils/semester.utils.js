@@ -14,3 +14,12 @@ export const getCookieValue = (cookies, name) => {
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) return parts.pop().split(';').shift();
 };
+
+export const submittedGradeSheetMessage = (data) => {
+      const filterNoMidtermGrade = data.filter(student => ['',0,'null'].includes(student.midTermGrade))
+      const filterNoEndtermGrade = data.filter(student => ['',0,'null'].includes(student.endTermGrade))
+      const midTermAlert = filterNoMidtermGrade.length > 0 ? `There are ${filterNoMidtermGrade.length} students without a midterm grade` : "";
+      const endTermAlert = filterNoEndtermGrade.length > 0 ? `There are ${filterNoEndtermGrade.length} students without an endterm grade` : "";
+      const alertMessage = `Are you sure you want to submit this grade sheet? Once submitted, it cannot be edited. \n #Contact Registrar for Grades Revision\n${midTermAlert}\n${endTermAlert}`
+      return alertMessage;
+}

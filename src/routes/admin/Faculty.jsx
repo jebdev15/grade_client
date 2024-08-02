@@ -19,6 +19,7 @@ import {
   Lock,
   LockOpen,
   People,
+  Print,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material'
 import axios from 'axios'
@@ -32,8 +33,9 @@ import { getEmailsService, getGradeTableService } from '../../services/admin.ser
 import { initialLoading, initialOpen, initialRows } from '../../utils/admin-faculty.util'
 import SubjectLoadDialog from '../../components/dialogs/SubjectLoadDialog'
 import moment from 'moment'
+import { momentFormatDate } from '../../utils/formatDate'
 
-const GradeSubmission = () => {
+const Faculty = () => {
     const [cookies, ,] = useCookies(['picture', 'name', 'faculty_id', 'email', 'campus', 'accessLevel']);
     const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('sm'));
     const [, schoolyear, semester, , , ] = useOutletContext();
@@ -78,9 +80,30 @@ const GradeSubmission = () => {
       rows: [],
       columns: [
         { field: 'id', headerName: 'ID', width: 150, hide: true },
-        { field: 'subject_code', headerName: 'Subject', width: 200 },
-        { field: 'section', headerName: 'Program/Year/Section', width: 300 },
-        { field: 'noStudents', headerName: 'No of Students', width: 300 },
+        { field: 'subject_code', headerName: 'Subject', width: 150 },
+        { field: 'section', headerName: 'Program/Year/Section', width: 200 },
+        { field: 'noStudents', headerName: 'No of Students', width: 150 },
+        { 
+          field: 'timestamp', 
+          headerName: 'Encoded', 
+          width: 200,
+          valueGetter: (params) => {
+            return momentFormatDate(params.row.timestamp) === 'Invalid date' ? '--' : momentFormatDate(params.row.timestamp);
+          }
+        },
+        { 
+          field: 'method', 
+          headerName: 'Method', 
+          width: 150 
+        },
+        { 
+          field: 'submittedLog', 
+          headerName: 'Submitted', 
+          width: 200,
+          valueGetter: (params) => {
+            return momentFormatDate(params.row.submittedLog) === 'Invalid date' ? '--' : momentFormatDate(params.row.submittedLog);
+          }
+        },
         {
           field: 'action',
           headerName: 'Action',
@@ -114,12 +137,13 @@ const GradeSubmission = () => {
             return (
               <>
               <ButtonGroup variant="text" color="primary" aria-label="">
-                
+                  {["Administrator","Registrar"].includes(cookies.accessLevel) && (
                   <Tooltip title={`Currently ${params.row.status ? 'Locked' : 'Unlocked'}. Click to ${params.row.status ? 'Unlock' : 'Lock'} Subject`}>  
                     <IconButton aria-label="view" variant="text" color="primary" onClick={handleOpenConfirmation}>
                       { params.row.status ? <Lock /> : <LockOpen /> }
                     </IconButton>
                   </Tooltip>
+                  )}
                   <Tooltip title="View Students">
                     <IconButton 
                         aria-label="view" 
@@ -129,6 +153,17 @@ const GradeSubmission = () => {
                         onClick={openViewStudentsHandler}
                       >
                       <People />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Print Grade Sheet">
+                    <IconButton 
+                        aria-label="view" 
+                        variant="text" 
+                        color="primary" 
+                        href={`/admin/print/${urlEncode(semester)}-${urlEncode(schoolyear)}/${urlEncode(params.row.id)}`}
+                        target='_blank'
+                      >
+                      <Print />
                     </IconButton>
                   </Tooltip>
               </ButtonGroup>
@@ -197,6 +232,13 @@ const GradeSubmission = () => {
             width: 400,
         },
         {
+          field: 'college_code',
+          headerName: 'College',
+          description: 'This column has a value getter and is not sortable.',
+          sortable: false,
+          width: 100,
+        },
+        {
           field: 'action',
           headerName: 'Action',
           description: 'This column has a value getter and is not sortable.',
@@ -206,7 +248,7 @@ const GradeSubmission = () => {
             const handleOpen = async () => {
               setOpenSubjectLoad(true);
               const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getSubjectLoad?faculty_id=${urlEncode(params.row.faculty_id)}&school_year=${urlEncode(schoolyear)}&semester=${urlEncode(semester)}`)
-              
+              console.log(data);
               setSubjectLoad((prevState) => ({...prevState, rows: data}))
             };
 
@@ -236,14 +278,14 @@ const GradeSubmission = () => {
   const [loading, setLoading] = useState(initialLoading)
   useEffect(() => {
     const loader = async () => {
-      const { data, status } = await getEmailsService();
+      const { data, status } = await getEmailsService(cookies);
       if(status === 200) {
         setRows({ emails: data});
         status === 200 && setLoading({ emails: false});
       }
     }
     loader();
-  },[])
+  },[cookies])
   const closeHandler = {
     viewStudents: () => setOpen({viewStudents: false}),
     subjectLoad: () => setOpen({subjectLoad: false}),
@@ -252,7 +294,7 @@ const GradeSubmission = () => {
   return (
     <>
 
-        <Box sx={isSmallScreen ? {height: '100%', width: '100%'} : {height: 600, width: '100%'}}>
+        <Box sx={{height: 600, width: '100%'}}>
           <Typography 
           variant="h4"
           fontWeight={700}
@@ -270,7 +312,7 @@ const GradeSubmission = () => {
                   },
                 },
               }}
-              pageSizeOptions={[5]}
+              pageSizeOptions={[5, 10, 25]}
               loading={loading.emails}
           />
         </Box>
@@ -338,4 +380,4 @@ const GradeSubmission = () => {
     </>
   )
 }
-export default GradeSubmission
+export default Faculty

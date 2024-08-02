@@ -2,16 +2,19 @@ export const getCampus = () => {
     const referer = getURLReferer();
     let campus;
     switch (referer) {
-        case "https://gs.chmsu.edu.ph":
+        case "https://staging-gs.chmsu.edu.ph" || "https://www.staging-gs.chmsu.edu.ph":
+            campus= "Staging Campus";
+            break;
+        case "https://gs.chmsu.edu.ph" || "https://www.gs.chmsu.edu.ph":
             campus= "Talisay Campus";
             break;
-        case "https://ft-gs.chmsu.edu.ph":
+        case "https://ft-gs.chmsu.edu.ph" || "https://www.ft-gs.chmsu.edu.ph":
             campus= "Fortune Towne Campus";
             break;
-        case "https://bin-gs.chmsu.edu.ph":
+        case "https://bin-gs.chmsu.edu.ph" || "https://www.bin-gs.chmsu.edu.ph":
             campus= "Binalbagan Campus";
             break;
-        case "https://ali-gs.chmsu.edu.ph":
+        case "https://ali-gs.chmsu.edu.ph" || "https://www.ali-gs.chmsu.edu.ph":
             campus= "Alijis Campus";
             break;
         default:

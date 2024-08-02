@@ -35,9 +35,10 @@ import { googleLogout } from "@react-oauth/google";
 import axios from "axios";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 import { getCampus } from "../../utils/header.util";
+import { checkAccessLevel, checkAccessLevelForMenu } from "../../utils/admin-index.util";
 
 export default function Admin() {
-  const siteCookies = ["picture", "name", "faculty_id", "email", "campus", "accessLevel"];
+  const siteCookies = ["picture", "name", "faculty_id", "email", "college_code", "campus", "accessLevel"];
   const [cookies, , removeCookie] = useCookies(siteCookies);
   const navigate = useNavigate();
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
@@ -79,7 +80,7 @@ export default function Admin() {
   );
 
   useEffect(() => {
-    if (!cookies.hasOwnProperty("accessLevel") || ["Administrator", "Registrar"].includes((accessLevel) => cookies.accessLevel !== accessLevel)) {
+    if (!checkAccessLevel(cookies)) {
       navigate("/");
     }
   }, [cookies, navigate]);
@@ -151,7 +152,7 @@ export default function Admin() {
               <span></span>
               <span></span>
             </Typography>
-            <Typography variant="body1" color="initial" sx={{ mr: 2 }}>{campusAccessing}</Typography>
+            <Typography variant="body1" color="initial" sx={{ mr: 2 }}>{`${campusAccessing}(${cookies.accessLevel})`}</Typography>
             <Button
               color="primary"
               onClick={(e) => setMenuAnchor(e.currentTarget)}
@@ -288,49 +289,52 @@ export default function Admin() {
                   <ListItemText primary="Faculty" />
                 )}
               </ListItemButton>
-
-              <ListItemButton
-                className={activeItem === "users" ? "navbtn active" : "navbtn"}
-                onClick={() => {
-                  setActiveItem("users");
-                  navigate(`/admin/users`);
-                }}
-              >
-                <Tooltip title="Users">
-                  <ListItemIcon>
-                    <PeopleIcon />
-                  </ListItemIcon>
-                </Tooltip>
-                {drawerMinimize ? null : <ListItemText primary="Users" />}
-              </ListItemButton>
-              <ListItemButton
-                className={activeItem === "reports" ? "navbtn active" : "navbtn"}
-                onClick={() => {
-                  setActiveItem("reports");
-                  navigate(`/admin/reports`);
-                }}
-              >
-                <Tooltip title="Reports">
-                  <ListItemIcon>
-                    <WorkHistoryIcon />
-                  </ListItemIcon>
-                </Tooltip>
-                {drawerMinimize ? null : <ListItemText primary="Reports" />}
-              </ListItemButton>
-              <ListItemButton
-                className={activeItem === "settings" ? "navbtn active" : "navbtn"}
-                onClick={() => {
-                  setActiveItem("settings");
-                  navigate(`/admin/settings`);
-                }}
-              >
-                <Tooltip title="Settings">
-                  <ListItemIcon>
-                    <Settings />
-                  </ListItemIcon>
-                </Tooltip>
-                {drawerMinimize ? null : <ListItemText primary="Settings" />}
-              </ListItemButton>
+              {checkAccessLevelForMenu(cookies.accessLevel) && (
+              <>
+                <ListItemButton
+                  className={activeItem === "users" ? "navbtn active" : "navbtn"}
+                  onClick={() => {
+                    setActiveItem("users");
+                    navigate(`/admin/users`);
+                  }}
+                >
+                  <Tooltip title="Users">
+                    <ListItemIcon>
+                      <PeopleIcon />
+                    </ListItemIcon>
+                  </Tooltip>
+                  {drawerMinimize ? null : <ListItemText primary="Users" />}
+                </ListItemButton>
+                <ListItemButton
+                  className={activeItem === "reports" ? "navbtn active" : "navbtn"}
+                  onClick={() => {
+                    setActiveItem("reports");
+                    navigate(`/admin/reports`);
+                  }}
+                >
+                  <Tooltip title="Reports">
+                    <ListItemIcon>
+                      <WorkHistoryIcon />
+                    </ListItemIcon>
+                  </Tooltip>
+                  {drawerMinimize ? null : <ListItemText primary="Reports" />}
+                </ListItemButton>
+                <ListItemButton
+                  className={activeItem === "settings" ? "navbtn active" : "navbtn"}
+                  onClick={() => {
+                    setActiveItem("settings");
+                    navigate(`/admin/settings`);
+                  }}
+                >
+                  <Tooltip title="Settings">
+                    <ListItemIcon>
+                      <Settings />
+                    </ListItemIcon>
+                  </Tooltip>
+                  {drawerMinimize ? null : <ListItemText primary="Settings" />}
+                </ListItemButton>
+              </>
+              )}
             </List>
           </Paper>
         </Box>

@@ -1,3 +1,5 @@
+import moment from "moment";
+
 const newDateWithParam = (date) => new Date(date);
 const newDateWithOutParam = () => new Date();
 
@@ -34,3 +36,7 @@ export const dateFormatter = (date) => {
     });
     return formattedDate;
 };
+
+export const momentFormatDate = (timestamp) => {
+  return moment(timestamp).format("MMM DD, YYYY hh:mm A")
+}

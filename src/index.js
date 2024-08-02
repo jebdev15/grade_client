@@ -28,10 +28,12 @@ import PrintGraduateStudiesGradeSheet, { loader as printGSLoader } from "./route
 
 // Admin Routes
 import Admin from './routes/admin/Index';
-import GradeSubmission from "./routes/admin/GradeSubmission";
+import Faculty from "./routes/admin/Faculty";
+import DownloadGradeSheetPdf from "./components/faculty/DownloadGradeSheetPdf";
 import Users, {loader as usersLoader} from "./routes/admin/Users";
 import GenerateReport from "./routes/admin/GenerateReport";
 import Settings from "./routes/admin/Settings";
+import PrintUnderGraduateGS, { loader as printUnderGraduateGSLoader } from "./components/faculty/printable/PrintUnderGraduateGS";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -78,12 +80,20 @@ const router = createBrowserRouter([
   {
     path: "/print/:code/:class_code",
     element: <PrintGradeSheet />,
+    errorElement: <h1>Error PrintGradeSheet</h1>,
     loader: printLoader,
   },
   {
     path: "/print/:code/:class_code/graduateStudies",
     element: <PrintGraduateStudiesGradeSheet />,
+    errorElement: <h1>Error PrintGraduateStudiesGradeSheet</h1>,
     loader: printGSLoader,
+  },
+  {
+    path: "/admin/print/:code/:class_code",
+    element: <PrintUnderGraduateGS />,
+    errorElement: <h1>Error PrintUnderGraduateGS</h1>,
+    loader: printUnderGraduateGSLoader,
   },
   {
     path: "admin",
@@ -93,7 +103,8 @@ const router = createBrowserRouter([
       { index: true, element: <Start /> },
       {
         path: "faculty",
-        element: <GradeSubmission />,
+        element: <Faculty />,
+        errorElement: <h1>Error Faculty</h1>,
       },
       {
         path: "users",
@@ -107,6 +118,15 @@ const router = createBrowserRouter([
       {
         path: "settings",
         element: <Settings />,
+      },
+      {
+        path: "download",
+        children: [
+          {
+            path: "gradesheet",
+            element: <DownloadGradeSheetPdf />,
+          }
+        ]
       }
     ],
   },
