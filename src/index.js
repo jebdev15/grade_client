@@ -34,6 +34,9 @@ import Users, {loader as usersLoader} from "./routes/admin/Users";
 import GenerateReport from "./routes/admin/GenerateReport";
 import Settings from "./routes/admin/Settings";
 import PrintUnderGraduateGS, { loader as printUnderGraduateGSLoader } from "./components/faculty/printable/PrintUnderGraduateGS";
+import Students from "./routes/admin/Students";
+import { Provider } from "react-redux";
+import { store } from "./app/store";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -102,6 +105,11 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Start /> },
       {
+        path: "students",
+        element: <Students />,
+        errorElement: <h1>Error Students</h1>,
+      },
+      {
         path: "faculty",
         element: <Faculty />,
         errorElement: <h1>Error Faculty</h1>,
@@ -136,7 +144,9 @@ root.render(
     <GoogleOAuthProvider clientId="853501125882-et0u8vs2qthqbq4vkskobqgm3mb8g91h.apps.googleusercontent.com"> {/* using johneric chmsu email */}
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <RouterProvider router={router} />
+        <Provider store={store}>
+          <RouterProvider router={router} />
+        </Provider>
       </ThemeProvider>
     </GoogleOAuthProvider>
   </React.StrictMode>

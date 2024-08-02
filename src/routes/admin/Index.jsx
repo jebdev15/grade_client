@@ -259,6 +259,7 @@ export default function Admin() {
             sx={{ height: "inherit", overflow: "auto" }}
           >
             <List>
+              {/* Home */}
               <ListItemButton
                 className={activeItem === "home" ? "navbtn active" : "navbtn"}
                 onClick={() => {
@@ -273,6 +274,26 @@ export default function Admin() {
                 </Tooltip>
                 {drawerMinimize ? null : <ListItemText primary="Home" />}
               </ListItemButton>
+              {/* Home */}
+
+              {/* Students */}
+              <ListItemButton
+                className={activeItem === "students" ? "navbtn active" : "navbtn"}
+                onClick={() => {
+                  setActiveItem("students");
+                  navigate(`/admin/students`);
+                }}
+              >
+                <Tooltip title="Students">
+                  <ListItemIcon>
+                    <PeopleIcon />
+                  </ListItemIcon>
+                </Tooltip>
+                {drawerMinimize ? null : <ListItemText primary="Students" />}
+              </ListItemButton>
+              {/* Students */}
+
+              {/* Faculty */}
               <ListItemButton
                 className={activeItem === "faculty" ? "navbtn active" : "navbtn"}
                 onClick={() => {
@@ -289,8 +310,11 @@ export default function Admin() {
                   <ListItemText primary="Faculty" />
                 )}
               </ListItemButton>
+              {/* Faculty */}
+              
               {checkAccessLevelForMenu(cookies.accessLevel) && (
               <>
+                {/* Users */}
                 <ListItemButton
                   className={activeItem === "users" ? "navbtn active" : "navbtn"}
                   onClick={() => {
@@ -305,6 +329,9 @@ export default function Admin() {
                   </Tooltip>
                   {drawerMinimize ? null : <ListItemText primary="Users" />}
                 </ListItemButton>
+                {/* Users */}
+
+                {/* Reports */}
                 <ListItemButton
                   className={activeItem === "reports" ? "navbtn active" : "navbtn"}
                   onClick={() => {
@@ -319,6 +346,9 @@ export default function Admin() {
                   </Tooltip>
                   {drawerMinimize ? null : <ListItemText primary="Reports" />}
                 </ListItemButton>
+                {/* Reports */}
+
+                {/* Settings */}
                 <ListItemButton
                   className={activeItem === "settings" ? "navbtn active" : "navbtn"}
                   onClick={() => {
@@ -333,6 +363,7 @@ export default function Admin() {
                   </Tooltip>
                   {drawerMinimize ? null : <ListItemText primary="Settings" />}
                 </ListItemButton>
+                {/* Settings */}
               </>
               )}
             </List>
