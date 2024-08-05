@@ -30,7 +30,6 @@ const SubjectLoadDialog = ({
           </IconButton>
           <DialogContent dividers>
           <Box 
-          fullWidth
             sx={{ 
               height: 500,
               width: 1500

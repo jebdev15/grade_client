@@ -3,6 +3,5 @@ export const checkAccessLevelForMenu = (accessLevel) =>  ["Administrator", "Regi
 
 export const checkAccessLevel = (cookies) => {
    const allowAccess = cookies.hasOwnProperty("faculty_id") && accessLevels.includes(cookies.accessLevel) 
-   console.log(allowAccess);
    return allowAccess
 }

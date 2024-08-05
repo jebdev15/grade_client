@@ -324,15 +324,6 @@ const PrintUnderGraduateGS = () => {
   };
 
   const componentRef = React.useRef();
-  // const handlePrint2 = useReactToPrint({
-  //   content: () => componentRef.current,
-  //   pageStyle: `
-  //     div#printContainer {
-  //       background-color: blue;
-  //     }
-  //   `,
-  //   print: handlePrint,
-  // });
   const navigate = useNavigate();
   const [cookies, ,] = useCookies(['accessLevel', 'email']);
   useEffect(() => {

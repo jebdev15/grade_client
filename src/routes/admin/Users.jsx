@@ -3,21 +3,32 @@ import React, { useEffect, useState } from "react";
 import { IconButton, Tooltip, Typography, Box, Dialog, DialogTitle, DialogContent, FormControl, TextField, InputLabel, Select, DialogActions, MenuItem, ButtonGroup, Button, useMediaQuery, Grid } from "@mui/material";
 import { Close, PersonAddAlt1 as PersonAddAlt1Icon, ModeEdit } from "@mui/icons-material";
 import axios from "axios";
-import { useNavigate, useLoaderData } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
-import { getColleges } from "../../services/admin-users.services";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUsers } from "../../features/admin/users/usersThunks";
+import { fetchAccessLevels } from "../../features/admin/users/accessLevelsThunks";
+import { fetchColleges } from "../../features/admin/users/collegesThunks";
+import { fetchNoAccounts } from "../../features/admin/users/noAccountsThunks";
 
 const Users = () => {
   const [cookies, ,] = useCookies(['email', 'accessLevel']);
-  const { data, status:dataStatus } = useLoaderData();
   const navigate = useNavigate();
-  const [rows, setRows] = useState([]);
-  const [accessLevelData, setAccessLevelData] = useState([]);
-  const [collegeCodes, setCollegeCodes] = useState({
-    data: [],
-    loading: true
-  });
-  const [noAccountData, setNoAccountData] = useState([]);
+
+  const users = useSelector(state => state.users.list);
+  const usersStatus = useSelector((state) => state.users.status);
+
+  const accessLevelData = useSelector((state) => state.accessLevels.list);
+  const accessLevelStatus = useSelector((state) => state.accessLevels.status);
+  
+  const collegeCodes = useSelector((state) => state.colleges.list);
+  const collegeStatus = useSelector((state) => state.colleges.status);
+
+  const noAccountData = useSelector((state) => state.noAccounts.list);
+  const noAccountStatus = useSelector((state) => state.noAccounts.status);
+
+  const dispatch = useDispatch();
+
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('sm'));
   const initialCreateUserData = {
     facultyId: '',
@@ -181,42 +192,42 @@ const Users = () => {
       },
     },
   ];
-
-
+  useEffect(() => {
+    if (noAccountStatus === 'idle') {
+        dispatch(fetchNoAccounts());
+    }
+    if(['idle','succeeded'].includes(noAccountStatus)) {
+        setLoading(false);
+    }
+  }, [noAccountStatus, dispatch]);
 
   useEffect(() => {
-    const loadAccessLevels = async () => {
-      const { data:accessLevels } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getAccessLevels`);
-      const checkAccessLevelData = cookies.accessLevel === 'Administrator' ? accessLevels : accessLevels.filter(accessLevel => accessLevel !== 'Administrator');
-      setAccessLevelData(checkAccessLevelData);
-    }
-    loadAccessLevels()
-    const loadNoAccounts = async () => {
-      const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getAllNoAccounts`);
-      setNoAccountData(data.rows);
-    }
-    loadNoAccounts()
-  },[cookies])
-  useEffect(() => {
-    if(dataStatus === 200){
-      
-      if(cookies.accessLevel !== 'Administrator') {
-        const filteredData = data.filter(user => user.accessLevel !== 'Administrator')
-        setRows(filteredData)
-      } else {
-        setRows(data) 
+      if (collegeStatus === 'idle') {
+          dispatch(fetchColleges(collegeStatus));
       }
-    }  
-  }, [data, dataStatus, cookies])
+      if(['idle','succeeded'].includes(collegeStatus)) {
+          setLoading(false);
+      }
+  }, [collegeStatus, dispatch]);
+
   useEffect(() => {
-      const getAxiosColleges = async () => {
-        const { data, status } = await getColleges();
-        if(status === 200) {
-          setCollegeCodes((prevState) => ({...prevState, data: data}));
-        }
-      } 
-      getAxiosColleges()
-  },[])
+      if (usersStatus === 'idle') {
+          dispatch(fetchUsers(cookies));
+      }
+      if(['idle','succeeded'].includes(usersStatus)) {
+          setLoading(false);
+      }
+  }, [usersStatus, dispatch, cookies]);
+
+  useEffect(() => {
+    if (accessLevelStatus === 'idle') {
+        dispatch(fetchAccessLevels(cookies));
+    }
+    if(['idle','succeeded'].includes(accessLevelStatus)) {
+        setLoading(false);
+    }
+}, [accessLevelStatus, dispatch, cookies]);
+  const [loading, setLoading] = useState(true);
   return (
     <>
         <Grid container spacing={0}>
@@ -252,8 +263,9 @@ const Users = () => {
       >
         <DataGrid
           sx={{ borderRadius: "5px" }}
-          rows={rows}
+          rows={users}
           columns={columns}
+          loading={loading}
           // initialState={{
           //   pagination: {
           //     paginationModel: { page: 0, pageSize: 5 },
@@ -321,7 +333,7 @@ const Users = () => {
                   disabled={["Administrator", "Registrar", "Dean", "Chairperson"].includes(createUserData?.accessLevel) ? true : false}
                   required
                 >
-                  {collegeCodes.data.map(({college_code}) => (
+                  {collegeCodes.map(({college_code}) => (
                     <MenuItem key={college_code} value={college_code}>{college_code}</MenuItem>
                   ))}
                 </Select>
@@ -429,7 +441,7 @@ const Users = () => {
                   disabled={["Administrator", "Registrar", "Dean", "Chairperson"].includes(updateAccountData.accessLevel) ? true : false}
                   required
                 >
-                  {collegeCodes.data.map(({college_code}) => (
+                  {collegeCodes.map(({college_code}) => (
                     <MenuItem key={college_code} defaultChecked={college_code === updateAccountData.college_code ? true : false} value={college_code}>{college_code}</MenuItem>
                   ))}
                 </Select>
@@ -455,7 +467,6 @@ const Users = () => {
                       position,
                       specialization,
                     }, index) => (
-                      // <MenuItem key={index} value={faculty_id}>{`${lastname}, ${firstname} ${middlename}, ${position}, ${specialization}`}</MenuItem>
                       <MenuItem key={index} value={faculty_id}>{`${lastname}, ${firstname} ${middlename} - ${faculty_id}`}</MenuItem>
                     ))}
                 </Select>
@@ -496,13 +507,6 @@ const Users = () => {
         </Dialog>
     </>
   );
-};
-
-export const loader = async () => {
-  const { data, status } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/admin/getAllEmails`
-  );
-  return { data, status };
 };
 
 export default Users;

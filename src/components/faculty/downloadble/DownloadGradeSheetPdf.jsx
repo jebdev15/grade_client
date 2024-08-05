@@ -1,6 +1,6 @@
 import { saveAs } from 'file-saver';
 import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
-import { momentFormatDate } from '../../utils/formatDate';
+import { momentFormatDate } from '../../../utils/formatDate';
 import { IconButton, Tooltip } from '@mui/material';
 import { CloudDownload } from '@mui/icons-material';
 

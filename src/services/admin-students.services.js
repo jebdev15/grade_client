@@ -6,7 +6,12 @@ export const getStudentsInitialData = async (cookies) => {
     return { data, status }
 }
 
-export const getStudentGrades = async (student_id) => {
-    const { data, status } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getStudentGrades?student_id=${student_id}`);
+export const getStudentGrades = async (student_id, year_level, semester, school_year) => {
+    const { data, status } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getStudentGrades?student_id=${student_id}&year_level=${year_level}&semester=${semester}&school_year=${school_year}`);
+    return { data, status }
+}
+
+export const getStudentYearSemesterAndSchoolYear = async (student_id) => {
+    const { data, status } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getStudentYearSemesterAndSchoolYear?student_id=${student_id}`);
     return { data, status }
 }

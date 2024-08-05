@@ -29,11 +29,12 @@ import PrintGraduateStudiesGradeSheet, { loader as printGSLoader } from "./route
 // Admin Routes
 import Admin from './routes/admin/Index';
 import Faculty from "./routes/admin/Faculty";
-import DownloadGradeSheetPdf from "./components/faculty/DownloadGradeSheetPdf";
-import Users, {loader as usersLoader} from "./routes/admin/Users";
+import DownloadGradeSheetPdf from "./components/faculty/downloadble/DownloadGradeSheetPdf";
+import Users from "./routes/admin/Users";
 import GenerateReport from "./routes/admin/GenerateReport";
 import Settings from "./routes/admin/Settings";
 import PrintUnderGraduateGS, { loader as printUnderGraduateGSLoader } from "./components/faculty/printable/PrintUnderGraduateGS";
+import PrintGraduateStudiesGS, { loader as printGraduateStudiesGSLoader } from "./components/faculty/printable/PrintGraduateStudiesGS";
 import Students from "./routes/admin/Students";
 import { Provider } from "react-redux";
 import { store } from "./app/store";
@@ -99,6 +100,12 @@ const router = createBrowserRouter([
     loader: printUnderGraduateGSLoader,
   },
   {
+    path: "/admin/print/:code/:class_code/gs",
+    element: <PrintGraduateStudiesGS />,
+    errorElement: <h1>Error PrintGraduateStudiesGS</h1>,
+    loader: printGraduateStudiesGSLoader,
+  },
+  {
     path: "admin",
     element: <Admin />,
     errorElement: <h1>Error AdminPage</h1>,
@@ -117,7 +124,6 @@ const router = createBrowserRouter([
       {
         path: "users",
         element: <Users />,
-        loader: usersLoader,
       },
       {
         path: "reports",

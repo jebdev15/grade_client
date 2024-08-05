@@ -1,12 +1,5 @@
 import axios from "axios";
 
-export const getAllData = async () => {
-    const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/admin/getAllData`
-    );
-    return data;
-}
-
 export const getEmailsService = async (cookies) => {
     const { college_code, accessLevel } = cookies;
     const { data, status } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getEmails?college_code=${college_code}&accessLevel=${accessLevel}`);

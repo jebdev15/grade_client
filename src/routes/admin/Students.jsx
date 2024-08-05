@@ -13,7 +13,7 @@ import {
 import { useCookies } from 'react-cookie'
 import { initialData } from '../../utils/admin-students.util'
 import { useDispatch, useSelector } from 'react-redux'
-import { /* addStudent, removeStudent, updateStudent, */ fetchStudents } from '../../features/students/studentsSlice'
+import { /* addStudent, removeStudent, updateStudent, */ fetchStudents } from '../../features/admin/students/studentsThunks'
 import ViewStudentData from '../../components/dialogs/admin/students/View'
 
 const Students = () => {

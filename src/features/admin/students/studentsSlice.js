@@ -1,6 +1,6 @@
 // src/features/students/studentsSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { createSlice } from '@reduxjs/toolkit';
+import { fetchStudents } from './studentsThunks';
 
 const initialState = {
   list: [],
@@ -9,11 +9,7 @@ const initialState = {
   error: null,
 };
 
-// Async thunk to fetch students data
-export const fetchStudents = createAsyncThunk('students/fetchStudents', async () => {
-  const response = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getStudentsInitialData`);
-  return response.data;
-});
+
 
 const studentsSlice = createSlice({
   name: 'students',

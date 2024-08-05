@@ -29,13 +29,19 @@ import {
 import { urlEncode } from 'url-encode-base64'
 import { useCookies } from 'react-cookie'
 import ViewStudentsDialog from '../../components/dialogs/ViewStudentsDialog'
-import { getEmailsService, getGradeTableService } from '../../services/admin.services'
-import { initialLoading, initialOpen, initialRows } from '../../utils/admin-faculty.util'
+import { getGradeTableService } from '../../services/admin.services'
+import { initialLoading, initialOpen } from '../../utils/admin-faculty.util'
 import SubjectLoadDialog from '../../components/dialogs/SubjectLoadDialog'
 import moment from 'moment'
 import { momentFormatDate } from '../../utils/formatDate'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchSubjectCodes } from '../../features/admin/faculty/subjectCodesThunks'
+import { fetchFaculty } from '../../features/admin/faculty/facultyThunks'
 
 const Faculty = () => {
+    const subjectCodesGS = useSelector(state => state.subjectCodes.list);
+    const subjectCodesStatus = useSelector((state) => state.subjectCodes.status);
+    const dispatch = useDispatch();
     const [cookies, ,] = useCookies(['picture', 'name', 'faculty_id', 'email', 'campus', 'accessLevel']);
     const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down('sm'));
     const [, schoolyear, semester, , , ] = useOutletContext();
@@ -133,7 +139,14 @@ const Faculty = () => {
               const { data } = await getGradeTableService(encoded.class_code);
               setViewStudents((prevState) => ({...prevState, rows: data}))
             }
-
+            const openSubjectCodesGSHandler = (subjectCode) => {
+              const subjectCodeIsGS = subjectCodesGS.some(subject => subject.subject_code === subjectCode);
+              const link = subjectCodeIsGS 
+                ? `/admin/print/${urlEncode(semester)}-${urlEncode(schoolyear)}/${urlEncode(params.row.id)}/gs` 
+                : `/admin/print/${urlEncode(semester)}-${urlEncode(schoolyear)}/${urlEncode(params.row.id)}`
+                return link
+            }
+            const printGradeSheetLink = openSubjectCodesGSHandler(params.row.subject_code)
             return (
               <>
               <ButtonGroup variant="text" color="primary" aria-label="">
@@ -160,7 +173,7 @@ const Faculty = () => {
                         aria-label="view" 
                         variant="text" 
                         color="primary" 
-                        href={`/admin/print/${urlEncode(semester)}-${urlEncode(schoolyear)}/${urlEncode(params.row.id)}`}
+                        href={printGradeSheetLink}
                         target='_blank'
                       >
                       <Print />
@@ -273,24 +286,30 @@ const Faculty = () => {
         },
     ];
   
-  const [rows, setRows] = useState(initialRows);
+  const facultyRows = useSelector((state) => state.faculty.list);
+  const facultyStatus = useSelector((state) => state.faculty.status);
   
   const [loading, setLoading] = useState(initialLoading)
   useEffect(() => {
-    const loader = async () => {
-      const { data, status } = await getEmailsService(cookies);
-      if(status === 200) {
-        setRows({ emails: data});
-        status === 200 && setLoading({ emails: false});
-      }
+    if (facultyStatus === 'idle') {
+        dispatch(fetchFaculty(cookies));
     }
-    loader();
-  },[cookies])
+    if(['idle','succeeded'].includes(facultyStatus)) {
+        setLoading({emails: false});
+    }
+}, [facultyStatus, dispatch, cookies]);
   const closeHandler = {
     viewStudents: () => setOpen({viewStudents: false}),
     subjectLoad: () => setOpen({subjectLoad: false}),
-}
-  
+  }
+  useEffect(() => {
+    if (subjectCodesStatus === 'idle') {
+      dispatch(fetchSubjectCodes());
+  }
+  if(['idle','succeeded'].includes(subjectCodesStatus)) {
+      setLoading(false);
+  }
+  },[subjectCodesStatus, dispatch])
   return (
     <>
 
@@ -303,7 +322,7 @@ const Faculty = () => {
           sx={{ flexGrow: 1 }}
           >LIST OF FACULTY</Typography>
           <DataGrid
-              rows={rows.emails}
+              rows={facultyRows}
               columns={columns}
               initialState={{
                 pagination: {
