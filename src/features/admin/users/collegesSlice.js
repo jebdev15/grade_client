@@ -34,7 +34,6 @@ const collegesSlice = createSlice({
       .addCase(fetchColleges.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.list = action.payload;
-        console.log(state.list);
       })
       .addCase(fetchColleges.rejected, (state, action) => {
         state.status = 'failed';

@@ -5,16 +5,17 @@ import {
   IconButton, 
   Typography, 
   Tooltip, 
-  ButtonGroup
+  ButtonGroup,
+  TextField,
 } from '@mui/material'
 import {
+  PersonSearch,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material'
-import { useCookies } from 'react-cookie'
-import { initialData } from '../../utils/admin-students.util'
 import { useDispatch, useSelector } from 'react-redux'
-import { /* addStudent, removeStudent, updateStudent, */ fetchStudents } from '../../features/admin/students/studentsThunks'
+import { fetchStudents } from '../../features/admin/students/studentsThunks'
 import ViewStudentData from '../../components/dialogs/admin/students/View'
+import { getStudentsBySearch } from '../../services/admin-students.services'
 
 const Students = () => {
     const students = useSelector(state => state.students.list);
@@ -22,24 +23,6 @@ const Students = () => {
     // const error = useSelector((state) => state.students.error);
     const dispatch = useDispatch();
 
-    // const addStudentHandler = () => {
-    //     const newStudent = {
-    //         id: Math.floor(Math.random() * 1000),
-    //         fullName: 'John Doe',
-    //     }
-    //     dispatch(addStudent(newStudent))
-    // }
-
-    // const removeStudentHandler = (id) => {
-    //     dispatch(removeStudent(id))
-    // }
-
-    // const updateStudentHandler = (student) => {
-    //     dispatch(updateStudent(student))
-    // }
-
-    const [cookies, ,] = useCookies(initialData.cookies);
-    const [loading, setLoading] = useState(true);
     const [studentData, setStudentData] = useState({
         data: {
             id: null,
@@ -110,42 +93,102 @@ const Students = () => {
         },
     ];
     
-    useEffect(() => {
-        if (status === 'idle') {
-            dispatch(fetchStudents());
-        }
-        if(['idle','succeeded'].includes(status)) {
-            setLoading(false);
-        }
-    }, [status, dispatch]);
-  return (
-    <>
+    // useEffect(() => {
+    //     if (status === 'idle') {
+    //         dispatch(fetchStudents());
+    //     }
+    //     if(['idle','succeeded'].includes(status)) {
+    //         setLoading(false);
+    //     }
+    // }, [status, dispatch]);
 
-        <Box sx={{height: 600, width: '100%'}}>
-          <Typography 
-          variant="h4"
-          fontWeight={700}
-          component="div"
-          marginBottom={3}
-          sx={{ flexGrow: 1 }}
-          >LIST OF STUDENTS</Typography>
-          <DataGrid
-              rows={students}
-              columns={columns}
-            //   slots={{ toolbar: GridToolbar }}
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 5,
-                  },
-                },
-              }}
-              pageSizeOptions={[5, 10, 25]}
-              loading={loading}
-          />
-        </Box>
-        {studentData.data.id !== null && <ViewStudentData {...studentData} /> }
-    </>
-  )
+    
+    const [searchResultData, setSearchResultData] = useState();
+    const [searchParam, setSearchParam] = useState("");
+    const searchStudentHandler = async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const { data, status } = await getStudentsBySearch(formData);
+      if(status === 200) {
+        setSearchResultData(data);
+      }
+
+    }
+    const onChangeSearchParam = (e) => {
+      setSearchParam(e.target.value);
+    }
+    return (
+      <>
+
+          <Box sx={{height: 600, width: '100%'}}>
+            <Box 
+              component="form" 
+              onSubmit={searchStudentHandler}
+              sx={{ marginBottom: 2, display: 'flex', justifyContent: 'center' }} 
+            >
+                <TextField
+                  name='searchParam'
+                  label="Search Student ID/Last Name/First Name/Middle Name"
+                  variant="outlined"
+                  value={searchParam}
+                  onChange={onChangeSearchParam}
+                  sx={{ 
+                    width: "clamp(600px, 100%, 600px)"
+                  }}
+                  InputProps={{
+                    endAdornment: 
+                    <IconButton aria-label="search" type='submit'>
+                      <PersonSearch />
+                    </IconButton>,
+                  }}
+                  required
+                />
+                
+                {/* <Button type='submit'>Search</Button> */}
+            </Box>
+            
+            {
+              searchResultData
+                ? searchResultData.length > 0
+                  ? (
+                    <>
+                      <Typography 
+                        variant="h4"
+                        fontWeight={700}
+                        component="div"
+                        marginBottom={3}
+                        sx={{ flexGrow: 1 }}
+                      >
+                        LIST OF STUDENTS
+                      </Typography>
+                      <DataGrid
+                        rows={searchResultData}
+                        columns={columns}
+                        initialState={{
+                          pagination: {
+                            paginationModel: {
+                              pageSize: 5,
+                            },
+                          },
+                        }}
+                        pageSizeOptions={[5, 10, 25]}
+                      />
+                    </>
+                  )
+                  : (
+                    <Typography variant="body1" color="initial" textAlign={"center"}>
+                      No Result
+                    </Typography>
+                  )
+                : (
+                  <Typography variant="body1" color="initial" textAlign={"center"}>
+                    List of Student Will Appear here...
+                  </Typography>
+                )
+            }
+          </Box>
+          {studentData.data.id !== null && <ViewStudentData {...studentData} /> }
+      </>
+    )
 }
 export default Students

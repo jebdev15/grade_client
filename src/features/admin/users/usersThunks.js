@@ -10,5 +10,4 @@ export const fetchUsers = createAsyncThunk('students/fetchUsers', async (cookies
       } else {
         return data 
       }
-     
 });

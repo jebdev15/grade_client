@@ -34,7 +34,6 @@ const accessLevelsSlice = createSlice({
       .addCase(fetchAccessLevels.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.list = action.payload;
-        console.log(state.list);
       })
       .addCase(fetchAccessLevels.rejected, (state, action) => {
         state.status = 'failed';

@@ -34,7 +34,6 @@ const noAccountsSlice = createSlice({
       .addCase(fetchNoAccounts.fulfilled, (state, action) => {
         state.status = 'succeeded';
         state.list = action.payload;
-        console.log(state.list);
       })
       .addCase(fetchNoAccounts.rejected, (state, action) => {
         state.status = 'failed';

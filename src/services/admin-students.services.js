@@ -15,3 +15,15 @@ export const getStudentYearSemesterAndSchoolYear = async (student_id) => {
     const { data, status } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getStudentYearSemesterAndSchoolYear?student_id=${student_id}`);
     return { data, status }
 }
+
+export const getStudentsBySearch = async (formData) => {
+    const { data, status } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/getStudentsBySearch`, 
+        formData, 
+        { 
+            headers: {
+                'Content-Type': 'application/json'
+            } 
+        }
+    );
+    return { data, status }
+}
