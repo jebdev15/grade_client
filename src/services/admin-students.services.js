@@ -16,7 +16,12 @@ export const getStudentYearSemesterAndSchoolYear = async (student_id) => {
     return { data, status }
 }
 
-export const getStudentsBySearch = async (formData) => {
+export const getStudentsBySearch = async (searchParam, cookies) => {
+    const { college_code, accessLevel } = cookies;
+    const formData = new FormData();
+    formData.append('searchParam', searchParam);
+    formData.append('accessLevel', accessLevel);
+    formData.append('college_code', college_code);
     const { data, status } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/getStudentsBySearch`, 
         formData, 
         { 

@@ -1,5 +1,5 @@
 import { DataGrid } from '@mui/x-data-grid'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   IconButton, 
@@ -12,17 +12,12 @@ import {
   PersonSearch,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material'
-import { useDispatch, useSelector } from 'react-redux'
-import { fetchStudents } from '../../features/admin/students/studentsThunks'
 import ViewStudentData from '../../components/dialogs/admin/students/View'
 import { getStudentsBySearch } from '../../services/admin-students.services'
+import { useCookies } from 'react-cookie'
 
 const Students = () => {
-    const students = useSelector(state => state.students.list);
-    const status = useSelector((state) => state.students.status);
-    // const error = useSelector((state) => state.students.error);
-    const dispatch = useDispatch();
-
+    const [cookies, ] = useCookies(['college_code', 'accessLevel']);
     const [studentData, setStudentData] = useState({
         data: {
             id: null,
@@ -92,23 +87,12 @@ const Students = () => {
           }
         },
     ];
-    
-    // useEffect(() => {
-    //     if (status === 'idle') {
-    //         dispatch(fetchStudents());
-    //     }
-    //     if(['idle','succeeded'].includes(status)) {
-    //         setLoading(false);
-    //     }
-    // }, [status, dispatch]);
 
-    
     const [searchResultData, setSearchResultData] = useState();
     const [searchParam, setSearchParam] = useState("");
     const searchStudentHandler = async (e) => {
       e.preventDefault();
-      const formData = new FormData(e.currentTarget);
-      const { data, status } = await getStudentsBySearch(formData);
+      const { data, status } = await getStudentsBySearch(searchParam, cookies);
       if(status === 200) {
         setSearchResultData(data);
       }

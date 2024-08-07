@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { IconButton, Tooltip, Typography, Box, Dialog, DialogTitle, DialogContent, FormControl, TextField, InputLabel, Select, DialogActions, MenuItem, ButtonGroup, Button, useMediaQuery, Grid } from "@mui/material";
 import { Close, PersonAddAlt1 as PersonAddAlt1Icon, ModeEdit } from "@mui/icons-material";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUsers } from "../../features/admin/users/usersThunks";
@@ -13,7 +12,6 @@ import { fetchNoAccounts } from "../../features/admin/users/noAccountsThunks";
 
 const Users = () => {
   const [cookies, ,] = useCookies(['email', 'accessLevel']);
-  const navigate = useNavigate();
 
   const users = useSelector(state => state.users.list);
   const usersStatus = useSelector((state) => state.users.status);
@@ -73,9 +71,9 @@ const Users = () => {
       })
       alert(data.message)
       if (data.success === 1) {
+        dispatch(fetchUsers(cookies))
         handleCloseCreateUsersDialog()
         setCreateUserData(initialCreateUserData)
-        navigate(".", { replace: true })
       }
   }
 
@@ -119,7 +117,7 @@ const Users = () => {
       })
       alert(data.message)
       if (data.success) {
-        navigate(".", { replace: true })
+        dispatch(fetchUsers(cookies))
         handleCloseEditAccountDialog()
         setUpdateAccountData(initialUpdateAccountData)
       }
@@ -226,7 +224,7 @@ const Users = () => {
     if(['idle','succeeded'].includes(accessLevelStatus)) {
         setLoading(false);
     }
-}, [accessLevelStatus, dispatch, cookies]);
+  }, [accessLevelStatus, dispatch, cookies]);
   const [loading, setLoading] = useState(true);
   return (
     <>
@@ -330,7 +328,7 @@ const Users = () => {
                   name="college_code"
                   value={createUserData.college_code}
                   onChange={handleChange}
-                  disabled={["Administrator", "Registrar", "Dean", "Chairperson"].includes(createUserData?.accessLevel) ? true : false}
+                  disabled={["Administrator", "Registrar"].includes(createUserData?.accessLevel) ? true : false}
                   required
                 >
                   {collegeCodes.map(({college_code}) => (
@@ -438,7 +436,7 @@ const Users = () => {
                   name="college_code"
                   value={updateAccountData.college_code}
                   onChange={handleChangeUpdateAccount}
-                  disabled={["Administrator", "Registrar", "Dean", "Chairperson"].includes(updateAccountData.accessLevel) ? true : false}
+                  disabled={["Administrator", "Registrar"].includes(updateAccountData.accessLevel) ? true : false}
                   required
                 >
                   {collegeCodes.map(({college_code}) => (

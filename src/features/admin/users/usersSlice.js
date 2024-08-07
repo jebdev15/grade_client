@@ -1,6 +1,7 @@
 // src/features/students/studentsSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 import { fetchUsers } from './usersThunks';
+import { v4 as uuidv4 } from 'uuid';
 
 const initialState = {
   list: [],
@@ -13,14 +14,19 @@ const usersSlice = createSlice({
   name: 'users',
   initialState,
   reducers: {
-    addStudent: (state, action) => {
-      state.list.push(action.payload);
+    addUser: (state, action) => {
+      state.list.push({
+        id: uuidv4(),
+        email: action.payload.emailAddress,
+        status: 'Active',
+        ...action.payload
+        });
     },
-    removeStudent: (state, action) => {
-      state.list = state.list.filter(student => student.id !== action.payload);
+    removeUser: (state, action) => {
+      state.list = state.list.filter(user => user.id !== action.payload);
     },
-    updateStudent: (state, action) => {
-      const index = state.list.findIndex(student => student.id === action.payload.id);
+    updateUser: (state, action) => {
+      const index = state.list.findIndex(user => user.id === action.payload.id);
       if (index !== -1) {
         state.list[index] = action.payload;
       }
@@ -42,5 +48,5 @@ const usersSlice = createSlice({
   },
 });
 
-export const { addSubjectCode, removeSubjectCode, updateSubjectCode } = usersSlice.actions;
+export const { addUser, removeUser, updateUser } = usersSlice.actions;
 export default usersSlice.reducer;

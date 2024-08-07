@@ -298,6 +298,7 @@ const Semester = () => {
                 </span>
               </Tooltip>
             )}
+            {parseInt(status) === 1 && (
               <Tooltip title="Print Grade Sheet">
                 <span>
                   <IconButton
@@ -311,6 +312,7 @@ const Semester = () => {
                   </IconButton>
                 </span>
               </Tooltip>
+            )}
           </ButtonGroup>
         </CardActions>
       </Card>

@@ -261,7 +261,6 @@ const Faculty = () => {
             const handleOpen = async () => {
               setOpenSubjectLoad(true);
               const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getSubjectLoad?faculty_id=${urlEncode(params.row.faculty_id)}&school_year=${urlEncode(schoolyear)}&semester=${urlEncode(semester)}`)
-              console.log(data);
               setSubjectLoad((prevState) => ({...prevState, rows: data}))
             };
 
