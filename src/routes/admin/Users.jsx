@@ -2,13 +2,14 @@ import { DataGrid } from "@mui/x-data-grid";
 import React, { useEffect, useState } from "react";
 import { IconButton, Tooltip, Typography, Box, Dialog, DialogTitle, DialogContent, FormControl, TextField, InputLabel, Select, DialogActions, MenuItem, ButtonGroup, Button, useMediaQuery, Grid } from "@mui/material";
 import { Close, PersonAddAlt1 as PersonAddAlt1Icon, ModeEdit } from "@mui/icons-material";
-import axios from "axios";
 import { useCookies } from "react-cookie";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUsers } from "../../features/admin/users/usersThunks";
 import { fetchAccessLevels } from "../../features/admin/users/accessLevelsThunks";
 import { fetchColleges } from "../../features/admin/users/collegesThunks";
 import { fetchNoAccounts } from "../../features/admin/users/noAccountsThunks";
+import { createUserServices, updateAccountServices } from "../../services/admin-users.services";
+import { fetchProgramCodes } from "../../features/admin/users/programCodesThunks";
 
 const Users = () => {
   const [cookies, ,] = useCookies(['email', 'accessLevel']);
@@ -22,6 +23,9 @@ const Users = () => {
   const collegeCodes = useSelector((state) => state.colleges.list);
   const collegeStatus = useSelector((state) => state.colleges.status);
 
+  const programCodes = useSelector((state) => state.programCodes.list);
+  const programCodeStatus = useSelector((state) => state.programCodes.status);
+
   const noAccountData = useSelector((state) => state.noAccounts.list);
   const noAccountStatus = useSelector((state) => state.noAccounts.status);
 
@@ -32,6 +36,7 @@ const Users = () => {
     facultyId: '',
     emailAddress: '',
     college_code: '',
+    program_code: '',
     accessLevel: '',
   }
   const [createUserData, setCreateUserData] = useState(initialCreateUserData);
@@ -42,6 +47,7 @@ const Users = () => {
     faculty_id: '',
     email: '',
     college_code: '',
+    program_code: '',
     accessLevel: '',
     status: '',
   }
@@ -58,17 +64,7 @@ const Users = () => {
     ))
   }
   const handleCreateUser = async () => {
-      const formData = new FormData();
-      formData.append('emailAddress', createUserData.emailAddress)
-      formData.append('college_code', createUserData.college_code)
-      formData.append('facultyId', createUserData.facultyId)
-      formData.append('accessLevel', createUserData.accessLevel)
-      formData.append('emailUsed', cookies.email)
-      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/createUser`, formData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
+      const { data } = await createUserServices(createUserData, cookies)
       alert(data.message)
       if (data.success === 1) {
         dispatch(fetchUsers(cookies))
@@ -99,28 +95,13 @@ const Users = () => {
       "Are you sure you want to update this account?"
     )
     if(!confirmation) return
-    const formData = new FormData();
-      formData.append('id', updateAccountData.id)
-      formData.append('email', updateAccountData.email)
-      formData.append('college_code', updateAccountData.college_code)
-      formData.append('faculty_id', updateAccountData.faculty_id)
-      formData.append('accessLevel', updateAccountData.accessLevel)
-      formData.append('status', updateAccountData.status)
-      formData.append('emailUsed', cookies.email)
-      formData.append('dataToCheck', JSON.stringify(updateDataToCheck))
-
-
-      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/updateAccount`, formData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      alert(data.message)
-      if (data.success) {
-        dispatch(fetchUsers(cookies))
-        handleCloseEditAccountDialog()
-        setUpdateAccountData(initialUpdateAccountData)
-      }
+    const { data } = await updateAccountServices(updateAccountData, cookies, updateDataToCheck)
+    alert(data.message)
+    if (data.success) {
+      dispatch(fetchUsers(cookies))
+      handleCloseEditAccountDialog()
+      setUpdateAccountData(initialUpdateAccountData)
+    }
   }
 
   const columns = [
@@ -146,6 +127,13 @@ const Users = () => {
     {
       field: "college_code",
       headerName: "College",
+      description: "This column has a value getter and is not sortable.",
+      sortable: false,
+      minWidth: 100,
+    },
+    {
+      field: "program_code",
+      headerName: "Program",
       description: "This column has a value getter and is not sortable.",
       sortable: false,
       minWidth: 100,
@@ -225,6 +213,15 @@ const Users = () => {
         setLoading(false);
     }
   }, [accessLevelStatus, dispatch, cookies]);
+
+  useEffect(() => {
+    if (programCodeStatus === 'idle') {
+        dispatch(fetchProgramCodes());
+    }
+    if(['idle','succeeded'].includes(programCodeStatus)) {
+        setLoading(false);
+    }
+  }, [programCodeStatus, dispatch, cookies]);
   const [loading, setLoading] = useState(true);
   return (
     <>
@@ -328,11 +325,28 @@ const Users = () => {
                   name="college_code"
                   value={createUserData.college_code}
                   onChange={handleChange}
-                  disabled={["Administrator", "Registrar"].includes(createUserData?.accessLevel) ? true : false}
+                  disabled={["Administrator", "Registrar", "Chairperson"].includes(createUserData?.accessLevel) ? true : false}
                   required
                 >
                   {collegeCodes.map(({college_code}) => (
                     <MenuItem key={college_code} value={college_code}>{college_code}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="select-accessLevel-program-code">Program Code</InputLabel>
+                <Select
+                  labelId="select-accessLevel-program-code"
+                  id="select-program-code"
+                  label="College"
+                  name="program_code"
+                  value={createUserData.program_code}
+                  onChange={handleChange}
+                  disabled={["Administrator", "Registrar", "Dean"].includes(createUserData?.accessLevel) ? true : false}
+                  required
+                >
+                  {programCodes.map(({curriculum_id, program_code}) => (
+                    <MenuItem key={curriculum_id} value={program_code}>{program_code}</MenuItem>
                   ))}
                 </Select>
               </FormControl>
@@ -428,11 +442,11 @@ const Users = () => {
                 </Select>
               </FormControl>
               <FormControl fullWidth>
-                <InputLabel id="select-updateCollege-label">College</InputLabel>
+                <InputLabel id="select-updateCollege-label">College Code</InputLabel>
                 <Select
                   labelId="select-updateCollege-label"
                   id="select-updateCollege"
-                  label="College"
+                  label="College Code"
                   name="college_code"
                   value={updateAccountData.college_code}
                   onChange={handleChangeUpdateAccount}
@@ -441,6 +455,23 @@ const Users = () => {
                 >
                   {collegeCodes.map(({college_code}) => (
                     <MenuItem key={college_code} defaultChecked={college_code === updateAccountData.college_code ? true : false} value={college_code}>{college_code}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="select-updateProgram-label">Program Code</InputLabel>
+                <Select
+                  labelId="select-updateProgram-label"
+                  id="select-updateProgram"
+                  label="Program Code"
+                  name="program_code"
+                  value={updateAccountData.program_code}
+                  onChange={handleChangeUpdateAccount}
+                  disabled={["Administrator", "Registrar"].includes(updateAccountData.accessLevel) ? true : false}
+                  required
+                >
+                  {programCodes.map(({curriculum_id, program_code}) => (
+                    <MenuItem key={curriculum_id} defaultChecked={program_code === updateAccountData.program_code ? true : false} value={program_code}>{program_code}</MenuItem>
                   ))}
                 </Select>
               </FormControl>

@@ -57,7 +57,7 @@ const Index = () => {
           setIndividualCookie("picture", picture);
           setIndividualCookie("email", email);
           setIndividualCookie("college_code", data[0].college_code);
-          // setIndividualCookie("campus", campus);
+          setIndividualCookie("program_code", data[0].program_code);
           navigate(data[1].url);
         } 
       } catch (error) {

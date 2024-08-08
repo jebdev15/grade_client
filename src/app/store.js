@@ -5,6 +5,7 @@ import usersReducer from "../features/admin/users/usersSlice";
 import accessLevelsReducer from "../features/admin/users/accessLevelsSlice";
 import collegesReducer from "../features/admin/users/collegesSlice";
 import noAccountsReducer from "../features/admin/users/noAccountsSlice";
+import programCodesReducer from "../features/admin/users/programCodesSlice";
 import facultyReducer from "../features/admin/faculty/facultySlice";
 
 export const store = configureStore({
@@ -15,6 +16,7 @@ export const store = configureStore({
         accessLevels: accessLevelsReducer,
         colleges: collegesReducer,
         noAccounts: noAccountsReducer,
+        programCodes: programCodesReducer,
         faculty: facultyReducer
     },
     middleware: (getDefaultMiddleware) =>

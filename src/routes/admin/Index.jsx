@@ -293,27 +293,27 @@ export default function Admin() {
               </ListItemButton>
               {/* Students */}
 
-              {/* Faculty */}
-              <ListItemButton
-                className={activeItem === "faculty" ? "navbtn active" : "navbtn"}
-                onClick={() => {
-                  setActiveItem("faculty");
-                  navigate(`/admin/faculty`);
-                }}
-              >
-                <Tooltip title="Faculty">
-                  <ListItemIcon>
-                    <ScheduleIcon />
-                  </ListItemIcon>
-                </Tooltip>
-                {drawerMinimize ? null : (
-                  <ListItemText primary="Faculty" />
-                )}
-              </ListItemButton>
-              {/* Faculty */}
               
               {checkAccessLevelForMenu(cookies.accessLevel) && (
-              <>
+                <>
+                {/* Faculty */}
+                <ListItemButton
+                  className={activeItem === "faculty" ? "navbtn active" : "navbtn"}
+                  onClick={() => {
+                    setActiveItem("faculty");
+                    navigate(`/admin/faculty`);
+                  }}
+                >
+                  <Tooltip title="Faculty">
+                    <ListItemIcon>
+                      <ScheduleIcon />
+                    </ListItemIcon>
+                  </Tooltip>
+                  {drawerMinimize ? null : (
+                    <ListItemText primary="Faculty" />
+                  )}
+                </ListItemButton>
+                {/* Faculty */}
                 {/* Users */}
                 <ListItemButton
                   className={activeItem === "users" ? "navbtn active" : "navbtn"}
