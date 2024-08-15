@@ -29,7 +29,7 @@ const ViewStudentData = ({ open, close, data }) => {
   }, [id]);
   return (
     <>
-      <Dialog open={open} onClose={close} aria-labelledby={"dialog-view"} fullScreen>
+      <Dialog open={open} onClose={close} aria-labelledby={"dialog-view"} fullScreen sx={{ padding: 3 }}>
         <DialogTitle id={"dialog-view-title"}>View Student</DialogTitle>
         <IconButton
           aria-label="close"
