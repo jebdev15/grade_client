@@ -20,10 +20,53 @@ body {
   box-shadow: none !important;
   border: 1px solid var(--border-default);
   width: unset !important;
+  border-radius: 1.5rem !important;
 }
 
 .signin_page .login_input_label {
   left: -14px !important;
+}
+
+.signinMsg {
+  & .chmsuLogo {
+    display: block;
+    width: 100px;
+    aspect-ratio: 1 / 1;
+    margin-bottom: 0.5rem;
+    & + h5 {
+      text-align: left;
+      font-size: 3rem;
+      text-transform: uppercase;
+      line-height: 1;
+      color: var(--primary-color-dark);
+      & span {
+        display: block;
+        font-size: 1.585rem;
+      }
+      & + p,
+      & + span {
+        display: block;
+        margin-top: 0.5rem;
+        text-align: left;
+        font-size: 1.25rem;
+        font-weight: 500;
+        letter-spacing: 0.1rem;
+        color: var(--primary-color);
+      }
+    }
+  }
+}
+
+.loginForm {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center;
+  gap: 0.25rem;
+  & label {
+    text-align: left;
+    width: 100%;
+    margin: auto;
+  }
 }
 
 .header {
@@ -150,7 +193,31 @@ div:has(> .semester-grid) {
 @media (min-width: 1200px) {
 }
 
-@media (min-width: 900px) {
+@media (max-width: 900px) {
+  .signin_page {
+    flex-direction: column !important;
+  }
+  .signinMsg {
+    & .chmsuLogo {
+      margin: 0 auto 0.5rem auto;
+    }
+  }
+
+  .signinMsg {
+    & .chmsuLogo {
+      & + h5 {
+        & + p,
+        & + span {
+          text-align: center;
+        }
+      }
+    }
+  }
+  .loginForm {
+    & label {
+      width: auto;
+    }
+  }
 }
 
 @media (min-width: 600px) {
