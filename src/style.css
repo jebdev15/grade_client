@@ -79,13 +79,7 @@ body {
   left: 0px;
   border-bottom-width: 1px !important;
   border-bottom-style: solid !important;
-  border-image: linear-gradient(
-      to right,
-      transparent,
-      var(--border-default),
-      transparent
-    )
-    1 !important;
+  border-image: linear-gradient(to right, transparent, var(--border-default), transparent) 1 !important;
 }
 
 .navbtn > div:first-child {
@@ -271,4 +265,8 @@ div:has(> .semester-grid) {
 
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--primary-color-dark);
+}
+
+.MuiPaper-rounded:has(> .MuiAccordionSummary-root)::before {
+  height: 0px !important;
 }
