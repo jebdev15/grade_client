@@ -10,6 +10,7 @@ import "../assets/custom.css";
 import "../style.css";
 import { authenticationProcess } from "../services/index.services";
 import chmsuLogo from "../assets/chmsu-small.jpg";
+import { AuthService } from "../services/authService";
 const Index = () => {
   const [loading, setLoading] = useState(false);
   const [saveCredentials, setSaveCredentials] = useState(false);
@@ -27,29 +28,35 @@ const Index = () => {
 
   const login = async (res) => {
     setLoading(true);
-
     const { credential } = res;
     const jsonObj = jwt_decode(credential);
     const { name, picture, email } = jsonObj;
-
     try {
-      const { data, status } = await authenticationProcess(email);
-      if (status === 200 && data.length > 0) {
-        setIndividualCookie("faculty_id", data[0].faculty_id);
-        setIndividualCookie("accessLevel", data[0].accessLevel);
-        setIndividualCookie("name", name);
-        setIndividualCookie("picture", picture);
-        setIndividualCookie("email", email);
-        setIndividualCookie("college_code", data[0].college_code);
-        setIndividualCookie("program_code", data[0].program_code);
-        navigate(data[1].url);
-      }
+        const { data, status } = await AuthService.login(credential,email)
+        console.log({data, status});
     } catch (error) {
-      alert("Something went wrong. Please contact Administrator");
-      setLoading(false);
+        console.log(error);
+    } finally {
+        setLoading(false);
     }
-  };
 
+    // try {
+    //   const { data, status } = await authenticationProcess(email);
+    //   if (status === 200 && data.length > 0) {
+    //     setIndividualCookie("faculty_id", data[0].faculty_id);
+    //     setIndividualCookie("accessLevel", data[0].accessLevel);
+    //     setIndividualCookie("name", name);
+    //     setIndividualCookie("picture", picture);
+    //     setIndividualCookie("email", email);
+    //     setIndividualCookie("college_code", data[0].college_code);
+    //     setIndividualCookie("program_code", data[0].program_code);
+    //     navigate(data[1].url);
+    //   }
+    // } catch (error) {
+    //   alert("Something went wrong. Please contact Administrator");
+    //   setLoading(false);
+    // }
+  };
   useEffect(() => {
     if (cookies.faculty_id && cookies.accessLevel) {
       const checkUser = async () => {

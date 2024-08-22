@@ -38,6 +38,7 @@ import PrintGraduateStudiesGS, { loader as printGraduateStudiesGSLoader } from "
 import Students from "./routes/admin/Students";
 import { Provider } from "react-redux";
 import { store } from "./app/store";
+import { REACT_APP_GOOGLE_CLIENT_ID } from "./utils/envVariables";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -147,7 +148,7 @@ const router = createBrowserRouter([
 ]);
 root.render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId="853501125882-et0u8vs2qthqbq4vkskobqgm3mb8g91h.apps.googleusercontent.com"> {/* using johneric chmsu email */}
+    <GoogleOAuthProvider clientId={REACT_APP_GOOGLE_CLIENT_ID}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Provider store={store}>
