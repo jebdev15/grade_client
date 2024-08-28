@@ -5,17 +5,16 @@ import jwt_decode from "jwt-decode";
 import { useCookies } from "react-cookie";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 import "../assets/custom.css";
 import "../style.css";
-import { authenticationProcess } from "../services/index.services";
 import chmsuLogo from "../assets/chmsu-small.jpg";
 import { AuthService } from "../services/authService";
+import { AuthUtil } from "../utils/authUtil";
 const Index = () => {
   const [loading, setLoading] = useState(false);
   const [saveCredentials, setSaveCredentials] = useState(false);
 
-  const [cookies, setCookie] = useCookies(["name", "faculty_id", "campus", "picture", "email", "college_code", "accessLevel"]);
+  const [cookies, setCookie] = useCookies(AuthUtil.siteCookies);
 
   const navigate = useNavigate();
 
@@ -32,38 +31,33 @@ const Index = () => {
     const jsonObj = jwt_decode(credential);
     const { name, picture, email } = jsonObj;
     try {
-        const { data, status } = await AuthService.login(credential,email)
-        console.log({data, status});
+      const { data, status } = await AuthService.login(credential,email);
+      const { token, path } = data;
+      if (status === 200 && Object.entries(data).length > 0) {
+        const decodedToken = jwt_decode(token);
+        const { faculty_id, accessLevel, college_code, program_code } = decodedToken.token;
+        setIndividualCookie("faculty_id", faculty_id);
+        setIndividualCookie("accessLevel", accessLevel);
+        setIndividualCookie("name", name);
+        setIndividualCookie("picture", picture);
+        setIndividualCookie("email", email);
+        setIndividualCookie("college_code", college_code);
+        setIndividualCookie("program_code", program_code);
+        setIndividualCookie("token", token);
+        navigate(path);
+      }
+      alert(AuthUtil.statusCodeResponse(status));
     } catch (error) {
-        console.log(error);
-    } finally {
-        setLoading(false);
+      const { status, statusText } = error.request;
+      console.log({ status, statusText });
+      alert(AuthUtil.statusCodeResponse(status));
     }
-
-    // try {
-    //   const { data, status } = await authenticationProcess(email);
-    //   if (status === 200 && data.length > 0) {
-    //     setIndividualCookie("faculty_id", data[0].faculty_id);
-    //     setIndividualCookie("accessLevel", data[0].accessLevel);
-    //     setIndividualCookie("name", name);
-    //     setIndividualCookie("picture", picture);
-    //     setIndividualCookie("email", email);
-    //     setIndividualCookie("college_code", data[0].college_code);
-    //     setIndividualCookie("program_code", data[0].program_code);
-    //     navigate(data[1].url);
-    //   }
-    // } catch (error) {
-    //   alert("Something went wrong. Please contact Administrator");
-    //   setLoading(false);
-    // }
+    setLoading(false);
   };
-  useEffect(() => {
-    if (cookies.faculty_id && cookies.accessLevel) {
-      const checkUser = async () => {
-        const { data } = await authenticationProcess(cookies.email);
-        navigate(data[1].url);
-      };
-      checkUser();
+  React.useEffect(() => {
+    if (cookies.token && cookies.accessLevel) {
+      const path = AuthUtil.getInitialPath(cookies);
+      navigate(path);
     }
   }, [cookies, navigate]);
 

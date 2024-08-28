@@ -30,39 +30,33 @@ import {
 import { Outlet, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { googleLogout } from "@react-oauth/google";
-import axios from "axios";
 import { urlEncode } from "url-encode-base64";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 import { checkRegistrarActivityDueDate } from "../../services/index.services";
 import { getCampus } from "../../utils/header.util";
-import { checkHomeAccessLevel } from "../../utils/home-index.util";
+import { homeIndexUtil } from "../../utils/home-index.util";
+import useFetchAxiosGet from "../../hooks/useFetchAxiosGet";
 
 const Home = () => {
-  const siteCookies = [
-    "picture",
-    "name",
-    "faculty_id",
-    "email",
-    "campus",
-    "college_code",
-    "accessLevel",
-  ];
-
-  const [cookies, , removeCookie] = useCookies(siteCookies);
+  const [cookies, , removeCookie] = useCookies(homeIndexUtil.siteCookies);
   const navigate = useNavigate();
 
   const [schoolyear, setSchoolYear] = useState(0);
   
+  const { data, loading, error } = useFetchAxiosGet('/getCurrentSchoolYear');
+  console.log(
+    data,
+    loading,
+    error
+  );
+  
   useEffect(() => {
-    const getCurrentSchoolYear = async () => {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
-        );
+    const getCurrentSchoolYear = () => {
         setSchoolYear(data[0].schoolyear);
         checkRegistrarActivityDueDate(data[0].to);
     };
     getCurrentSchoolYear();
-  }, [schoolyear]);
+  }, [data]);
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -93,7 +87,7 @@ const Home = () => {
 
 
   const logout = () => {
-    siteCookies.forEach((cookie) => removeCookie(cookie, { path: "/" }));
+    homeIndexUtil.siteCookies.forEach((cookie) => removeCookie(cookie, { path: "/" }));
     googleLogout();
     navigate("/");
     localStorage.removeItem("activeItem");
@@ -108,7 +102,7 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (!checkHomeAccessLevel(cookies)) {
+    if (!homeIndexUtil.checkHomeAccessLevel(cookies)) {
       navigate("/");
     }
   }, [cookies, navigate]);
