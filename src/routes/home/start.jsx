@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
 import axios from "axios";
 import { dateFormatter } from "../../utils/formatDate";
+import useFetchAxiosGet from "../../hooks/useFetchAxiosGet";
 const Start = () => {
   const initialRegistrarActivity = {
     activity: "",
@@ -12,6 +13,7 @@ const Start = () => {
     to: "0000-00-00",
   }
   const [registrarActivity, setRegistrarActivity] = useState(initialRegistrarActivity);
+  const { data, loading, error } = useFetchAxiosGet('/getCurrentSchoolYear');
   useEffect(() => {
     const handleGetRegistrarActivity = async () => {
       try {
@@ -22,7 +24,7 @@ const Start = () => {
       }
     }
     handleGetRegistrarActivity();
-  },[])
+  },[data, loading, error])
   return (
     <Box>
       <Typography variant="h3" fontWeight={700}>

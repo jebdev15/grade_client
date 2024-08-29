@@ -1,9 +1,10 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axiosInstance from '../../../api/axiosInstance';
+
 // Async thunk to fetch students data
 export const fetchUsers = createAsyncThunk('students/fetchUsers', async (cookies) => {
     
-    const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getAllEmails`);
+    const { data } = await axiosInstance.get(`/admin/getAllEmails`);
     if(cookies.accessLevel !== 'Administrator') {
         const filteredData = data.filter(user => user.accessLevel !== 'Administrator')
         return filteredData

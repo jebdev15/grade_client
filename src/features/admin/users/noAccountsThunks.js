@@ -1,7 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axiosInstance from '../../../api/axiosInstance';
+
 // Async thunk to fetch students data
 export const fetchNoAccounts = createAsyncThunk('students/fetchNoAccounts', async () => {
-    const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getAllNoAccounts`);
+    const { data } = await axiosInstance.get(`/admin/getAllNoAccounts`);
     return data.rows
 });

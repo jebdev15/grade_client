@@ -217,7 +217,9 @@ const Faculty = () => {
       renderCell: (params) => {
         const handleOpen = async () => {
           setOpenSubjectLoad(true);
-          const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getSubjectLoad?faculty_id=${urlEncode(params.row.faculty_id)}&school_year=${urlEncode(schoolyear)}&semester=${urlEncode(semester)}`);
+          const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getSubjectLoad?faculty_id=${urlEncode(params.row.faculty_id)}&school_year=${urlEncode(schoolyear)}&semester=${urlEncode(semester)}`,{
+            withCredentials: true
+          });
           setSubjectLoad((prevState) => ({ ...prevState, rows: data }));
         };
 
@@ -242,12 +244,12 @@ const Faculty = () => {
   const [loading, setLoading] = useState(initialLoading);
   useEffect(() => {
     if (facultyStatus === "idle") {
-      dispatch(fetchFaculty(cookies));
+      dispatch(fetchFaculty());
     }
     if (["idle", "succeeded"].includes(facultyStatus)) {
       setLoading({ emails: false });
     }
-  }, [facultyStatus, dispatch, cookies]);
+  }, [facultyStatus, dispatch]);
   const closeHandler = {
     viewStudents: () => setOpen({ viewStudents: false }),
     subjectLoad: () => setOpen({ subjectLoad: false }),

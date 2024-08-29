@@ -32,14 +32,13 @@ import {
 import { Outlet, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { googleLogout } from "@react-oauth/google";
-import axios from "axios";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 import { getCampus } from "../../utils/header.util";
-import { checkAccessLevel, checkAccessLevelForMenu } from "../../utils/admin-index.util";
+import { adminIndexUtil, checkAccessLevel, checkAccessLevelForMenu } from "../../utils/admin-index.util";
+import useFetchAxiosGet from "../../hooks/useFetchAxiosGet";
 
 export default function Admin() {
-  const siteCookies = ["picture", "name", "faculty_id", "email", "college_code", "campus", "accessLevel"];
-  const [cookies, , removeCookie] = useCookies(siteCookies);
+  const [cookies, , removeCookie] = useCookies(adminIndexUtil.siteCookies);
   const navigate = useNavigate();
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const initialRegistrarActivity = {
@@ -86,21 +85,18 @@ export default function Admin() {
   }, [cookies, navigate]);
 
   const logout = () => {
-    siteCookies.forEach((cookie) => removeCookie(cookie, { path: "/" }));
+    adminIndexUtil.siteCookies.forEach((cookie) => removeCookie(cookie, { path: "/" }));
     googleLogout();
     navigate("/");
     localStorage.removeItem("activeItem");
   };
 
+  const { data, loading } = useFetchAxiosGet("/getCurrentSchoolYear");
   useEffect(() => {
-    const loader = async () => {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
-      );
+    if(!loading) {
       setRegistrarActivity(data[0])
-    };
-    loader();
-  }, []);
+    }
+  }, [data, loading]);
 
   useEffect(() => {
     setDrawerMinimize(isSmallScreen ? true : !true);

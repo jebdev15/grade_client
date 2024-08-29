@@ -43,20 +43,23 @@ const Home = () => {
 
   const [schoolyear, setSchoolYear] = useState(0);
   
+  
   const { data, loading, error } = useFetchAxiosGet('/getCurrentSchoolYear');
-  console.log(
-    data,
-    loading,
-    error
-  );
   
   useEffect(() => {
-    const getCurrentSchoolYear = () => {
+    const getCurrentSchoolYear =() => {
         setSchoolYear(data[0].schoolyear);
         checkRegistrarActivityDueDate(data[0].to);
+        console.log(
+          data,
+          loading,
+          error
+        );
     };
-    getCurrentSchoolYear();
-  }, [data]);
+    if(!loading && data) {
+      getCurrentSchoolYear();
+    } 
+  }, [data, loading, error]);
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);

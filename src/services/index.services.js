@@ -1,34 +1,19 @@
-import axios from 'axios';
+import axiosInstance from '../api/axiosInstance';
 export const updateRegistrarActivityStatus = async () => {
-    await axios.get(`${process.env.REACT_APP_API_URL}/updateRegistrarActivityStatus`);
+    await axiosInstance.get(`/updateRegistrarActivityStatus`);
 }
 
 export const checkRegistrarActivityDueDate = (dueDate) => {
     const currentDate = new Date();
     const dueDateObj = new Date(dueDate);
     if (dueDateObj < currentDate) {
-        // console.log({
-        //     message: "Due date has passed",
-        //     currentDate: currentDate,
-        //     dueDateObj,
-        // });
         return true;
     } else {
-        // console.log({
-        //     message: "Due date has not passed",
-        //     currentDate: currentDate,
-        //     dueDateObj,
-        // });
         return false;
     }
 }
 
 export const authenticationProcess = async (email) => {
-    const { data, status } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/login?email=${email}`, 
-        {
-            withCredentials: true
-        }
-    );
+    const { data, status } = await axiosInstance.get(`/login?email=${email}`);
     return { data, status };
 }

@@ -1,7 +1,10 @@
 import axios from "axios";
+import { REACT_APP_API_URL } from "../utils/envVariables";
+axios.defaults.baseURL = REACT_APP_API_URL;  // Set base URL
+axios.defaults.withCredentials = true;  // Automatically include credentials
 
 export const getColleges = async () => {
-    const { data, status } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getColleges`);
+    const { data, status } = await axios.get(`/admin/getColleges`);
     return { data, status };
 }
 
@@ -13,7 +16,7 @@ export const createUserServices = async (createUserData, cookies) => {
     formData.append('facultyId', createUserData.facultyId)
     formData.append('accessLevel', createUserData.accessLevel)
     formData.append('emailUsed', cookies.email)
-    const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/createUser`, formData, {
+    const { data } = await axios.post(`/admin/createUser`, formData, {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -34,7 +37,7 @@ export const updateAccountServices = async (updateAccountData, cookies, updateDa
       formData.append('program_code', updateAccountData.program_code)
 
 
-      const { data } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/updateAccount`, formData, {
+      const { data } = await axios.post(`/admin/updateAccount`, formData, {
         headers: {
           'Content-Type': 'application/json'
         }

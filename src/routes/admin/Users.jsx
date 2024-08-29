@@ -214,7 +214,7 @@ const Users = () => {
   return (
     <>
       <Box marginBottom={3} sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
-        <Typography variant="h4" fontWeight={700} component="div" sx={{ flexGrow: 1 }}>
+        <Typography variant="h4" fontWeight={700} component="div">
           LIST OF USERS
         </Typography>
         <Grid spacing={0}>

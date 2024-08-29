@@ -4,10 +4,8 @@ import { Box, IconButton, Typography, Tooltip, ButtonGroup, TextField } from "@m
 import { PersonSearch, Visibility as VisibilityIcon } from "@mui/icons-material";
 import ViewStudentData from "../../components/dialogs/admin/students/View";
 import { getStudentsBySearch } from "../../services/admin-students.services";
-import { useCookies } from "react-cookie";
 
 const Students = () => {
-  const [cookies] = useCookies(["college_code", "accessLevel"]);
   const [studentData, setStudentData] = useState({
     data: {
       id: null,
@@ -75,7 +73,7 @@ const Students = () => {
   const [searchParam, setSearchParam] = useState("");
   const searchStudentHandler = async (e) => {
     e.preventDefault();
-    const { data, status } = await getStudentsBySearch(searchParam, cookies);
+    const { data, status } = await getStudentsBySearch(searchParam);
     if (status === 200) {
       setSearchResultData(data);
     }

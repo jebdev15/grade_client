@@ -1,18 +1,8 @@
-import axios from "axios";
+import axiosInstance from "../api/axiosInstance";
 
 export const AuthService = {
     login: async (token, email) => {
-        const { data, status } = await axios.post(
-            `${process.env.REACT_APP_API_URL}/auth/login`,
-            {
-                token,
-                email
-            }, 
-            {
-                withCredentials: true
-            }
-        );
+        const { data, status } = await axiosInstance.post(`/auth/login`,{ token, email });
         return { data, status };
-        // return { data: token, status:200 }
     },
 } 
