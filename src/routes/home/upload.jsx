@@ -16,7 +16,6 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useOutletContext, useLoaderData, useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
-// import { FileUploader } from "react-drag-drop-files";
 import { saveAs } from "file-saver";
 import { urlDecode } from "url-encode-base64";
 
@@ -208,47 +207,6 @@ const Upload = () => {
                 </Button>
                   )}
               </Box>
-              {/* <FileUploader
-                handleChange={(file) => setUploadFile(file)}
-                name="file"
-                disabled={!canUpload || uploading }
-                types={["xlsx"]}
-                children={
-                  <Box
-                    sx={{
-                      borderColor: "primary.light",
-                      border: "2px dashed",
-                      p: 2,
-                      height: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      cursor: "pointer",
-                      flexDirection: "column",
-                    }}
-                  >
-                    {uploadFile ? (
-                      <Box sx={{ textAlign: "center" }}>
-                        <Done color="primary" fontSize="large" />
-                        <Typography variant="h6" sx={{ mt: 2 }}>
-                          File Inserted!
-                        </Typography>
-                        <Typography>{uploadFile.name}</Typography>
-                        <Typography variant="caption">
-                          (Click or drop file to re-upload)
-                        </Typography>
-                      </Box>
-                    ) : (
-                      <Box sx={{ textAlign: "center" }}>
-                        <UploadFile color="primary" fontSize="large" />
-                        <Typography variant="h6" sx={{ mt: 2 }}>
-                          Click to upload a file
-                        </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                }
-              /> */}
             </Box>
             <Button
               variant="contained"
