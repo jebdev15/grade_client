@@ -49,7 +49,13 @@ export default function Admin() {
     from: "0000-00-00",
     to: "0000-00-00",
   }
+  const initialRegistrarActivitySummer = {...initialRegistrarActivity}
+  const initialRegistrarActivityFirstSemester = {...initialRegistrarActivity}
+  const initialRegistrarActivitySecondSemester = {...initialRegistrarActivity}
   const [registrarActivity, setRegistrarActivity] = useState(initialRegistrarActivity);
+  const [registrarActivitySummer, setRegistrarActivitySummer] = useState(initialRegistrarActivitySummer);
+  const [registrarActivityFirstSemester, setRegistrarActivityFirstSemester] = useState(initialRegistrarActivityFirstSemester);
+  const [registrarActivitySecondSemester, setRegistrarActivitySecondSemester] = useState(initialRegistrarActivitySecondSemester);
   const { activity, schoolyear, semester, status, from, to } = registrarActivity;
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
@@ -95,6 +101,9 @@ export default function Admin() {
   useEffect(() => {
     if(!loading) {
       setRegistrarActivity(data[0])
+      setRegistrarActivitySummer(data[0])
+      setRegistrarActivityFirstSemester(data[1])
+      setRegistrarActivitySecondSemester(data[2])
     }
   }, [data, loading]);
 
@@ -387,7 +396,7 @@ export default function Admin() {
               }}
             ></Backdrop>
           )}
-          <Outlet context={[activity, schoolyear, semester, status, from, to]} />
+          <Outlet context={[activity, schoolyear, semester, status, from, to, registrarActivitySummer, registrarActivityFirstSemester, registrarActivitySecondSemester]} />
         {/* <Box sx={{ flexGrow: 1, p: 3 }}>
           <Outlet context={[schoolyear, semester, from, to]}/> */}
         </Box>

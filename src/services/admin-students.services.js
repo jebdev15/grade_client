@@ -1,5 +1,4 @@
 import axiosInstance from "../api/axiosInstance";
-
 export const getStudentsInitialData = async (cookies) => {
     const { college_code, accessLevel } = cookies;
     const { data, status } = await axiosInstance.get(`/admin/getStudentsInitialData?college_code=${college_code}&accessLevel=${accessLevel}`);
@@ -17,15 +16,9 @@ export const getStudentYearSemesterAndSchoolYear = async (student_id) => {
 }
 
 export const getStudentsBySearch = async (searchParam) => {
+    console.log(searchParam);
     const formData = new FormData();
     formData.append('searchParam', searchParam);
-    const { data, status } = await axiosInstance.post(`/admin/getStudentsBySearch`, 
-        formData, 
-        { 
-            headers: {
-                'Content-Type': 'application/json'
-            },
-        }
-    );
+    const { data, status } = await axiosInstance.post(`/admin/getStudentsBySearch`, formData);
     return { data, status }
 }

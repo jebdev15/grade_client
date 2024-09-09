@@ -1,11 +1,9 @@
-import { Box, TextField, Button, FormControl, Typography, InputLabel, MenuItem, Select } from "@mui/material";
+import { Box, TextField, Button, FormControl, Typography, InputLabel, MenuItem, Select, Paper } from "@mui/material";
 import { useState } from "react";
 import { dateOnlyFormatter } from "../../utils/formatDate";
 import { saveDeadlineServices } from "../../services/admin-settings.services";
-import { useCookies } from "react-cookie";
 
 const Deadline = ({ activity, schoolyear, semester, status, from, to }) => {
-  const [cookies, ,] = useCookies(["email"]);
   const initialDeadlineState = {
     activity: activity || "",
     schoolyear: schoolyear || "",
@@ -21,12 +19,18 @@ const Deadline = ({ activity, schoolyear, semester, status, from, to }) => {
   const updateHandler = async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
-    formData.append("email_used", cookies.email);
     const { data, status } = await saveDeadlineServices(formData);
     alert(data.message, status);
   };
   return (
     <>
+    <Paper 
+      elevation={12}
+      sx={{ 
+        padding: 2,
+       }}
+    >
+
       <Box
         sx={{
           display: "flex",
@@ -71,6 +75,7 @@ const Deadline = ({ activity, schoolyear, semester, status, from, to }) => {
           </Button>
         </Box>
       </Box>
+    </Paper>
     </>
   );
 };

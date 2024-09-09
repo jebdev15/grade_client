@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button, FormControl, Typography, InputLabel, MenuItem, Select } from "@mui/material";
+import { Box, Button, FormControl, Typography, InputLabel, MenuItem, Select, Paper } from "@mui/material";
 import { useCookies } from "react-cookie";
 import { updateClassStatusServices } from "../../services/admin-settings.services";
 
@@ -25,39 +25,44 @@ const ClassStatus = ({ schoolyear, semester }) => {
     console.log(data, status);
     alert(data.message, status);
   };
+  React.useEffect(() => {
+    console.log({schoolyear,semester});
+  }, [schoolyear, semester]);
   return (
     <>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 3,
-        }}
-      >
-        <Typography variant="h5" color="initial">{`MANAGE SUBJECT LOAD`}</Typography>
-        <Box component="form" onSubmit={updateHandler} sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: "100%" }}>
-          <Typography variant="body1" color="initial">
-            {`School Year: ${parseInt(data.schoolyear)} - ${parseInt(data.schoolyear) + 1}`}
-          </Typography>
+      <Paper elevation={12} sx={{ padding: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 3,
+          }}
+        >
+          <Typography variant="h5" color="initial">{`MANAGE SUBJECT LOAD`}</Typography>
+          <Box component="form" onSubmit={updateHandler} sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: "100%" }}>
+            <Typography variant="body1" color="initial">
+              {`School Year: ${parseInt(data.schoolyear)} - ${parseInt(data.schoolyear) + 1}`}
+            </Typography>
 
-          <Typography variant="body1" color="initial">
-            {`Semester: ${data.semester}`}
-          </Typography>
+            <Typography variant="body1" color="initial">
+              {`Semester: ${data.semester}`}
+            </Typography>
 
-          <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel id="select-action-label">Action</InputLabel>
-              <Select id="select-action" label="Action" name="action" value={data.action} onChange={changeHandler} required>
-                <MenuItem value="Lock">Lock</MenuItem>
-                <MenuItem value="Unlock">Unlock</MenuItem>
-              </Select>
-            </FormControl>
-            <Button sx={{ paddingLeft: 5, paddingRight: 5, color: "white", alignItems: "center" }} type="submit" variant="contained">
-              SAVE
-            </Button>
+            <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+              <FormControl fullWidth>
+                <InputLabel id="select-action-label">Action</InputLabel>
+                <Select id="select-action" label="Action" name="action" value={data.action} onChange={changeHandler} required>
+                  <MenuItem value="Lock">Lock</MenuItem>
+                  <MenuItem value="Unlock">Unlock</MenuItem>
+                </Select>
+              </FormControl>
+              <Button sx={{ paddingLeft: 5, paddingRight: 5, color: "white", alignItems: "center" }} type="submit" variant="contained">
+                SAVE
+              </Button>
+            </Box>
           </Box>
         </Box>
-      </Box>
+      </Paper>
     </>
   );
 };

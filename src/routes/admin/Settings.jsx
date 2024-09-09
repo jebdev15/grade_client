@@ -36,7 +36,7 @@ const Settings = () => {
         break;
     }
   };
-  const [activity, schoolyear, semester, status, from, to] = useOutletContext();
+  const [activity, schoolyear, semester, status, from, to, registrarActivitySummer, registrarActivityFirstSemester, registrarActivitySecondSemester] = useOutletContext();
   return (
     <>
       <Accordion
@@ -61,7 +61,16 @@ const Settings = () => {
         >
           <Typography>DEADLINE</Typography>
         </AccordionSummary>
-        <AccordionDetails sx={{ padding: 3, paddingTop: 1 }}>{expanded.deadline && <Deadline activity={activity} schoolyear={schoolyear} semester={semester} status={status} from={from} to={to} />}</AccordionDetails>
+        <AccordionDetails sx={{ padding: 3, paddingTop: 1 }}>
+          {
+            expanded.deadline && 
+            <>
+              <Deadline activity={registrarActivitySummer.activity} schoolyear={registrarActivitySummer.schoolyear} semester={registrarActivitySummer.semester} status={registrarActivitySummer.status} from={registrarActivitySummer.from} to={registrarActivitySummer.to} /><br />
+              <Deadline activity={registrarActivityFirstSemester.activity} schoolyear={registrarActivityFirstSemester.schoolyear} semester={registrarActivityFirstSemester.semester} status={registrarActivityFirstSemester.status} from={registrarActivityFirstSemester.from} to={registrarActivityFirstSemester.to} /><br />
+              <Deadline activity={registrarActivitySecondSemester.activity} schoolyear={registrarActivitySecondSemester.schoolyear} semester={registrarActivitySecondSemester.semester} status={registrarActivitySecondSemester.status} from={registrarActivitySecondSemester.from} to={registrarActivitySecondSemester.to} />
+            </>
+          }
+        </AccordionDetails>
       </Accordion>
       {/* <Accordion
                 expanded={expanded.colleges}
@@ -130,7 +139,16 @@ const Settings = () => {
         >
           <Typography>LOCK/UNLOCK SUBJECT LOAD</Typography>
         </AccordionSummary>
-        <AccordionDetails sx={{ padding: 3, paddingTop: 1 }}>{expanded.classStatus && <ClassStatus schoolyear={schoolyear} semester={semester} />}</AccordionDetails>
+        <AccordionDetails sx={{ padding: 3, paddingTop: 1 }}>
+          {
+            expanded.classStatus && 
+              <>
+                <ClassStatus schoolyear={registrarActivitySummer.schoolyear} semester={registrarActivitySummer.semester} /><br />
+                <ClassStatus schoolyear={registrarActivityFirstSemester.schoolyear} semester={registrarActivityFirstSemester.semester} /><br />
+                <ClassStatus schoolyear={registrarActivitySecondSemester.schoolyear} semester={registrarActivitySecondSemester.semester} /><br />
+              </>
+          }
+          </AccordionDetails>
       </Accordion>
     </>
   );
