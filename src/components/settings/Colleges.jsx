@@ -1,7 +1,7 @@
 import { Box, Typography, TextField, Button } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
-import { getCollegesServices, saveCollegeServices } from "../../services/admin-settings.services";
+import { AdminSettingsServices } from "../../services/admin-settings.services";
 import { v4 } from "uuid";
 import { useNavigate } from "react-router";
 
@@ -28,7 +28,7 @@ const Colleges = () => {
       ]
       useEffect(() => { 
         const getColleges = async () => {
-            const { data, status } = await getCollegesServices();
+            const { data, status } = await AdminSettingsServices.getCollegesServices();
             if(status === 200) {
                 const collegesData = data.map(college => {
                     const uuid = v4();
@@ -61,7 +61,7 @@ const Colleges = () => {
         // for(const pair of formData.entries()) {
         //     console.log(pair[0], pair[1]);
         // }
-        const { data, status } = await saveCollegeServices(formData);
+        const { data, status } = await AdminSettingsServices.saveCollegeServices(formData);
         alert(data.message, status);
         navigate(".", { replace: true });
         setTimeout(() => {

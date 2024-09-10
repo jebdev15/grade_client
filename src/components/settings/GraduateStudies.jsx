@@ -1,7 +1,7 @@
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
-import { getGraduateStudiesServices, getProgramCodesServices, getSubjectCodesServices, saveSubjectCodeServices } from "../../services/admin-settings.services";
+import { AdminSettingsServices } from "../../services/admin-settings.services";
 
 const GraduateStudies = () => {
   const columns = [
@@ -20,13 +20,13 @@ const GraduateStudies = () => {
   };
   const [graduateStudiesData, setGraduateStudiesData] = useState(initialGraduateStudiesData);
   const axiosGetGraduateStudies = async () => {
-    const { data, status } = await getGraduateStudiesServices();
+    const { data, status } = await AdminSettingsServices.getGraduateStudiesServices();
     if (status === 200) {
       setGraduateStudiesData((prevState) => ({ ...prevState, rows: data, loading: false }));
     }
   };
   const axiosGetProgramCodes = async () => {
-    const { data, status } = await getProgramCodesServices();
+    const { data, status } = await AdminSettingsServices.getProgramCodesServices();
     if (status === 200) {
       setGraduateStudiesData((prevState) => ({ ...prevState, program_codes: data }));
     }
@@ -53,7 +53,7 @@ const GraduateStudies = () => {
 
     if (name === "program_code") {
       const getSubjectCodes = async () => {
-        const { data } = await getSubjectCodesServices(value);
+        const { data } = await AdminSettingsServices.getSubjectCodesServices(value);
         setGraduateStudiesData((prevState) => ({ ...prevState, subject_codes: data || [] }));
       };
       setTimeout(() => {
@@ -76,7 +76,7 @@ const GraduateStudies = () => {
     }
     const formData = new FormData();
     formData.append("subject_code", graduateStudiesData.select.subject_code);
-    const { data, status } = await saveSubjectCodeServices(formData);
+    const { data, status } = await AdminSettingsServices.saveSubjectCodeServices(formData);
     alert(data.message, status);
     setGraduateStudiesData(initialGraduateStudiesData);
   };

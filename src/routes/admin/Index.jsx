@@ -52,11 +52,9 @@ export default function Admin() {
   const initialRegistrarActivitySummer = {...initialRegistrarActivity}
   const initialRegistrarActivityFirstSemester = {...initialRegistrarActivity}
   const initialRegistrarActivitySecondSemester = {...initialRegistrarActivity}
-  const [registrarActivity, setRegistrarActivity] = useState(initialRegistrarActivity);
   const [registrarActivitySummer, setRegistrarActivitySummer] = useState(initialRegistrarActivitySummer);
   const [registrarActivityFirstSemester, setRegistrarActivityFirstSemester] = useState(initialRegistrarActivityFirstSemester);
   const [registrarActivitySecondSemester, setRegistrarActivitySecondSemester] = useState(initialRegistrarActivitySecondSemester);
-  const { activity, schoolyear, semester, status, from, to } = registrarActivity;
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -100,7 +98,6 @@ export default function Admin() {
   const { data, loading } = useFetchAxiosGet("/getCurrentSchoolYear");
   useEffect(() => {
     if(!loading) {
-      setRegistrarActivity(data[0])
       setRegistrarActivitySummer(data[0])
       setRegistrarActivityFirstSemester(data[1])
       setRegistrarActivitySecondSemester(data[2])
@@ -396,7 +393,7 @@ export default function Admin() {
               }}
             ></Backdrop>
           )}
-          <Outlet context={[activity, schoolyear, semester, status, from, to, registrarActivitySummer, registrarActivityFirstSemester, registrarActivitySecondSemester]} />
+          <Outlet context={[registrarActivitySummer, registrarActivityFirstSemester, registrarActivitySecondSemester]} />
         {/* <Box sx={{ flexGrow: 1, p: 3 }}>
           <Outlet context={[schoolyear, semester, from, to]}/> */}
         </Box>

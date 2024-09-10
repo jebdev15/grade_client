@@ -39,6 +39,7 @@ import Students from "./routes/admin/Students";
 import { Provider } from "react-redux";
 import { store } from "./app/store";
 import { REACT_APP_GOOGLE_CLIENT_ID } from "./utils/envVariables";
+import { QueryClient, QueryClientProvider } from "react-query";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -146,13 +147,16 @@ const router = createBrowserRouter([
     ],
   },
 ]);
+const queryClient = new QueryClient();
 root.render(
   <React.StrictMode>
     <GoogleOAuthProvider clientId={REACT_APP_GOOGLE_CLIENT_ID}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Provider store={store}>
-          <RouterProvider router={router} />
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router} />
+          </QueryClientProvider>
         </Provider>
       </ThemeProvider>
     </GoogleOAuthProvider>

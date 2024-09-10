@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Box, Button, FormControl, Typography, InputLabel, MenuItem, Select, Paper } from "@mui/material";
 import { useCookies } from "react-cookie";
-import { updateClassStatusServices } from "../../services/admin-settings.services";
+import { AdminSettingsServices } from "../../services/admin-settings.services";
 
 const ClassStatus = ({ schoolyear, semester }) => {
   const [cookies, ,] = useCookies(["email"]);
@@ -21,7 +21,7 @@ const ClassStatus = ({ schoolyear, semester }) => {
     for (const pair of formData.entries()) {
       console.log(pair[0], pair[1]);
     }
-    const { data, status } = await updateClassStatusServices(formData);
+    const { data, status } = await AdminSettingsServices.updateClassStatusServices(formData);
     console.log(data, status);
     alert(data.message, status);
   };

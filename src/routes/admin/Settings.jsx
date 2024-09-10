@@ -2,7 +2,6 @@ import React from "react";
 import { Typography, Accordion, AccordionSummary, AccordionDetails, Fade } from "@mui/material";
 
 import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material";
-// import Colleges from '../../components/settings/Colleges';
 import Deadline from "../../components/settings/Deadline";
 import GraduateStudies from "../../components/settings/GraduateStudies";
 import { useOutletContext } from "react-router";
@@ -36,7 +35,7 @@ const Settings = () => {
         break;
     }
   };
-  const [activity, schoolyear, semester, status, from, to, registrarActivitySummer, registrarActivityFirstSemester, registrarActivitySecondSemester] = useOutletContext();
+  const [registrarActivitySummer, registrarActivityFirstSemester,registrarActivitySecondSemester] = useOutletContext();
   return (
     <>
       <Accordion
@@ -62,37 +61,9 @@ const Settings = () => {
           <Typography>DEADLINE</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 3, paddingTop: 1 }}>
-          {
-            expanded.deadline && 
-            <>
-              <Deadline activity={registrarActivitySummer.activity} schoolyear={registrarActivitySummer.schoolyear} semester={registrarActivitySummer.semester} status={registrarActivitySummer.status} from={registrarActivitySummer.from} to={registrarActivitySummer.to} /><br />
-              <Deadline activity={registrarActivityFirstSemester.activity} schoolyear={registrarActivityFirstSemester.schoolyear} semester={registrarActivityFirstSemester.semester} status={registrarActivityFirstSemester.status} from={registrarActivityFirstSemester.from} to={registrarActivityFirstSemester.to} /><br />
-              <Deadline activity={registrarActivitySecondSemester.activity} schoolyear={registrarActivitySecondSemester.schoolyear} semester={registrarActivitySecondSemester.semester} status={registrarActivitySecondSemester.status} from={registrarActivitySecondSemester.from} to={registrarActivitySecondSemester.to} />
-            </>
-          }
+          { expanded.deadline && <Deadline />}
         </AccordionDetails>
       </Accordion>
-      {/* <Accordion
-                expanded={expanded.colleges}
-                onChange={() => handleExpansion(2)}
-                slots={{ transition: Fade }}
-                slotprops={{ transition: { timeout: 400 } }}
-                sx={{
-                '& .MuiAccordion-region': { height: expanded ? 'auto' : 0 },
-                '& .MuiAccordionDetails-root': { display: expanded ? 'block' : 'none' },
-                }}
-            >
-                <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls="panel2-content"
-                    id="panel2-header"
-                >
-                    <Typography>COLLEGES</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                    { expanded.colleges && <Colleges /> }
-                </AccordionDetails>
-            </Accordion> */}
       <Accordion
         expanded={expanded.graduateStudies}
         onChange={() => handleExpansion(3)}
