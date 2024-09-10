@@ -260,7 +260,8 @@ const Semester = () => {
                 </IconButton>
               </span>
             </Tooltip>
-            {(canUpload && parseInt(status) === 0 && (!checkIfGraduateStudiesLoad)) && (
+            {(canUpload && parseInt(status) === 0 && (!checkIfGraduateStudiesLoad)) 
+            ? (
               <Tooltip title="Grade Sheet">
                 <span>
                   <IconButton
@@ -282,6 +283,21 @@ const Semester = () => {
                   </IconButton>
                 </span>
               </Tooltip>
+            )
+            : checkIfGraduateStudiesLoad
+             && (
+             <Tooltip title="Disabled for Graduate Studies">
+              <span>
+                <IconButton
+                  color="primary"
+                  size="large"
+                  aria-label=""
+                  disabled={true}
+                >
+                  <FolderOpen />
+                </IconButton>
+              </span>
+            </Tooltip>
             )}
             {canUpload && parseInt(status) === 0 && (
               <Tooltip title="Submit grade sheet. You may not able to edit or upload grades. To edit or upload grades, please contact your administrator.">
