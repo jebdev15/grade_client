@@ -15,6 +15,7 @@ import Index from "./routes";
 import Home from "./routes/home";
 
 import Start from "./routes/home/start";
+import AdminStart from "./routes/admin/start";
 import Semester, { loader as semesterLoader } from "./routes/home/semester";
 import GradeTable, {
   loader as gradeTableLoader,
@@ -112,7 +113,7 @@ const router = createBrowserRouter([
     element: <Admin />,
     errorElement: <h1>Error AdminPage</h1>,
     children: [
-      { index: true, element: <Start /> },
+      { index: true, element: <AdminStart /> },
       {
         path: "students",
         element: <Students />,

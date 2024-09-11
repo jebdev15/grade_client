@@ -49,12 +49,21 @@ const getRegistrarActivity = async () => {
     const { data, status } = await axiosInstance.get(`/admin/getRegistrarActivity`);
     return { data, status };
 }
-const getOneRegistrarActivity = async (semester) => {
-    const { data, status } = await axiosInstance.get(`/admin/getOneRegistrarActivity?semester=${semester}`);
+const getRegistrarActivityBySemester = async (semester) => {
+    const { data, status } = await axiosInstance.get(`/admin/getRegistrarActivityBySemester?semester=${semester}`);
     console.log({data, status});
     return { data, status };
 }
 
+const updateRegistrarActivityById = async (formData) => {
+    const { data, status } = await axiosInstance.put(`/admin/updateRegistrarActivityById`, formData);
+    return { data, status };
+}
+
+const getAllClassStatusBySemester = async (semester) => {
+    const { data, status } = await axiosInstance.get(`/admin/getAllClassStatusBySemester?semester=${semester}`);
+    return { data, status };
+}
 export const AdminSettingsServices = {
     getGraduateStudiesServices,
     getCollegesServices,
@@ -66,5 +75,6 @@ export const AdminSettingsServices = {
     updateClassStatusServices,
     saveSubjectCodeServices,
     getRegistrarActivity,
-    getOneRegistrarActivity
+    getRegistrarActivityBySemester,
+    updateRegistrarActivityById
 }

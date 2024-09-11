@@ -4,7 +4,6 @@ import { Typography, Accordion, AccordionSummary, AccordionDetails, Fade } from 
 import { ExpandMore as ExpandMoreIcon } from "@mui/icons-material";
 import Deadline from "../../components/settings/Deadline";
 import GraduateStudies from "../../components/settings/GraduateStudies";
-import { useOutletContext } from "react-router";
 import ClassStatus from "../../components/settings/ClassStatus";
 
 const Settings = () => {
@@ -35,7 +34,6 @@ const Settings = () => {
         break;
     }
   };
-  const [registrarActivitySummer, registrarActivityFirstSemester,registrarActivitySecondSemester] = useOutletContext();
   return (
     <>
       <Accordion
@@ -111,15 +109,8 @@ const Settings = () => {
           <Typography>LOCK/UNLOCK SUBJECT LOAD</Typography>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: 3, paddingTop: 1 }}>
-          {
-            expanded.classStatus && 
-              <>
-                <ClassStatus schoolyear={registrarActivitySummer.schoolyear} semester={registrarActivitySummer.semester} /><br />
-                <ClassStatus schoolyear={registrarActivityFirstSemester.schoolyear} semester={registrarActivityFirstSemester.semester} /><br />
-                <ClassStatus schoolyear={registrarActivitySecondSemester.schoolyear} semester={registrarActivitySecondSemester.semester} /><br />
-              </>
-          }
-          </AccordionDetails>
+          { expanded.classStatus && <ClassStatus /> }
+        </AccordionDetails>
       </Accordion>
     </>
   );

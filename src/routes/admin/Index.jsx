@@ -35,26 +35,26 @@ import { googleLogout } from "@react-oauth/google";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 import { getCampus } from "../../utils/header.util";
 import { adminIndexUtil, checkAccessLevel, checkAccessLevelForMenu } from "../../utils/admin-index.util";
-import useFetchAxiosGet from "../../hooks/useFetchAxiosGet";
+// import useFetchAxiosGet from "../../hooks/useFetchAxiosGet";
 
 export default function Admin() {
   const [cookies, , removeCookie] = useCookies(adminIndexUtil.siteCookies);
   const navigate = useNavigate();
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
-  const initialRegistrarActivity = {
-    activity: "",
-    schoolyear: 1970,
-    semester: "",
-    status: "",
-    from: "0000-00-00",
-    to: "0000-00-00",
-  }
-  const initialRegistrarActivitySummer = {...initialRegistrarActivity}
-  const initialRegistrarActivityFirstSemester = {...initialRegistrarActivity}
-  const initialRegistrarActivitySecondSemester = {...initialRegistrarActivity}
-  const [registrarActivitySummer, setRegistrarActivitySummer] = useState(initialRegistrarActivitySummer);
-  const [registrarActivityFirstSemester, setRegistrarActivityFirstSemester] = useState(initialRegistrarActivityFirstSemester);
-  const [registrarActivitySecondSemester, setRegistrarActivitySecondSemester] = useState(initialRegistrarActivitySecondSemester);
+  // const initialRegistrarActivity = {
+  //   activity: "",
+  //   schoolyear: 1970,
+  //   semester: "",
+  //   status: "",
+  //   from: "0000-00-00",
+  //   to: "0000-00-00",
+  // }
+  // const initialRegistrarActivitySummer = {...initialRegistrarActivity}
+  // const initialRegistrarActivityFirstSemester = {...initialRegistrarActivity}
+  // const initialRegistrarActivitySecondSemester = {...initialRegistrarActivity}
+  // const [registrarActivitySummer, setRegistrarActivitySummer] = useState(initialRegistrarActivitySummer);
+  // const [registrarActivityFirstSemester, setRegistrarActivityFirstSemester] = useState(initialRegistrarActivityFirstSemester);
+  // const [registrarActivitySecondSemester, setRegistrarActivitySecondSemester] = useState(initialRegistrarActivitySecondSemester);
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -95,14 +95,14 @@ export default function Admin() {
     localStorage.removeItem("activeItem");
   };
 
-  const { data, loading } = useFetchAxiosGet("/getCurrentSchoolYear");
-  useEffect(() => {
-    if(!loading) {
-      setRegistrarActivitySummer(data[0])
-      setRegistrarActivityFirstSemester(data[1])
-      setRegistrarActivitySecondSemester(data[2])
-    }
-  }, [data, loading]);
+  // const { data, loading } = useFetchAxiosGet("/getCurrentSchoolYear");
+  // useEffect(() => {
+  //   if(!loading) {
+  //     setRegistrarActivitySummer(data[0])
+  //     setRegistrarActivityFirstSemester(data[1])
+  //     setRegistrarActivitySecondSemester(data[2])
+  //   }
+  // }, [data, loading]);
 
   useEffect(() => {
     setDrawerMinimize(isSmallScreen ? true : !true);
@@ -393,7 +393,7 @@ export default function Admin() {
               }}
             ></Backdrop>
           )}
-          <Outlet context={[registrarActivitySummer, registrarActivityFirstSemester, registrarActivitySecondSemester]} />
+          <Outlet />
         {/* <Box sx={{ flexGrow: 1, p: 3 }}>
           <Outlet context={[schoolyear, semester, from, to]}/> */}
         </Box>
