@@ -1,36 +1,32 @@
 import React, { useState } from "react";
-import { Box, Button, FormControl, Typography, InputLabel, MenuItem, Select, Paper, FormLabel, FormGroup, FormHelperText, TextField, Alert } from "@mui/material";
+import { Box, Button, FormControl, Typography, InputLabel, MenuItem, Select, Paper, TextField, Alert } from "@mui/material";
 import { useCookies } from "react-cookie";
-import { AdminSettingsServices } from "../../services/admin-settings.services";
+import { AdminSettingsServices } from "../../services/adminSettingsService";
 
-const ClassStatus = ({ schoolyear, semester }) => {
-  const [cookies, ,] = useCookies(["email"]);
+const ClassStatus = () => {
   const initialDeadlineState = {
     schoolyear: new Date().getFullYear(),
-    semester: "",
+    semester: "1st",
     action: "",
   };
   const [data, setData] = useState(initialDeadlineState);
   const changeHandler = (event) => {
     setData({ ...data, [event.target.name]: event.target.value });
   };
-  // const changeSemesterHandler = (event) => {
-  //   const response = AdminSettingsServices.getClassStatus
-  // }
   const updateHandler = async (e) => {
     e.preventDefault();
+    const confirmation = window.confirm("Are you sure you want to update?");
+    if (!confirmation) return;
     const formData = new FormData(e.target);
-    formData.append("email_used", cookies.email);
     for (const pair of formData.entries()) {
       console.log(pair[0], pair[1]);
     }
-    const { data, status } = await AdminSettingsServices.updateClassStatusServices(formData);
-    console.log(data, status);
+    const { data, status } = await AdminSettingsServices.updateClassStatusByYearAndSemester(formData);
     alert(data.message, status);
   };
   React.useEffect(() => {
-    console.log({schoolyear,semester});
-  }, [schoolyear, semester]);
+    console.log({schoolyear: data.schoolyear, semester: data.semester});
+  }, [data]);
   return (
     <>
       <Paper elevation={12} sx={{ padding: 2 }}>
@@ -52,12 +48,15 @@ const ClassStatus = ({ schoolyear, semester }) => {
                 label="School Year"
                 value={data.schoolyear}
                 onChange={changeHandler}
+                required
+                fullWidth
               />
               <TextField
                 id="select-schoolyear-to"
                 label="School Year"
                 value={data.schoolyear ? parseInt(data.schoolyear) + 1 : ""}
                 readonly
+                fullWidth
               />
             </FormControl>
             <FormControl fullWidth>

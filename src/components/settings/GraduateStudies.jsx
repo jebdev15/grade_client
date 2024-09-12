@@ -1,7 +1,7 @@
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
-import { AdminSettingsServices } from "../../services/admin-settings.services";
+import { AdminSettingsServices } from "../../services/adminSettingsService";
 
 const GraduateStudies = () => {
   const columns = [

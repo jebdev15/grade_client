@@ -235,13 +235,7 @@ const Users = () => {
           rows={users}
           columns={columns}
           loading={loading}
-          // initialState={{
-          //   pagination: {
-          //     paginationModel: { page: 0, pageSize: 5 },
-          //   },
-          // }}
           pageSizeOptions={[5, 10, 25]}
-          // checkboxSelection
         />
       </Box>
 
@@ -326,7 +320,6 @@ const Users = () => {
                 fullWidth
               >
                 {noAccountData?.map(({ faculty_id, lastname, firstname, middlename, position, specialization }, index) => (
-                  // <MenuItem key={index} value={faculty_id}>{`${lastname}, ${firstname} ${middlename}, ${position}, ${specialization}`}</MenuItem>
                   <MenuItem key={index} value={faculty_id}>{`${faculty_id} - ${lastname}, ${firstname} ${middlename}`}</MenuItem>
                 ))}
               </Select>

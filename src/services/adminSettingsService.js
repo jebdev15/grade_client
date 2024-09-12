@@ -60,8 +60,8 @@ const updateRegistrarActivityById = async (formData) => {
     return { data, status };
 }
 
-const getAllClassStatusBySemester = async (semester) => {
-    const { data, status } = await axiosInstance.get(`/admin/getAllClassStatusBySemester?semester=${semester}`);
+const updateClassStatusByYearAndSemester = async (formData) => {
+    const { data, status } = await axiosInstance.put(`/admin/updateClassStatusByYearAndSemester`, formData);
     return { data, status };
 }
 export const AdminSettingsServices = {
@@ -76,5 +76,6 @@ export const AdminSettingsServices = {
     saveSubjectCodeServices,
     getRegistrarActivity,
     getRegistrarActivityBySemester,
-    updateRegistrarActivityById
+    updateRegistrarActivityById,
+    updateClassStatusByYearAndSemester
 }

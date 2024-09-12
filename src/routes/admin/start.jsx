@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import { dateFormatter } from "../../utils/formatDate";
-import { AdminSettingsServices } from "../../services/admin-settings.services";
+import { AdminSettingsServices } from "../../services/adminSettingsService";
 const Start = () => {
   const initialRegistrarActivity = {
     activity: "",
@@ -11,9 +11,8 @@ const Start = () => {
     from: "0000-00-00",
     to: "0000-00-00",
   }
-  const [registrarActivity, setRegistrarActivity] = useState(initialRegistrarActivity);
   const [data, setData] = React.useState([initialRegistrarActivity])
-  useEffect(() => {
+  React.useEffect(() => {
     const fetchRegistrarActivity = async () => {
       const { data, status } = await AdminSettingsServices.getRegistrarActivity();
       if(status === 200) {
@@ -26,7 +25,7 @@ const Start = () => {
     <React.Suspense fallback={<div>Loading...</div>}>
       <Box >
         <Typography variant="h3" fontWeight={700}>
-          Welcome to the {process.env.REACT_APP_TITLE}
+          Welcome to {process.env.REACT_APP_TITLE}
         </Typography>
         <Typography>Navigate on the sidebar to start.</Typography><br />
         <Box

@@ -1,7 +1,7 @@
 import { Box, TextField, Button, FormControl, Typography, InputLabel, MenuItem, Select, Paper, Alert } from "@mui/material";
 import React from "react";
 import { dateOnlyFormatter } from "../../utils/formatDate";
-import { AdminSettingsServices } from "../../services/admin-settings.services";
+import { AdminSettingsServices } from "../../services/adminSettingsService";
 
 const Deadline = () => {
   

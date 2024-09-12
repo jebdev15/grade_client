@@ -1,9 +1,8 @@
 import { DataGrid } from "@mui/x-data-grid";
 import React, { useEffect, useState } from "react";
-import { Box, Button, IconButton, Typography, Tooltip, useMediaQuery, ButtonGroup, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from "@mui/material";
-import { Close, Lock, LockOpen, People, Print, Visibility as VisibilityIcon } from "@mui/icons-material";
+import { Box, Button, IconButton, Typography, Tooltip, useMediaQuery, ButtonGroup, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, FormControl, InputLabel, Select, MenuItem, TextField, Alert } from "@mui/material";
+import { Close, Lock, LockOpen, People, Print, Visibility as VisibilityIcon, Settings as SettingsIcon } from "@mui/icons-material";
 import axios from "axios";
-import { useOutletContext } from "react-router-dom";
 import { urlEncode } from "url-encode-base64";
 import { useCookies } from "react-cookie";
 import ViewStudentsDialog from "../../components/dialogs/ViewStudentsDialog";
@@ -15,6 +14,7 @@ import { momentFormatDate } from "../../utils/formatDate";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSubjectCodes } from "../../features/admin/faculty/subjectCodesThunks";
 import { fetchFaculty } from "../../features/admin/faculty/facultyThunks";
+import { AdminFacultyService } from "../../services/adminFacultyService";
 
 const Faculty = () => {
   const subjectCodesGS = useSelector((state) => state.subjectCodes.list);
@@ -22,19 +22,24 @@ const Faculty = () => {
   const dispatch = useDispatch();
   const [cookies, ,] = useCookies(["picture", "name", "faculty_id", "email", "campus", "accessLevel"]);
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
-  const [, schoolyear, semester, , ,] = useOutletContext();
 
   const [open, setOpen] = useState(initialOpen);
-  const [openSubjectLoad, setOpenSubjectLoad] = useState(false);
-  const [openConfirmation, setOpenConfirmation] = useState(false);
-  const [subjectInfo, setSubjectInfo] = useState({
-    status: 0,
+  const [openSubjectLoad, setOpenSubjectLoad] = React.useState(false);
+  const [openConfirmation, setOpenConfirmation] = React.useState(false);
+  const [subjectInfo, setSubjectInfo] = React.useState({
+    status: "",
     classCode: "",
     code: "",
     section: "",
     noOfStudents: 0,
   });
-
+  const [filterData, setFilterData] = React.useState({
+    schoolyear: new Date().getFullYear(),
+    semester: "1st"
+  })
+  const handleChangeFilterData = (event) => {
+    setFilterData((prevState) => ({ ...prevState, [event.target.name]: event.target.value }));
+  }
   const [viewStudents, setViewStudents] = useState({
     rows: [],
     columns: [
@@ -111,12 +116,12 @@ const Faculty = () => {
             const encoded = {
               class_code: urlEncode(params.row.id),
             };
-            const { data } = await getGradeTableService(encoded.class_code);
-            setViewStudents((prevState) => ({ ...prevState, rows: data }));
+            const { data } = await AdminFacultyService.getStudentsByClassCode(encoded.class_code);
+            setViewStudents((prevState) => ({ ...prevState, rows: data.rows }));
           };
           const openSubjectCodesGSHandler = (subjectCode) => {
             const subjectCodeIsGS = subjectCodesGS.some((subject) => subject.subject_code === subjectCode);
-            const link = subjectCodeIsGS ? `/admin/print/${urlEncode(semester)}-${urlEncode(schoolyear)}/${urlEncode(params.row.id)}/gs` : `/admin/print/${urlEncode(semester)}-${urlEncode(schoolyear)}/${urlEncode(params.row.id)}`;
+            const link = subjectCodeIsGS ? `/admin/print/${urlEncode(filterData.semester)}-${urlEncode(filterData.schoolyear)}/${urlEncode(params.row.id)}/gs` : `/admin/print/${urlEncode(filterData.semester)}-${urlEncode(filterData.schoolyear)}/${urlEncode(params.row.id)}`;
             return link;
           };
           const printGradeSheetLink = openSubjectCodesGSHandler(params.row.subject_code);
@@ -126,7 +131,7 @@ const Faculty = () => {
                 {["Administrator", "Registrar"].includes(cookies.accessLevel) && (
                   <Tooltip title={`Currently ${params.row.status ? "Locked" : "Unlocked"}. Click to ${params.row.status ? "Unlock" : "Lock"} Subject`}>
                     <IconButton aria-label="view" variant="text" color="primary" onClick={handleOpenConfirmation}>
-                      {params.row.status ? <Lock /> : <LockOpen />}
+                      {(params.row.status) ? <Lock /> : <LockOpen />}
                     </IconButton>
                   </Tooltip>
                 )}
@@ -160,16 +165,13 @@ const Faculty = () => {
     const formData = new FormData();
     formData.append("class_code", urlEncode(id));
     formData.append("status", status);
-    formData.append("email_used", cookies.email);
     let response;
     try {
-      const { data, status } = await axios.post(`${process.env.REACT_APP_API_URL}/admin/updateClassCodeStatus`, formData, {
-        headers: { "Content-Type": "application/json" },
-      });
+      const { data, status } = await AdminFacultyService.updateClassStatusByClassCode(formData);
       if (status === 200) {
         if (data.success) {
-          setSubjectInfo((prevState) => ({ ...prevState, status: data.status }));
           response = data.message;
+          setSubjectInfo((prevState) => ({ ...prevState, status: data.newStatus }));
           handleCloseSubjectLoad();
           handleCloseConfirmation();
         } else {
@@ -179,7 +181,7 @@ const Faculty = () => {
         response = data.message;
       }
     } catch (error) {
-      response = "Error Occured. Contact Administrator";
+      response = "Something went wrong. Contact Administrator";
     }
     alert(response);
   };
@@ -217,7 +219,7 @@ const Faculty = () => {
       renderCell: (params) => {
         const handleOpen = async () => {
           setOpenSubjectLoad(true);
-          const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getSubjectLoad?faculty_id=${urlEncode(params.row.faculty_id)}&school_year=${urlEncode(schoolyear)}&semester=${urlEncode(semester)}`,{
+          const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getSubjectLoad?faculty_id=${urlEncode(params.row.faculty_id)}&school_year=${urlEncode(filterData.schoolyear)}&semester=${urlEncode(filterData.semester)}`,{
             withCredentials: true
           });
           setSubjectLoad((prevState) => ({ ...prevState, rows: data }));
@@ -262,31 +264,96 @@ const Faculty = () => {
       setLoading(false);
     }
   }, [subjectCodesStatus, dispatch]);
+  const [openFilterModal, setOpenFilterModal] = React.useState(false)
+  const handleOpenFilterYearAndSemester = () => {
+    setOpenFilterModal(true);
+  }
+  const handleCloseFilterYearAndSemester = (panel) => {
+    setOpenFilterModal(false);
+  }
+  const [data, setData] = React.useState({
+    faculty: []
+  })
+  const handleFetchData = async () => {
+    if(data.faculty.length > 0) {
+      setData((prevState) => ({ ...prevState, faculty: [] }));
+    }
+    const { data:queryData, status } = await AdminFacultyService.getFacultyBySchoolYearAndSemester(filterData.schoolyear, filterData.semester)
+    setData((prevState) => ({ ...prevState, faculty: queryData.rows }))
+  }
   return (
     <>
-      <Box sx={{ height: 600, width: "100%" }}>
-        <Typography variant="h4" fontWeight={700} component="div" marginBottom={3} sx={{ flexGrow: 1 }}>
-          LIST OF FACULTY
-        </Typography>
-        <Box borderRadius={"10px"} border={"1px solid var(--border-default)"} className="usersTable" height={600}>
-          <DataGrid
-            rows={facultyRows}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 5,
-                },
-              },
-            }}
-            pageSizeOptions={[5, 10, 25]}
-            loading={loading.emails}
-          />
-        </Box>
+      <Alert severity="info">FILTER SCHOOL YEAR AND SEMESTER TO SHOW LIST OF FACULTY IN FILTER BUTTON</Alert><br />
+      <Box
+        sx={{ 
+          display: "flex", 
+          flexDirection: "row", 
+          justifyContent: "space-between", 
+          alignItems: "center", 
+          width: "100%" 
+        }}
+      >
+          <Typography variant="h4" fontWeight={700} component="div" marginBottom={3} sx={{ flexGrow: 1 }}>
+            LIST OF FACULTY
+          </Typography>
+        <Button 
+          variant="contained" 
+          onClick={handleOpenFilterYearAndSemester} 
+          sx={{ color: "white" }}
+          startIcon={<SettingsIcon />}
+        >
+          FILTER
+        </Button>
       </Box>
+        <Box sx={{ width: "100%" }}>
+          <Box 
+            borderRadius={"10px"} 
+            border={"1px solid var(--border-default)"} 
+            className="usersTable" 
+            // sx={{ height: {xs: "auto", md: 500} }}
+            sx={{ 
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
+              height: 500
+            }}
+          >
+              <DataGrid
+                rows={data.faculty}
+                columns={columns}
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      pageSize: 5,
+                    },
+                  },
+                }}
+                pageSizeOptions={[5, 10, 25]}
+                loading={loading.emails}
+              />
+              {/* <DataGrid
+                rows={facultyRows}
+                columns={columns}
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      pageSize: 5,
+                    },
+                  },
+                }}
+                pageSizeOptions={[5, 10, 25]}
+                loading={loading.emails}
+              /> */}
+          </Box>
+        </Box>
 
       {/* Modal for Subject Load */}
-      <SubjectLoadDialog open={openSubjectLoad} close={handleCloseSubjectLoad} isSmallScreen={isSmallScreen} data={subjectLoad} />
+      <SubjectLoadDialog 
+        open={openSubjectLoad} 
+        close={handleCloseSubjectLoad} 
+        isSmallScreen={isSmallScreen} 
+        data={subjectLoad} 
+      />
 
       {/* Dialog for Confirmation of Locking/Unlocking a Subject */}
       <Dialog open={openConfirmation} onClose={handleCloseConfirmation} aria-labelledby={"dialog-confirmation"}>
@@ -329,6 +396,75 @@ const Faculty = () => {
         </DialogActions>
       </Dialog>
       <ViewStudentsDialog open={open.viewStudents} close={closeHandler.viewStudents} data={viewStudents} />
+
+      <Dialog open={openFilterModal} onClose={handleCloseFilterYearAndSemester} aria-labelledby={"dialog-confirmation"}>
+        <DialogTitle id={"dialog-confirmation-title"}>FILTER YEAR AND SEMESTER</DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={handleCloseFilterYearAndSemester}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+          }}
+        >
+          <Close />
+        </IconButton>
+        <DialogContent dividers>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+            <FormControl 
+              sx={{ 
+                display: "flex", 
+                flexDirection: "row", 
+                gap: 1,
+                flexGrow: 1
+                }} 
+              fullWidth
+            >
+              <TextField 
+                id="select-schoolyear-from" 
+                name="schoolyear" 
+                label="School Year" 
+                type="number" 
+                value={filterData.schoolyear} 
+                onChange={handleChangeFilterData}
+                fullWidth 
+              />
+              <TextField 
+                id="select-schoolyear-to" 
+                name="schoolyear" 
+                label="School Year" 
+                value={filterData.schoolyear ? parseInt(filterData.schoolyear) + 1 : ""} 
+                readonly
+                fullWidth 
+              />
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="select-semester-label">Semester</InputLabel>
+              <Select
+                id="select-semester" 
+                label="Semester" 
+                name="semester" 
+                value={filterData.semester}
+                onChange={handleChangeFilterData}
+                required
+              >
+                <MenuItem value="summer">Summer</MenuItem>
+                <MenuItem value="1st">1st Semester</MenuItem>
+                <MenuItem value="2nd">2nd Semester</MenuItem>
+              </Select>
+            </FormControl>
+            <Button 
+              variant="contained" 
+              onClick={handleFetchData}
+              sx={{ color: "white" }}
+            >
+              Filter
+            </Button>
+            <Typography variant="body1" color="initial" >Result: {data.faculty.length}</Typography>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
