@@ -8,7 +8,7 @@ import { fetchUsers } from "../../features/admin/users/usersThunks";
 import { fetchAccessLevels } from "../../features/admin/users/accessLevelsThunks";
 import { fetchColleges } from "../../features/admin/users/collegesThunks";
 import { fetchNoAccounts } from "../../features/admin/users/noAccountsThunks";
-import { createUserServices, updateAccountServices } from "../../services/admin-users.services";
+import { AdminUsersService } from "../../services/adminUsersService";
 import { fetchProgramCodes } from "../../features/admin/users/programCodesThunks";
 
 const Users = () => {
@@ -62,7 +62,7 @@ const Users = () => {
     setCreateUserData((prevState) => ({ ...prevState, [e.target.name]: e.target.value }));
   };
   const handleCreateUser = async () => {
-    const { data } = await createUserServices(createUserData, cookies);
+    const { data } = await AdminUsersService.createUser(createUserData);
     alert(data.message);
     if (data.success === 1) {
       dispatch(fetchUsers(cookies));
@@ -89,7 +89,7 @@ const Users = () => {
   const handleUpdateAccount = async () => {
     const confirmation = window.confirm("Are you sure you want to update this account?");
     if (!confirmation) return;
-    const { data } = await updateAccountServices(updateAccountData, cookies, updateDataToCheck);
+    const { data } = await AdminUsersService.updateUser(updateAccountData, updateDataToCheck);
     alert(data.message);
     if (data.success) {
       dispatch(fetchUsers(cookies));
@@ -213,11 +213,20 @@ const Users = () => {
   const [loading, setLoading] = useState(true);
   return (
     <>
-      <Box marginBottom={3} sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center", width: "100%" }}>
+      <Box 
+        marginBottom={3} 
+        sx={{ 
+          display: "flex", 
+          flexDirection: "row", 
+          justifyContent: "space-between", 
+          alignItems: "center", 
+          width: "100%" 
+        }}
+      >
         <Typography variant="h4" fontWeight={700} component="div">
           LIST OF USERS
         </Typography>
-        <Grid spacing={0}>
+        <Grid>
           <Grid item>
             <ButtonGroup variant="text" color="primary" aria-label="">
               <Tooltip title="Create Account">

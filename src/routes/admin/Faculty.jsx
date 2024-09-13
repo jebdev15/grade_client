@@ -2,25 +2,20 @@ import { DataGrid } from "@mui/x-data-grid";
 import React, { useEffect, useState } from "react";
 import { Box, Button, IconButton, Typography, Tooltip, useMediaQuery, ButtonGroup, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, FormControl, InputLabel, Select, MenuItem, TextField, Alert } from "@mui/material";
 import { Close, Lock, LockOpen, People, Print, Visibility as VisibilityIcon, Settings as SettingsIcon } from "@mui/icons-material";
-import axios from "axios";
 import { urlEncode } from "url-encode-base64";
-import { useCookies } from "react-cookie";
 import ViewStudentsDialog from "../../components/dialogs/ViewStudentsDialog";
-import { getGradeTableService } from "../../services/admin.services";
-import { initialLoading, initialOpen } from "../../utils/admin-faculty.util";
+import { initialOpen } from "../../utils/admin-faculty.util";
 import SubjectLoadDialog from "../../components/dialogs/SubjectLoadDialog";
 import moment from "moment";
 import { momentFormatDate } from "../../utils/formatDate";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchSubjectCodes } from "../../features/admin/faculty/subjectCodesThunks";
-import { fetchFaculty } from "../../features/admin/faculty/facultyThunks";
 import { AdminFacultyService } from "../../services/adminFacultyService";
 
 const Faculty = () => {
   const subjectCodesGS = useSelector((state) => state.subjectCodes.list);
   const subjectCodesStatus = useSelector((state) => state.subjectCodes.status);
   const dispatch = useDispatch();
-  const [cookies, ,] = useCookies(["picture", "name", "faculty_id", "email", "campus", "accessLevel"]);
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
   const [open, setOpen] = useState(initialOpen);
@@ -35,7 +30,7 @@ const Faculty = () => {
   });
   const [filterData, setFilterData] = React.useState({
     schoolyear: new Date().getFullYear(),
-    semester: "1st"
+    semester: ""
   })
   const handleChangeFilterData = (event) => {
     setFilterData((prevState) => ({ ...prevState, [event.target.name]: event.target.value }));
@@ -128,20 +123,24 @@ const Faculty = () => {
           return (
             <>
               <ButtonGroup variant="text" color="primary" aria-label="">
-                {["Administrator", "Registrar"].includes(cookies.accessLevel) && (
                   <Tooltip title={`Currently ${params.row.status ? "Locked" : "Unlocked"}. Click to ${params.row.status ? "Unlock" : "Lock"} Subject`}>
                     <IconButton aria-label="view" variant="text" color="primary" onClick={handleOpenConfirmation}>
                       {(params.row.status) ? <Lock /> : <LockOpen />}
                     </IconButton>
                   </Tooltip>
-                )}
                 <Tooltip title="View Students">
                   <IconButton aria-label="view" variant="text" color="primary" name="viewStudents" onClick={openViewStudentsHandler}>
                     <People />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Print Grade Sheet">
-                  <IconButton aria-label="view" variant="text" color="primary" href={printGradeSheetLink} target="_blank">
+                  <IconButton 
+                    aria-label="view" 
+                    variant="text" 
+                    color="primary" 
+                    href={printGradeSheetLink} 
+                    target="_blank"
+                  >
                     <Print />
                   </IconButton>
                 </Tooltip>
@@ -219,9 +218,7 @@ const Faculty = () => {
       renderCell: (params) => {
         const handleOpen = async () => {
           setOpenSubjectLoad(true);
-          const { data } = await axios.get(`${process.env.REACT_APP_API_URL}/admin/getSubjectLoad?faculty_id=${urlEncode(params.row.faculty_id)}&school_year=${urlEncode(filterData.schoolyear)}&semester=${urlEncode(filterData.semester)}`,{
-            withCredentials: true
-          });
+          const { data } = await AdminFacultyService.getSubjectLoadByFacultyIdYearAndSemester(urlEncode(params.row.id),urlEncode(filterData.schoolyear),urlEncode(filterData.semester));
           setSubjectLoad((prevState) => ({ ...prevState, rows: data }));
         };
 
@@ -240,18 +237,6 @@ const Faculty = () => {
     },
   ];
 
-  const facultyRows = useSelector((state) => state.faculty.list);
-  const facultyStatus = useSelector((state) => state.faculty.status);
-
-  const [loading, setLoading] = useState(initialLoading);
-  useEffect(() => {
-    if (facultyStatus === "idle") {
-      dispatch(fetchFaculty());
-    }
-    if (["idle", "succeeded"].includes(facultyStatus)) {
-      setLoading({ emails: false });
-    }
-  }, [facultyStatus, dispatch]);
   const closeHandler = {
     viewStudents: () => setOpen({ viewStudents: false }),
     subjectLoad: () => setOpen({ subjectLoad: false }),
@@ -259,9 +244,6 @@ const Faculty = () => {
   useEffect(() => {
     if (subjectCodesStatus === "idle") {
       dispatch(fetchSubjectCodes());
-    }
-    if (["idle", "succeeded"].includes(subjectCodesStatus)) {
-      setLoading(false);
     }
   }, [subjectCodesStatus, dispatch]);
   const [openFilterModal, setOpenFilterModal] = React.useState(false)
@@ -278,7 +260,7 @@ const Faculty = () => {
     if(data.faculty.length > 0) {
       setData((prevState) => ({ ...prevState, faculty: [] }));
     }
-    const { data:queryData, status } = await AdminFacultyService.getFacultyBySchoolYearAndSemester(filterData.schoolyear, filterData.semester)
+    const { data:queryData } = await AdminFacultyService.getFacultyBySchoolYearAndSemester(filterData.schoolyear, filterData.semester)
     setData((prevState) => ({ ...prevState, faculty: queryData.rows }))
   }
   return (
@@ -329,21 +311,7 @@ const Faculty = () => {
                   },
                 }}
                 pageSizeOptions={[5, 10, 25]}
-                loading={loading.emails}
               />
-              {/* <DataGrid
-                rows={facultyRows}
-                columns={columns}
-                initialState={{
-                  pagination: {
-                    paginationModel: {
-                      pageSize: 5,
-                    },
-                  },
-                }}
-                pageSizeOptions={[5, 10, 25]}
-                loading={loading.emails}
-              /> */}
           </Box>
         </Box>
 
@@ -435,7 +403,7 @@ const Faculty = () => {
                 name="schoolyear" 
                 label="School Year" 
                 value={filterData.schoolyear ? parseInt(filterData.schoolyear) + 1 : ""} 
-                readonly
+                readOnly
                 fullWidth 
               />
             </FormControl>
@@ -458,6 +426,7 @@ const Faculty = () => {
               variant="contained" 
               onClick={handleFetchData}
               sx={{ color: "white" }}
+              disabled={filterData.schoolyear === "" || filterData.semester === ""}
             >
               Filter
             </Button>

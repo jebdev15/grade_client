@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Box, Button, FormControl, Typography, InputLabel, MenuItem, Select, Paper, TextField, Alert } from "@mui/material";
-import { useCookies } from "react-cookie";
 import { AdminSettingsServices } from "../../services/adminSettingsService";
 
 const ClassStatus = () => {
@@ -18,15 +17,9 @@ const ClassStatus = () => {
     const confirmation = window.confirm("Are you sure you want to update?");
     if (!confirmation) return;
     const formData = new FormData(e.target);
-    for (const pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
-    }
     const { data, status } = await AdminSettingsServices.updateClassStatusByYearAndSemester(formData);
     alert(data.message, status);
   };
-  React.useEffect(() => {
-    console.log({schoolyear: data.schoolyear, semester: data.semester});
-  }, [data]);
   return (
     <>
       <Paper elevation={12} sx={{ padding: 2 }}>
@@ -55,7 +48,7 @@ const ClassStatus = () => {
                 id="select-schoolyear-to"
                 label="School Year"
                 value={data.schoolyear ? parseInt(data.schoolyear) + 1 : ""}
-                readonly
+                readOnly
                 fullWidth
               />
             </FormControl>
