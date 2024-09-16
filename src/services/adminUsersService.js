@@ -10,7 +10,7 @@ export const AdminUsersService = {
     formData.append('accessLevel', createUserData.accessLevel)
     const { data } = await axiosInstance.post(`/admin/createUser`, formData)
     return { data }
-  }, 
+  },
   updateUser: async (updateAccountData, updateDataToCheck) => {
     const formData = new FormData();
     formData.append('id', updateAccountData.id)

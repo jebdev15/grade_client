@@ -32,34 +32,50 @@ import { useCookies } from "react-cookie";
 import { googleLogout } from "@react-oauth/google";
 import { urlEncode } from "url-encode-base64";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
-import { checkRegistrarActivityDueDate } from "../../services/index.services";
+// import { checkRegistrarActivityDueDate } from "../../services/index.services";
 import { getCampus } from "../../utils/header.util";
 import { homeIndexUtil } from "../../utils/home-index.util";
-import useFetchAxiosGet from "../../hooks/useFetchAxiosGet";
+import { RegistrarActivityContext } from "../../context/RegistrarActivityContext";
 
 const Home = () => {
   const [cookies, , removeCookie] = useCookies(homeIndexUtil.siteCookies);
   const navigate = useNavigate();
+  const [schoolyear, setSchoolYear] = useState({
+    summer: 1970,
+    firstSemester: 1970,
+    secondSemester: 1970,
+  });
 
-  const [schoolyear, setSchoolYear] = useState(0);
-  
-  
-  const { data, loading, error } = useFetchAxiosGet('/getCurrentSchoolYear');
-  
+  const { data, error, status:registrarActivityStatus } = React.useContext(RegistrarActivityContext);
   useEffect(() => {
-    const getCurrentSchoolYear =() => {
-        setSchoolYear(data[0].schoolyear);
-        checkRegistrarActivityDueDate(data[0].to);
-        console.log(
-          data,
-          loading,
-          error
-        );
-    };
-    if(!loading && data) {
-      getCurrentSchoolYear();
+    if(registrarActivityStatus === "succeeded" && !error) {
+      const { data:registrarActivityData } = data;
+      const {
+        schoolyear:summerSchoolYear,
+        semester:summerSemester,
+      } = registrarActivityData[0];
+      const {
+        schoolyear:firstSemesterSchoolYear,
+        semester:firstSemester,
+      } = registrarActivityData[1];
+      const {
+        schoolyear:secondSemesterSchoolYear,
+        semester:secondSemester,
+      } = registrarActivityData[2];
+      setSchoolYear((prevState) => ({
+          ...prevState, 
+          summer: summerSemester === 'summer' ? summerSchoolYear : prevState.summer,
+          firstSemester: firstSemester === '1st' ? firstSemesterSchoolYear : prevState.firstSemester,
+          secondSemester: secondSemester === '2nd' ? secondSemesterSchoolYear : prevState.secondSemester,
+        })
+      );
+      console.log({
+        summer: summerSchoolYear,
+        firstSemester: registrarActivityData[1],
+        secondSemester: registrarActivityData[2],
+      });
     } 
-  }, [data, loading, error]);
+  }, [data, registrarActivityStatus, error]);
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -264,62 +280,59 @@ const Home = () => {
           >
             <List>
               <ListItemButton
-                className={activeItem === "1st" ? "navbtn active" : "navbtn"}
-                onClick={() => {
-                  // setDrawerMinimize(false);
-                  navigate(
-                    `/home/${params("1st", parseInt(schoolyear), cookies.faculty_id)}`
-                  );
-                  setActiveItem("1st");
-                }}
-              >
-                <Tooltip title="First Semester">
-                  <ListItemIcon>
-                    <LooksOne />
-                  </ListItemIcon>
-                </Tooltip>
-                {drawerMinimize ? null : (
-                  <ListItemText primary="First Semester" />
-                )}
-              </ListItemButton>
+                  className={activeItem === "summer" ? "navbtn active" : "navbtn"}
+                  onClick={() => {
+                    // setDrawerMinimize(false);
+                    navigate(
+                      `/home/${params("summer", parseInt(schoolyear.summer), cookies.faculty_id)}`
+                    );
+                    setActiveItem("summer");
+                  }}
+                >
+                  <Tooltip title="Summer">
+                    <ListItemIcon>
+                      <BeachAccess />
+                    </ListItemIcon>
+                  </Tooltip>
+                  {drawerMinimize ? null : <ListItemText primary="Summer" />}
+                </ListItemButton>
+                <ListItemButton
+                  className={activeItem === "1st" ? "navbtn active" : "navbtn"}
+                  onClick={() => {
+                    navigate(
+                      `/home/${params("1st", parseInt(schoolyear.firstSemester), cookies.faculty_id)}`
+                    );
+                    setActiveItem("1st");
+                  }}
+                >
+                  <Tooltip title="First Semester">
+                    <ListItemIcon>
+                      <LooksOne />
+                    </ListItemIcon>
+                  </Tooltip>
+                  {drawerMinimize ? null : (
+                    <ListItemText primary="First Semester" />
+                  )}
+                </ListItemButton>
 
-              <ListItemButton
-                className={activeItem === "2nd" ? "navbtn active" : "navbtn"}
-                onClick={() => {
-                  // setDrawerMinimize(false);
-                  navigate(
-                    `/home/${params("2nd", parseInt(schoolyear), cookies.faculty_id)}`
-                  );
-                  setActiveItem("2nd");
-                }}
-              >
-                <Tooltip title="Second Semester">
-                  <ListItemIcon>
-                    <LooksTwo />
-                  </ListItemIcon>
-                </Tooltip>
-                {drawerMinimize ? null : (
-                  <ListItemText primary="Second Semester" />
-                )}
-              </ListItemButton>
-
-              <ListItemButton
-                className={activeItem === "summer" ? "navbtn active" : "navbtn"}
-                onClick={() => {
-                  // setDrawerMinimize(false);
-                  navigate(
-                    `/home/${params("summer", parseInt(schoolyear), cookies.faculty_id)}`
-                  );
-                  setActiveItem("summer");
-                }}
-              >
-                <Tooltip title="Summer">
-                  <ListItemIcon>
-                    <BeachAccess />
-                  </ListItemIcon>
-                </Tooltip>
-                {drawerMinimize ? null : <ListItemText primary="Summer" />}
-              </ListItemButton>
+                <ListItemButton
+                  className={activeItem === "2nd" ? "navbtn active" : "navbtn"}
+                  onClick={() => {
+                    navigate(
+                      `/home/${params("2nd", parseInt(schoolyear.secondSemester), cookies.faculty_id)}`
+                    );
+                    setActiveItem("2nd");
+                  }}
+                >
+                  <Tooltip title="Second Semester">
+                    <ListItemIcon>
+                      <LooksTwo />
+                    </ListItemIcon>
+                  </Tooltip>
+                  {drawerMinimize ? null : (
+                    <ListItemText primary="Second Semester" />
+                  )}
+                </ListItemButton>
             </List>
           </Paper>
         </Box>

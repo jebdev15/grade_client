@@ -94,16 +94,6 @@ export default function Admin() {
     navigate("/");
     localStorage.removeItem("activeItem");
   };
-
-  // const { data, loading } = useFetchAxiosGet("/getCurrentSchoolYear");
-  // useEffect(() => {
-  //   if(!loading) {
-  //     setRegistrarActivitySummer(data[0])
-  //     setRegistrarActivityFirstSemester(data[1])
-  //     setRegistrarActivitySecondSemester(data[2])
-  //   }
-  // }, [data, loading]);
-
   useEffect(() => {
     setDrawerMinimize(isSmallScreen ? true : !true);
   }, [isSmallScreen, setDrawerMinimize]);

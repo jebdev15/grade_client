@@ -41,6 +41,7 @@ import { Provider } from "react-redux";
 import { store } from "./app/store";
 import { REACT_APP_GOOGLE_CLIENT_ID } from "./utils/envVariables";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { RegistrarActivityProvider } from "./context/RegistrarActivityContext";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -52,7 +53,10 @@ const router = createBrowserRouter([
   },
   {
     path: "home",
-    element: <Home />,
+    element: 
+    <RegistrarActivityProvider>
+        <Home />
+    </RegistrarActivityProvider>,
     children: [
       { index: true, element: <Start /> },
       {
@@ -75,11 +79,6 @@ const router = createBrowserRouter([
             element: <Upload />,
             loader: uploadLoader,
           },
-          // {
-          //   path: "/home/:code/print/:class_code",
-          //   element: <PrintGradeSheet />,
-          //   loader: printLoader,
-          // },
         ],
       },
     ],

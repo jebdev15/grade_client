@@ -7,6 +7,7 @@ import collegesReducer from "../features/admin/users/collegesSlice";
 import noAccountsReducer from "../features/admin/users/noAccountsSlice";
 import programCodesReducer from "../features/admin/users/programCodesSlice";
 import facultyReducer from "../features/admin/faculty/facultySlice";
+import registrarActivityReducer from "../features/home/index/registrarActivitySlice";
 
 export const store = configureStore({
     reducer: {
@@ -17,7 +18,8 @@ export const store = configureStore({
         colleges: collegesReducer,
         noAccounts: noAccountsReducer,
         programCodes: programCodesReducer,
-        faculty: facultyReducer
+        faculty: facultyReducer,
+        registrarActivity: registrarActivityReducer
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

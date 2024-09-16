@@ -1,6 +1,6 @@
 import { urlEncode } from "url-encode-base64";
 
-export const identifyGraduateStudiesLoad = (subject_codes, subject_code) => subject_codes.includes(subject_code) ? true : false
+export const identifyGraduateStudiesLoad = (subject_codes, subject_code) => subject_codes?.includes(subject_code) ? true : false
 
 export const extractSubjectCode = (subject_codes) => subject_codes.map((subject) => subject?.subject_code);
 

@@ -36,8 +36,9 @@ import { useCookies } from "react-cookie";
 import moment from "moment";
 import { urlEncode, urlDecode } from "url-encode-base64";
 import { dateFormatter } from "../../utils/formatDate";
-import { useFetch } from "../../hooks/useFetch";
 import { extractSubjectCode, identifyGraduateStudiesLoad, identifyPrintLink, submittedGradeSheetMessage } from "../../utils/semester.utils";
+import { HomeSemesterServices } from "../../services/homeSemesterService";
+import { useQuery } from "react-query";
 
 const Semester = () => {
   const { code } = useParams();
@@ -124,11 +125,13 @@ const Semester = () => {
   const checkSchoolYear = dbSchoolYear === parseInt(decodedSchoolYear);
   const checkSemester = dbSemester === decodedSemester;
   const canUpload = checkDate && checkSchoolYear && checkSemester;
-  const graduateStudiesLoads = useFetch('getGraduateStudiesLoad');
+  const {data, error, isLoading} = useQuery('graduateStudiesLoad',HomeSemesterServices.getGraduateStudiesLoad);
   useEffect(() => {
-    const graduateStudiesSubjectCodes = extractSubjectCode(graduateStudiesLoads);
-    setGraduateStudies(graduateStudiesSubjectCodes);
-  }, [graduateStudiesLoads]);
+    if(!error && !isLoading) {
+      const graduateStudiesSubjectCodes = extractSubjectCode(data.data);
+      setGraduateStudies(graduateStudiesSubjectCodes);
+    }
+  }, [data, error, isLoading]);
   const LoadCard = ({
     subject_code,
     status,
@@ -320,23 +323,33 @@ const Semester = () => {
   };
   return (
     <Box>
-      <Typography variant="h4" fontWeight={700}>
-        {` ${decodedSemester?.toUpperCase()} ${
-          decodedSemester === "summer" ? "" : "SEMESTER"
-        }`}
-      </Typography>
-      <Box sx={{ display: "flex", alignItems: "center" }}>
-        <IconButton onClick={() => navigate("/home")}>
-          <Home sx={{ fontSize: 20 }} />
-        </IconButton>
-        <span>/</span>
-        <Typography variant="caption" fontSize={12} sx={{ mx: 1 }}>
-          {`${decodedSchoolYear} - ${parseInt(decodedSchoolYear) + 1}`}
-        </Typography>
-        <span>/</span>
-        <Typography variant="caption" fontSize={12} sx={{ mx: 1 }}>
-          {decodedSemester}
-        </Typography>
+      <Box
+        sx={{ 
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+         }}
+      >
+        <Box>
+          <Typography variant="h4" fontWeight={700}>
+            {` ${decodedSemester?.toUpperCase()} ${
+              decodedSemester === "summer" ? "" : "SEMESTER"
+            }`}
+          </Typography>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
+            <IconButton onClick={() => navigate("/home")}>
+              <Home sx={{ fontSize: 20 }} />
+            </IconButton>
+            <span>/</span>
+            <Typography variant="caption" fontSize={12} sx={{ mx: 1 }}>
+              {`${decodedSchoolYear} - ${parseInt(decodedSchoolYear) + 1}`}
+            </Typography>
+            <span>/</span>
+            <Typography variant="caption" fontSize={12} sx={{ mx: 1 }}>
+              {decodedSemester}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
 
       <Box sx={{ mt: 2, overflowY: "auto" }}>
@@ -386,20 +399,17 @@ export const loader = async ({ params }) => {
   const { code } = params;
   const [semester, currentSchoolYear, faculty_id] = code.split("-");
 
-  const { data } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}`
-  );
+  const { data } = await HomeSemesterServices.getSubjectLoadByFacultyIdYearAndSemester(faculty_id,currentSchoolYear,semester)
   const loads = data;
 
-  const { data: data2 } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
-  );
-  const {
-    schoolyear: dbSchoolYear,
-    semester: dbSemester,
-    to: dbTo,
-  } = data2[0];
+  // const { data: data2 } = await HomeSemesterServices.getRegistrarActivity();
+  // const {
+  //   schoolyear: dbSchoolYear,
+  //   semester: dbSemester,
+  //   to: dbTo,
+  // } = data2[0];
 
-  return { loads, dbSchoolYear, dbSemester, dbTo };
+  // return { loads, dbSchoolYear, dbSemester, dbTo };
+  return { loads };
 };
 export default Semester;
