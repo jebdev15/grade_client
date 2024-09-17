@@ -18,6 +18,7 @@ import { useOutletContext, useLoaderData, useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { saveAs } from "file-saver";
 import { urlDecode } from "url-encode-base64";
+import { HomeSemesterServices } from "../../services/homeSemesterService";
 
 const Upload = () => {
   const { code, class_code } = useParams();
@@ -241,10 +242,12 @@ const Upload = () => {
 export const loader = async ({ params }) => {
   const { code, class_code } = params;
   const [semester, currentSchoolYear, faculty_id] = code.split("-");
-  const { data } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}&class_code=${class_code}`
-  );
-  const loadInfoArr = data;
+  const { facultyLoadData: loadInfoArr } = await HomeSemesterServices.getFacultyLoadByFacultyIdYearSemesterAndClassCode(
+    faculty_id,
+    currentSchoolYear,
+    semester,
+    class_code
+  )
   return { loadInfoArr };
 };
 export default Upload;

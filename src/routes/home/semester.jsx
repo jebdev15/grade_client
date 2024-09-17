@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Avatar,
   Box,
@@ -36,9 +36,8 @@ import { useCookies } from "react-cookie";
 import moment from "moment";
 import { urlEncode, urlDecode } from "url-encode-base64";
 import { dateFormatter } from "../../utils/formatDate";
-import { extractSubjectCode, identifyGraduateStudiesLoad, identifyPrintLink, submittedGradeSheetMessage } from "../../utils/semester.utils";
+import { identifyPrintLink, submittedGradeSheetMessage } from "../../utils/semester.utils";
 import { HomeSemesterServices } from "../../services/homeSemesterService";
-import { useQuery } from "react-query";
 
 const Semester = () => {
   const { code } = useParams();
@@ -51,7 +50,6 @@ const Semester = () => {
   const [manualOpen, setManualOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [printOpen, setPrintOpen] = useState(false);
-  const [graduateStudies, setGraduateStudies] = useState([]);
   const [loading, setLoading] = useState({
     manual: false,
     upload: false,
@@ -125,13 +123,17 @@ const Semester = () => {
   const checkSchoolYear = dbSchoolYear === parseInt(decodedSchoolYear);
   const checkSemester = dbSemester === decodedSemester;
   const canUpload = checkDate && checkSchoolYear && checkSemester;
-  const {data, error, isLoading} = useQuery('graduateStudiesLoad',HomeSemesterServices.getGraduateStudiesLoad);
-  useEffect(() => {
-    if(!error && !isLoading) {
-      const graduateStudiesSubjectCodes = extractSubjectCode(data.data);
-      setGraduateStudies(graduateStudiesSubjectCodes);
-    }
-  }, [data, error, isLoading]);
+  React.useEffect(() => {
+    console.log({
+      canUpload,
+      checkDate,
+      checkSchoolYear,
+      checkSemester,
+      dbSchoolYear,
+      dbSemester,
+      dbTo,
+    })
+  }, [canUpload, checkDate, checkSchoolYear, checkSemester, dbSchoolYear, dbSemester, dbTo]);
   const LoadCard = ({
     subject_code,
     status,
@@ -141,12 +143,14 @@ const Semester = () => {
     timestamp,
     method,
     submittedLog,
+    isGraduateStudies
   }) => {
     const encodedClassCode = urlEncode(class_code);
     const submitGradeSheetConfirmation = async (classCode) => {
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${encodedClassCode}`
-      );
+      // const { data } = await axios.get(
+      //   `${process.env.REACT_APP_API_URL}/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${encodedClassCode}`
+      // );
+      const { data } = await HomeSemesterServices.submitGradeSheetConfirmation(semester, currentSchoolYear, encodedClassCode);
       const alertMessage = submittedGradeSheetMessage(data)
       const confirmation = window.confirm(alertMessage)
       if(!confirmation) return
@@ -159,25 +163,24 @@ const Semester = () => {
       formData.append("class_code", encodedClassCode);
       formData.append("status", 0)
       formData.append("email_used", cookies.email)
-      await axios.post(
-        `${process.env.REACT_APP_API_URL}/submitGradeSheet`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      // await axios.post(
+      //   `${process.env.REACT_APP_API_URL}/submitGradeSheet`,
+      //   formData,
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //   }
+      // );
+      await HomeSemesterServices.submitGradeSheet(formData);
       navigate(".", { replace: true });
       alert("Grade Sheet has been submitted.");
     }
-    const checkIfGraduateStudiesLoad = identifyGraduateStudiesLoad(graduateStudies, subject_code);
-    const printLink = identifyPrintLink(checkIfGraduateStudiesLoad, semester, currentSchoolYear, cookies, encodedClassCode);
-    
+    const printLink = identifyPrintLink(isGraduateStudies, semester, currentSchoolYear, cookies, encodedClassCode);
     return (
       <Card variant="outlined">
         <CardHeader
-          title={checkIfGraduateStudiesLoad ? `${subject_code}(Graduate Studies)` : subject_code}
+          title={isGraduateStudies ? `${subject_code}(Graduate Studies)` : subject_code}
           subheader={section}
           avatar={
             <Avatar sx={{ bgcolor: "white" }}>
@@ -248,7 +251,7 @@ const Semester = () => {
                   size="large"
                   aria-label=""
                   onClick={() => {
-                    const url = checkIfGraduateStudiesLoad ? `/home/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}/graduateStudies` : `/home/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}` ;
+                    const url = isGraduateStudies ? `/home/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}/graduateStudies` : `/home/${semester}-${currentSchoolYear}-${urlEncode(cookies.faculty_id)}/${encodedClassCode}` ;
                     navigate(url);
                     setManualOpen(true);
                     manualTimer();
@@ -263,7 +266,7 @@ const Semester = () => {
                 </IconButton>
               </span>
             </Tooltip>
-            {(canUpload && parseInt(status) === 0 && (!checkIfGraduateStudiesLoad)) && (
+            {/* {(canUpload && parseInt(status) === 0) && ( */}
               <Tooltip title="Grade Sheet">
                 <span>
                   <IconButton
@@ -285,8 +288,8 @@ const Semester = () => {
                   </IconButton>
                 </span>
               </Tooltip>
-            )}
-            {canUpload && parseInt(status) === 0 && (
+            {/* )} */}
+            {/* {canUpload && parseInt(status) === 0 && ( */}
               <Tooltip title="Submit grade sheet. You may not able to edit or upload grades. To edit or upload grades, please contact your administrator.">
                 <span>
                   <IconButton
@@ -300,7 +303,7 @@ const Semester = () => {
                   </IconButton>
                 </span>
               </Tooltip>
-            )}
+            {/* )} */}
             {parseInt(status) === 1 && (
               <Tooltip title="Print Grade Sheet">
                 <span>
@@ -402,14 +405,9 @@ export const loader = async ({ params }) => {
   const { data } = await HomeSemesterServices.getSubjectLoadByFacultyIdYearAndSemester(faculty_id,currentSchoolYear,semester)
   const loads = data;
 
-  // const { data: data2 } = await HomeSemesterServices.getRegistrarActivity();
-  // const {
-  //   schoolyear: dbSchoolYear,
-  //   semester: dbSemester,
-  //   to: dbTo,
-  // } = data2[0];
+  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
 
-  // return { loads, dbSchoolYear, dbSemester, dbTo };
-  return { loads };
+  return { loads, dbSchoolYear, dbSemester, dbTo };
+  // return { loads };
 };
 export default Semester;

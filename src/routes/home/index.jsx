@@ -69,11 +69,6 @@ const Home = () => {
           secondSemester: secondSemester === '2nd' ? secondSemesterSchoolYear : prevState.secondSemester,
         })
       );
-      console.log({
-        summer: summerSchoolYear,
-        firstSemester: registrarActivityData[1],
-        secondSemester: registrarActivityData[2],
-      });
     } 
   }, [data, registrarActivityStatus, error]);
 

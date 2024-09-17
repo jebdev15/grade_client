@@ -218,7 +218,7 @@ const Faculty = () => {
       renderCell: (params) => {
         const handleOpen = async () => {
           setOpenSubjectLoad(true);
-          const { data } = await AdminFacultyService.getSubjectLoadByFacultyIdYearAndSemester(urlEncode(params.row.id),urlEncode(filterData.schoolyear),urlEncode(filterData.semester));
+          const { data } = await AdminFacultyService.getSubjectLoadByFacultyIdYearAndSemester(urlEncode(params.row.faculty_id),urlEncode(filterData.schoolyear),urlEncode(filterData.semester));
           setSubjectLoad((prevState) => ({ ...prevState, rows: data }));
         };
 

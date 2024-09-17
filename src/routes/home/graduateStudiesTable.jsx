@@ -26,6 +26,7 @@ import React, { useState } from "react";
 import { urlDecode } from "url-encode-base64";
 import { useCookies } from "react-cookie";
 import { dateFormatter } from "../../utils/formatDate";
+import { HomeSemesterServices } from "../../services/homeSemesterService";
 
 const GraduateStudiesTable = () => {
   const [cookies, , ] = useCookies(["email"]);
@@ -333,25 +334,13 @@ const GraduateStudiesTable = () => {
 export const loader = async ({ params }) => {
   const { code, class_code } = params;
   const [semester, currentSchoolYear, faculty_id] = code.split("-");
-  const { data } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getGraduateStudiesTable?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
-  );
+  const { data } = await HomeSemesterServices.getGraduateStudiesStudentsByYearSemesterAndClassCode(currentSchoolYear,semester,class_code);
 
   const rows = data;
 
-  const { data: data2, status } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}&class_code=${class_code}`
-  );
-  const loadInfoArr = data2;
+  const { facultyLoadData:loadInfoArr, status } = await HomeSemesterServices.getFacultyLoadByFacultyIdYearSemesterAndClassCode(faculty_id, currentSchoolYear, semester, class_code);
 
-  const { data: data3 } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
-  );
-  const {
-    schoolyear: dbSchoolYear,
-    semester: dbSemester,
-    to: dbTo,
-  } = data3[0];
+  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = HomeSemesterServices.getRegistrarActivityBySemester(semester);
 
   return {
     rows,

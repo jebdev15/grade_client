@@ -17,6 +17,7 @@ import registrarUDC from "../../assets/registrar_udc.jpg";
 import axios from "axios";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+import { HomeSemesterServices } from "../../services/homeSemesterService";
 
 const GradeSheetHeaderContainer = styled("header")({
   '@media print': {
@@ -394,13 +395,15 @@ const PrintGradeSheet = () => {
   export const loader = async ({ params }) => {
     const { code, class_code} = params;
     const [semester, currentSchoolYear] = code.split("-");
-    const { data } = await axios.get(
-      `${process.env.REACT_APP_API_URL}/getClassCodeDetails?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
-    );
+    // const { data } = await axios.get(
+    //   `${process.env.REACT_APP_API_URL}/getClassCodeDetails?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+    // );
+    const { data } = await HomeSemesterServices.getClassCodeDetails(semester, currentSchoolYear, class_code);
 
-    const { data: students } = await axios.get(
-      `${process.env.REACT_APP_API_URL}/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
-    );
+    // const { data: students } = await axios.get(
+    //   `${process.env.REACT_APP_API_URL}/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+    // );
+    const { students } = await HomeSemesterServices.getClassStudents(semester, currentSchoolYear, class_code);
     return { data, students };
   };
   export default PrintGradeSheet;

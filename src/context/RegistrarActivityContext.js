@@ -12,9 +12,6 @@ export const RegistrarActivityProvider = ({ children }) => {
     if (status === "idle") {
       dispatch(fetchRegistrarActivity());
     }
-    if(status === "succeeded" && !error) {
-      console.log(data);
-    }
   },[status,error,data, dispatch]);
   return (
     <RegistrarActivityContext.Provider

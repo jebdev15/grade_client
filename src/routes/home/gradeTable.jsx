@@ -17,7 +17,6 @@ import {
   useOutletContext,
   useParams,
 } from "react-router-dom";
-import axios from "axios";
 import { Close } from "@mui/icons-material";
 import { 
   DataGrid
@@ -26,7 +25,7 @@ import React, { useState } from "react";
 import { urlDecode } from "url-encode-base64";
 import { useCookies } from "react-cookie";
 import { dateFormatter } from "../../utils/formatDate";
-import { getCookieValue } from "../../utils/semester.utils";
+import { HomeSemesterServices } from "../../services/homeSemesterService";
 
 const GradeTable = () => {
   const [cookies, , ] = useCookies(["email"]);
@@ -245,10 +244,11 @@ const GradeTable = () => {
       const confirmation = window.confirm(message)
       if(!confirmation) return
       setTableLoading(true);
-      const { data } = await axios.post(
-                      `${process.env.REACT_APP_API_URL}/updateGrade`,
-                      { grades: toUpdate, class_code, method: "Manual", email_used: cookies.email }
-                    );
+      // const { data } = await axios.post(
+      //                 `${process.env.REACT_APP_API_URL}/updateGrade`,
+      //                 { grades: toUpdate, class_code, method: "Manual", email_used: cookies.email }
+      //               );
+      const { data } = await HomeSemesterServices.updateGrade({grades: toUpdate, class_code, method: "Manual", email_used: cookies.email})
       if (data) {
         setToUpdate([]);
         setTableLoading(false);
@@ -317,31 +317,33 @@ const GradeTable = () => {
         </Box>
         <Typography variant="body1" color="initial" sx={{ alignSelf: "flex-end" }}>*Double Click to Select Remark</Typography>
         <Box>
-          <DataGrid
-            getRowId={(row) => row.student_id}
-            columns={columns}
-            rows={rows}
-            rowHeight={32}
-            autoHeight
-            loading={tableLoading}
-            editMode="row"
-            disableColumnMenu
-            hideFooter
-            experimentalFeatures={{ newEditingApi: true }}
-            sx={{
-              '& .MuiDataGrid-booleanCell[data-value="true"]': {
-                color: theme.palette.secondary.main,
-              },
-              "& .MuiCheckbox-root:hover": {
-                bgcolor: theme.palette.text.main,
-              },
-              "& .MuiSvgIcon-root": {
-                color: theme.palette.placeholder.default,
-              },
-              color: theme.palette.text.main,
-            }}
-            processRowUpdate={handleProcessRowUpdate}
-          />
+          {rows.length > 0 && (
+            <DataGrid
+              getRowId={(row) => row.student_id}
+              columns={columns}
+              rows={rows}
+              rowHeight={32}
+              autoHeight
+              loading={tableLoading}
+              editMode="row"
+              disableColumnMenu
+              hideFooter
+              experimentalFeatures={{ newEditingApi: true }}
+              sx={{
+                '& .MuiDataGrid-booleanCell[data-value="true"]': {
+                  color: theme.palette.secondary.main,
+                },
+                "& .MuiCheckbox-root:hover": {
+                  bgcolor: theme.palette.text.main,
+                },
+                "& .MuiSvgIcon-root": {
+                  color: theme.palette.placeholder.default,
+                },
+                color: theme.palette.text.main,
+              }}
+              processRowUpdate={handleProcessRowUpdate}
+            />
+          )}
           
           <Snackbar
             open={Boolean(updatedCount)}
@@ -377,32 +379,18 @@ const GradeTable = () => {
     </Dialog>
   );
 };
-export const loader = async ({ request, params }) => {
-  const cookiesString = request.headers.get('cookie');
-  const email = getCookieValue(cookiesString, 'email');
-  console.log(email);
+export const loader = async ({ params }) => {
   const { code, class_code } = params;
   const [semester, currentSchoolYear, faculty_id] = code.split("-");
-  const { data } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getGradeTable?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
-  );
+  const { data } = await HomeSemesterServices.getStudentsByYearSemesterAndClassCode(currentSchoolYear,semester,class_code)
 
   const rows = data;
 
-  const { data: data2, status } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}&class_code=${class_code}`
-  );
-  const loadInfoArr = data2;
+  const { facultyLoadData, status } = await HomeSemesterServices.getFacultyLoadByFacultyIdYearSemesterAndClassCode(faculty_id, currentSchoolYear, semester, class_code);
+  const loadInfoArr = facultyLoadData;
 
-  const { data: data3 } = await axios.get(
-    `${process.env.REACT_APP_API_URL}/getCurrentSchoolYear`
-  );
-  const {
-    schoolyear: dbSchoolYear,
-    semester: dbSemester,
-    to: dbTo,
-  } = data3[0];
-
+  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = HomeSemesterServices.getRegistrarActivityBySemester(semester);
+  
   return {
     rows,
     loadInfoArr,

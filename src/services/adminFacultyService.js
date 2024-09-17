@@ -7,8 +7,6 @@ export const AdminFacultyService = {
     },
     getSubjectLoadByFacultyIdYearAndSemester: async (faculty_id, school_year, semester) => {
         const { data } = await axiosInstance.get(`/admin/getSubjectLoad?faculty_id=${faculty_id}&school_year=${school_year}&semester=${semester}`);
-        console.log(data);
-        
         return { data }
     },
     getStudentsByClassCode: async (class_code) => {
