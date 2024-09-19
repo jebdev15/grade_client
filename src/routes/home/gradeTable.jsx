@@ -254,7 +254,6 @@ const GradeTable = () => {
         setTableLoading(false);
         setUpdatedCount(data);
       }
-      console.log(toUpdate);
     } else {
       alert("No rows to update")
     }
@@ -363,7 +362,7 @@ const GradeTable = () => {
       <DialogActions>
         <Button
             variant="contained"
-            disabled={tableLoading}
+            disabled={tableLoading || toUpdate.length < 1}
             sx={{
               mt: 2,
               justifySelf: "center",
@@ -389,7 +388,8 @@ export const loader = async ({ params }) => {
   const { facultyLoadData, status } = await HomeSemesterServices.getFacultyLoadByFacultyIdYearSemesterAndClassCode(faculty_id, currentSchoolYear, semester, class_code);
   const loadInfoArr = facultyLoadData;
 
-  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = HomeSemesterServices.getRegistrarActivityBySemester(semester);
+  const { data: registrarActivityData } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
+  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = registrarActivityData;
   
   return {
     rows,

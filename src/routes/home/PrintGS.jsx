@@ -11,12 +11,11 @@ import {
 } from "react-router-dom";
 import React, { useEffect } from "react";
 import { urlDecode } from "url-encode-base64";
-// import { useReactToPrint } from "react-to-print";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 import registrarUDC from "../../assets/registrar_udc.jpg";
-import axios from "axios";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+import { HomeSemesterServices } from "../../services/homeSemesterService";
 
 const GradeSheetHeaderContainer = styled("header")({
   '@media print': {
@@ -204,9 +203,9 @@ class ComponentToPrint extends React.Component {
                             <td>{id}</td>
                             <td height={"auto"}>{studentID}</td>
                             <td style={{ paddingLeft: '8px' }} align="left" height={"auto"}>{studentName}</td>
-                            <td height={"auto"}>{midTermGrade === 0 ? "" : midTermGrade}</td>
-                            <td height={"auto"}>{endTermGrade === 0 ? "" : endTermGrade}</td>
-                            <td height={"auto"}>{finalGrade === 0 ? "" : finalGrade}</td>
+                            <td height={"auto"}>{midTermGrade}</td>
+                            <td height={"auto"}>{endTermGrade}</td>
+                            <td height={"auto"}>{finalGrade}</td>
                             <td height={"auto"}> { getStatusOrRemark(remarks) }</td>
                           </tr>
                         )
@@ -385,13 +384,15 @@ const PrintGraduateStudiesGradeSheet = () => {
   export const loader = async ({ params }) => {
     const { code, class_code} = params;
     const [semester, currentSchoolYear] = code.split("-");
-    const { data } = await axios.get(
-      `${process.env.REACT_APP_API_URL}/getClassCodeDetails?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
-    );
+    // const { data } = await axios.get(
+    //   `${process.env.REACT_APP_API_URL}/getClassCodeDetails?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+    // );
+    const { data } = await HomeSemesterServices.getClassCodeDetails(semester, currentSchoolYear, class_code);
 
-    const { data: students } = await axios.get(
-      `${process.env.REACT_APP_API_URL}/getClassGraduateStudiesStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
-    );
+    // const { data: students } = await axios.get(
+    //   `${process.env.REACT_APP_API_URL}/getClassGraduateStudiesStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+    // );
+    const { students } = await HomeSemesterServices.getClassGraduateStudiesStudents(semester, currentSchoolYear, class_code)
     return { data, students };
   };
   export default PrintGraduateStudiesGradeSheet;

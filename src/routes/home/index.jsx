@@ -34,7 +34,7 @@ import { urlEncode } from "url-encode-base64";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 // import { checkRegistrarActivityDueDate } from "../../services/index.services";
 import { getCampus } from "../../utils/header.util";
-import { homeIndexUtil } from "../../utils/home-index.util";
+import { homeIndexUtil } from "../../utils/homeIndexUtil";
 import { RegistrarActivityContext } from "../../context/RegistrarActivityContext";
 
 const Home = () => {
@@ -98,8 +98,6 @@ const Home = () => {
     [isMobile]
   );
 
-
-
   const logout = () => {
     homeIndexUtil.siteCookies.forEach((cookie) => removeCookie(cookie, { path: "/" }));
     googleLogout();
@@ -121,6 +119,8 @@ const Home = () => {
     }
   }, [cookies, navigate]);
   const campusAccessing = getCampus();
+
+  // const [registrarActivityData, setRegistrarActivityData] = React.useState(homeIndexUtil.initialRegistrarActivityData)
   return (
     <Box
       sx={{

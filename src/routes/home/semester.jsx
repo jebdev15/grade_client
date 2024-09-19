@@ -31,7 +31,6 @@ import {
   Visibility,
   Task as TaskIcon,
 } from "@mui/icons-material";
-import axios from "axios";
 import { useCookies } from "react-cookie";
 import moment from "moment";
 import { urlEncode, urlDecode } from "url-encode-base64";
@@ -172,7 +171,8 @@ const Semester = () => {
       //     },
       //   }
       // );
-      await HomeSemesterServices.submitGradeSheet(formData);
+      const { data } = await HomeSemesterServices.submitGradeSheet(formData);
+      console.log(data);
       navigate(".", { replace: true });
       alert("Grade Sheet has been submitted.");
     }
@@ -266,7 +266,7 @@ const Semester = () => {
                 </IconButton>
               </span>
             </Tooltip>
-            {/* {(canUpload && parseInt(status) === 0) && ( */}
+            {(canUpload && parseInt(status) === 0) && (
               <Tooltip title="Grade Sheet">
                 <span>
                   <IconButton
@@ -274,22 +274,26 @@ const Semester = () => {
                     size="large"
                     aria-label=""
                     onClick={() => {
-                      navigate(
-                        `/home/${semester}-${currentSchoolYear}-${urlEncode(
-                          cookies.faculty_id
-                        )}/upload/${encodedClassCode}`
-                      );
-                      setUploadOpen(true);
-                      uploadTimer();
+                      if(!Boolean(isGraduateStudies)){
+                        navigate(
+                          `/home/${semester}-${currentSchoolYear}-${urlEncode(
+                            cookies.faculty_id
+                          )}/upload/${encodedClassCode}`
+                        );
+                        setUploadOpen(true);
+                        uploadTimer();
+                      } else {
+                        console.log("Clicked.")
+                      }
                     }}
-                    disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false}
+                    disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false || Boolean(isGraduateStudies)}
                   >
                     <FolderOpen />
                   </IconButton>
                 </span>
               </Tooltip>
-            {/* )} */}
-            {/* {canUpload && parseInt(status) === 0 && ( */}
+             )}
+             {canUpload && parseInt(status) === 0 && ( 
               <Tooltip title="Submit grade sheet. You may not able to edit or upload grades. To edit or upload grades, please contact your administrator.">
                 <span>
                   <IconButton
@@ -303,7 +307,7 @@ const Semester = () => {
                   </IconButton>
                 </span>
               </Tooltip>
-            {/* )} */}
+             )} 
             {parseInt(status) === 1 && (
               <Tooltip title="Print Grade Sheet">
                 <span>
@@ -405,8 +409,8 @@ export const loader = async ({ params }) => {
   const { data } = await HomeSemesterServices.getSubjectLoadByFacultyIdYearAndSemester(faculty_id,currentSchoolYear,semester)
   const loads = data;
 
-  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
-
+  const { data:registrarActivity } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
+  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = registrarActivity || {};
   return { loads, dbSchoolYear, dbSemester, dbTo };
   // return { loads };
 };

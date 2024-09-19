@@ -27,8 +27,6 @@ export const HomeSemesterServices = {
     },
     getFacultyLoadByFacultyIdYearSemesterAndClassCode: async (faculty_id, currentSchoolYear, semester, class_code) => {
         const { data: facultyLoadData, status } = await axiosInstance.get(`/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}&class_code=${class_code}`);
-        console.log(facultyLoadData);
-        
         return { facultyLoadData, status };
     },
     getClassCodeDetails: async (semester, currentSchoolYear, class_code) => {
@@ -39,6 +37,10 @@ export const HomeSemesterServices = {
         const { data: students } = await axiosInstance.get(`/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`);
         return { students };
     },
+    getClassGraduateStudiesStudents: async (semester, currentSchoolYear, class_code) => {
+        const { data:students } = await axiosInstance.get(`/getClassGraduateStudiesStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`);
+        return { students }
+    },
     updateGrade: async (data) => {
         const { data: updatedData } = await axiosInstance.post(`/updateGrade`, data);
         return { updatedData };
@@ -48,6 +50,7 @@ export const HomeSemesterServices = {
         return { data };
     },
     submitGradeSheet: async (formData) =>  {
-        return await axiosInstance.post(`/submitGradeSheet`,formData);
+        const { data } = await axiosInstance.post(`/submitGradeSheet`, formData);
+        return { data }
     }
 }

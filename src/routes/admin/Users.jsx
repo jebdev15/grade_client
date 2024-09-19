@@ -27,6 +27,10 @@ const Users = () => {
   const programCodeStatus = useSelector((state) => state.programCodes.status);
 
   const noAccountData = useSelector((state) => state.noAccounts.list);
+  const addIdToNoAccountData = noAccountData?.map((data, index) => ({...data, id: ++index}))
+  React.useEffect(() => {
+    console.log({addIdToNoAccountData});
+  }, [addIdToNoAccountData])
   const noAccountStatus = useSelector((state) => state.noAccounts.status);
 
   const dispatch = useDispatch();
@@ -332,6 +336,31 @@ const Users = () => {
                   <MenuItem key={index} value={faculty_id}>{`${faculty_id} - ${lastname}, ${firstname} ${middlename}`}</MenuItem>
                 ))}
               </Select>
+              {/* <Autocomplete
+                disablePortal
+                options={addIdToNoAccountData}
+                fullWidth
+                getOptionLabel={(option) => option.faculty_id}
+                renderOption={(props, option) => {
+                  const {key, ...optionProps} = props;
+                  console.log({
+                    optionProps,
+                    option,
+                    key
+                  });
+                  
+                  return (
+                    <Box 
+                      key={option.id} 
+                      {...optionProps}
+                    >
+                      {`${option.faculty_id} - ${option.lastname}, ${option.firstname} ${option.middlename}`}
+                    </Box>
+                  )
+                  }
+                }
+                renderInput={(params) => <TextField {...params} label="Faculty ID" />}
+              /> */}
             </FormControl>
           </Box>
         </DialogContent>

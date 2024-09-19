@@ -8,6 +8,7 @@ import {
   DialogTitle,
   IconButton,
   Snackbar,
+  Tooltip,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -316,17 +317,17 @@ const GraduateStudiesTable = () => {
         </Box>
       </DialogContent>
       <DialogActions>
-      <Button
-            variant="contained"
-            disabled={tableLoading}
-            sx={{
-              mt: 2,
-              justifySelf: "center",
-            }}
-            onClick={handleCheckNotUpdated}
-          >
-            {tableLoading ? "Updating..." : "Update Record"}
-          </Button>
+          <Button
+              variant="contained"
+              disabled={tableLoading || toUpdate.length < 1}
+              sx={{
+                mt: 2,
+                justifySelf: "center",
+              }}
+              onClick={handleCheckNotUpdated}
+            >
+              {tableLoading ? "Updating..." : "Update Record"}
+            </Button>
       </DialogActions>
     </Dialog>
   );
@@ -340,8 +341,8 @@ export const loader = async ({ params }) => {
 
   const { facultyLoadData:loadInfoArr, status } = await HomeSemesterServices.getFacultyLoadByFacultyIdYearSemesterAndClassCode(faculty_id, currentSchoolYear, semester, class_code);
 
-  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = HomeSemesterServices.getRegistrarActivityBySemester(semester);
-
+  const { data: registrarActivityData } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
+  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = registrarActivityData;
   return {
     rows,
     loadInfoArr,
