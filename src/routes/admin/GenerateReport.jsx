@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { Box, Button, Typography, useMediaQuery, Select, TextField, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { CloudDownload as CloudDownloadIcon } from "@mui/icons-material";
-import axios from "axios";
 import { saveAs } from "file-saver";
+import { AdminReportsService } from "../../services/adminReportsService";
 
 const GenerateReport = () => {
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("md"));
@@ -91,9 +91,7 @@ const GenerateReport = () => {
       return;
     }
     const params = ["gradeSheetSubmission", "deadlineLogs"].includes(typeOfReport.toGenerate) ? `schoolYear=${typeOfReport.schoolYear}&semester=${typeOfReport.semester}` : `from=${typeOfReport.from}&to=${typeOfReport.to}`;
-    const { data, status } = await axios.get(`${process.env.REACT_APP_API_URL}/download/${url}?toGenerate=${toGenerateValueInURL}&${params}`, {
-      responseType: "arraybuffer",
-    });
+    const { data, status } = await AdminReportsService.generateReport(url, toGenerateValueInURL, params);
     if (status === 200) {
       const dateToday = getTodayDate();
       let blob = new Blob([data], {
