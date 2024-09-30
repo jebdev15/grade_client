@@ -11,10 +11,8 @@ import {
 } from "react-router-dom";
 import React, { useEffect } from "react";
 import { urlDecode } from "url-encode-base64";
-// import { useReactToPrint } from "react-to-print";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 import registrarUDC from "../../assets/registrar_udc.jpg";
-import axios from "axios";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import { HomeSemesterServices } from "../../services/homeSemesterService";

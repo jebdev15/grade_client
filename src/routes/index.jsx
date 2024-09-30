@@ -89,9 +89,6 @@ const Index = () => {
                 flexDirection: "column",
               }}
             >
-              <Typography variant="h6" fontWeight={700} color="primary" textAlign="center">
-                {process.env.REACT_APP_TITLE}
-              </Typography>
               <Typography variant="h4" fontWeight={400} textAlign={{ xs: "center", md: "left" }} sx={{ mb: 1 }}>
                 Sign In
               </Typography>

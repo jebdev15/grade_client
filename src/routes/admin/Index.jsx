@@ -28,6 +28,7 @@ import {
   Schedule as ScheduleIcon,
   Settings,
   WorkHistory as WorkHistoryIcon,
+  AccountCircle as AccountCircleIcon,
 } from "@mui/icons-material";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
@@ -144,7 +145,6 @@ export default function Admin() {
               <span></span>
               <span></span>
             </Typography>
-            <Typography variant="body1" color="initial" sx={{ mr: 2 }}>{`${campusAccessing}(${cookies.accessLevel})`}</Typography>
             <Button
               color="primary"
               onClick={(e) => setMenuAnchor(e.currentTarget)}
@@ -199,10 +199,22 @@ export default function Admin() {
                 anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
               >
                 <MenuItem>
+                  <ListItemIcon>
+                    <HomeIcon />
+                  </ListItemIcon>
+                  <ListItemText sx={{ ml: 3 }} primary={campusAccessing} />
+                </MenuItem>
+                <MenuItem>
+                  <ListItemIcon>
+                    <AccountCircleIcon />
+                  </ListItemIcon>
+                  <ListItemText sx={{ ml: 3 }} primary={cookies.accessLevel} />
+                </MenuItem>
+                <MenuItem>
                   <ListItemAvatar>
                     <Avatar
                       src={cookies.picture}
-                      sx={{ width: 40, height: 40 }}
+                      sx={{ width: 24, height: 24 }}
                     />
                   </ListItemAvatar>
                   <ListItemText primary={cookies.name} />

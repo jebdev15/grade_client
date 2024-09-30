@@ -244,10 +244,6 @@ const GradeTable = () => {
       const confirmation = window.confirm(message)
       if(!confirmation) return
       setTableLoading(true);
-      // const { data } = await axios.post(
-      //                 `${process.env.REACT_APP_API_URL}/updateGrade`,
-      //                 { grades: toUpdate, class_code, method: "Manual", email_used: cookies.email }
-      //               );
       const { data } = await HomeSemesterServices.updateGrade({grades: toUpdate, class_code, method: "Manual", email_used: cookies.email})
       if (data) {
         setToUpdate([]);
@@ -358,8 +354,8 @@ const GradeTable = () => {
           </Snackbar>
         </Box>
       </DialogContent>
-      {(canUpload && checkSubjectIsNotLock) && (    
       <DialogActions>
+      {canUpload && (    
         <Button
             variant="contained"
             disabled={tableLoading || toUpdate.length < 1}
@@ -373,8 +369,8 @@ const GradeTable = () => {
           >
             {tableLoading ? "Updating..." : "Update Record"}
         </Button>
-      </DialogActions>
       )}
+      </DialogActions>
     </Dialog>
   );
 };

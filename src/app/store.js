@@ -19,7 +19,7 @@ export const store = configureStore({
         noAccounts: noAccountsReducer,
         programCodes: programCodesReducer,
         faculty: facultyReducer,
-        registrarActivity: registrarActivityReducer
+        registrarActivity: registrarActivityReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

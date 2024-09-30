@@ -54,9 +54,9 @@ const router = createBrowserRouter([
   {
     path: "home",
     element: 
-    <RegistrarActivityProvider>
-        <Home />
-    </RegistrarActivityProvider>,
+      <RegistrarActivityProvider>
+          <Home />
+      </RegistrarActivityProvider>,
     children: [
       { index: true, element: <Start /> },
       {

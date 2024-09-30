@@ -26,16 +26,18 @@ import {
   LooksOne,
   LooksTwo,
   Menu as MenuIcon,
+  Home as HomeIcon,
+  AccountCircle as AccountCircleIcon,
 } from "@mui/icons-material";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { googleLogout } from "@react-oauth/google";
 import { urlEncode } from "url-encode-base64";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
-// import { checkRegistrarActivityDueDate } from "../../services/index.services";
 import { getCampus } from "../../utils/header.util";
 import { homeIndexUtil } from "../../utils/homeIndexUtil";
-import { RegistrarActivityContext } from "../../context/RegistrarActivityContext";
+import { fetchRegistrarActivity } from "../../features/home/index/registrarActivityThunks";
+import { useDispatch, useSelector } from "react-redux";
 
 const Home = () => {
   const [cookies, , removeCookie] = useCookies(homeIndexUtil.siteCookies);
@@ -45,32 +47,32 @@ const Home = () => {
     firstSemester: 1970,
     secondSemester: 1970,
   });
+  const data = useSelector((state) => state.registrarActivity.list);
+  const error = useSelector((state) => state.registrarActivity.error);
+  const registrarActivityStatus = useSelector((state) => state.registrarActivity.status);
 
-  const { data, error, status:registrarActivityStatus } = React.useContext(RegistrarActivityContext);
+  const dispatch = useDispatch();
   useEffect(() => {
+    if (registrarActivityStatus === "idle") {
+      dispatch(fetchRegistrarActivity());
+    }
     if(registrarActivityStatus === "succeeded" && !error) {
-      const { data:registrarActivityData } = data;
-      const {
-        schoolyear:summerSchoolYear,
-        semester:summerSemester,
-      } = registrarActivityData[0];
-      const {
-        schoolyear:firstSemesterSchoolYear,
-        semester:firstSemester,
-      } = registrarActivityData[1];
-      const {
-        schoolyear:secondSemesterSchoolYear,
-        semester:secondSemester,
-      } = registrarActivityData[2];
-      setSchoolYear((prevState) => ({
-          ...prevState, 
-          summer: summerSemester === 'summer' ? summerSchoolYear : prevState.summer,
-          firstSemester: firstSemester === '1st' ? firstSemesterSchoolYear : prevState.firstSemester,
-          secondSemester: secondSemester === '2nd' ? secondSemesterSchoolYear : prevState.secondSemester,
-        })
-      );
+      data?.data.forEach(({ schoolyear, semester }) => {
+        // Set the school year based on the semester
+        if (semester === 'summer') {
+          setSchoolYear((prevState) => ({ ...prevState, summer: schoolyear }));
+        } else if (semester === '1st') {
+          setSchoolYear((prevState) => ({ ...prevState, firstSemester: schoolyear }));
+        } else if (semester === '2nd') {
+          setSchoolYear((prevState) => ({ ...prevState, secondSemester: schoolyear }));
+        }
+        console.log({
+          schoolyear,
+          semester
+        });
+      });
     } 
-  }, [data, registrarActivityStatus, error]);
+  }, [data, registrarActivityStatus, error, dispatch]);
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
@@ -120,7 +122,6 @@ const Home = () => {
   }, [cookies, navigate]);
   const campusAccessing = getCampus();
 
-  // const [registrarActivityData, setRegistrarActivityData] = React.useState(homeIndexUtil.initialRegistrarActivityData)
   return (
     <Box
       sx={{
@@ -167,7 +168,6 @@ const Home = () => {
               <span></span>
               <span></span>
             </Typography>
-            <Typography variant="body1" color="initial" sx={{ mr: 2 }}>{`${campusAccessing}(${cookies.accessLevel})`}</Typography>
             <Button
               color="primary"
               onClick={(e) => setMenuAnchor(e.currentTarget)}
@@ -222,10 +222,22 @@ const Home = () => {
                 anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
               >
                 <MenuItem>
+                  <ListItemIcon>
+                    <HomeIcon />
+                  </ListItemIcon>
+                  <ListItemText sx={{ ml: 3 }} primary={campusAccessing} />
+                </MenuItem>
+                <MenuItem>
+                  <ListItemIcon>
+                    <AccountCircleIcon />
+                  </ListItemIcon>
+                  <ListItemText sx={{ ml: 3 }} primary={cookies.accessLevel} />
+                </MenuItem>
+                <MenuItem>
                   <ListItemAvatar>
                     <Avatar
                       src={cookies.picture}
-                      sx={{ width: 40, height: 40 }}
+                      sx={{ width: 24, height: 24 }}
                     />
                   </ListItemAvatar>
                   <ListItemText primary={cookies.name} />
@@ -353,7 +365,7 @@ const Home = () => {
               }}
             ></Backdrop>
           )}
-          <Outlet context={[schoolyear]} />
+          <Outlet context={[schoolyear,data,registrarActivityStatus]} />
         </Box>
       </Box>
     </Box>

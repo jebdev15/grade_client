@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import { dateFormatter } from "../../utils/formatDate";
-import { AdminSettingsServices } from "../../services/adminSettingsService";
+import { useOutletContext } from "react-router";
 const Start = () => {
   const initialRegistrarActivity = {
     activity: "",
@@ -11,16 +11,17 @@ const Start = () => {
     from: "0000-00-00",
     to: "0000-00-00",
   }
+  const [,registrarActivityData,registrarActivityStatus] = useOutletContext();
   const [data, setData] = React.useState([initialRegistrarActivity])
   React.useEffect(() => {
-    const fetchRegistrarActivity = async () => {
-      const { data, status } = await AdminSettingsServices.getRegistrarActivity();
-      if(status === 200) {
-        setData(data)
-      }
+    if(registrarActivityStatus === "succeeded") {
+      console.log({
+        registrarActivityData,
+        registrarActivityStatus
+      })
+      setData(registrarActivityData.data)
     }
-    fetchRegistrarActivity()
-  },[])
+  },[registrarActivityData, registrarActivityStatus])
   return (
     <React.Suspense fallback={<div>Loading...</div>}>
       <Box >
@@ -42,25 +43,33 @@ const Start = () => {
             semester, 
             status, 
             from, 
-            to
-          }, index) => (
-            <Paper 
-              key={index} 
-              elevation={12}
-              sx={{ 
-                p: 2, 
-                mt: 4, 
-                flexGrow: 1 
-              }}
-            >
-              <Typography variant="body1" color="initial"><strong>{activity}</strong></Typography>
-              <Typography variant="body1" color="initial">Current Status <strong>{status}</strong></Typography>
-              <Typography variant="body1" color="initial">Current School Year: <strong>{`${schoolyear} - ${schoolyear + 1}`}</strong></Typography>
-              <Typography variant="body1" color="initial">Current Semester: <strong>{semester === "summer" ? "Summer" : semester }</strong></Typography>
-              <Typography variant="body1" color="initial">From: <strong>{dateFormatter(from)}</strong></Typography>
-              <Typography variant="body1" color="initial">To: <strong>{dateFormatter(to)}</strong></Typography>
-            </Paper>
-          ))}
+            to,
+            currentSem
+          }, index) => {
+            if(Boolean(currentSem)) {
+              return (
+                <Paper 
+                  key={index} 
+                  elevation={12}
+                  sx={{ 
+                    p: 2, 
+                    mt: 4, 
+                    flexGrow: 1 
+                  }}
+                >
+                  <Typography variant="body1" color="initial"><strong>{activity}</strong></Typography>
+                  <Typography variant="body1" color="initial">Current Status <strong>{status}</strong></Typography>
+                  <Typography variant="body1" color="initial">Current School Year: <strong>{`${schoolyear} - ${schoolyear + 1}`}</strong></Typography>
+                  <Typography variant="body1" color="initial">Current Semester: <strong>{semester === "summer" ? "Summer" : semester }</strong></Typography>
+                  <Typography variant="body1" color="initial">From: <strong>{dateFormatter(from)}</strong></Typography>
+                  <Typography variant="body1" color="initial">To: <strong>{dateFormatter(to)}</strong></Typography>
+                </Paper>
+              )
+            } else {
+              return ""
+            }
+          }
+          )}
         </Box>
       </Box>
     </React.Suspense>

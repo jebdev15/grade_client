@@ -5,7 +5,7 @@ export const AuthUtil = {
         let response = '';
         switch(status){
             case 200:
-                response = "Successful";
+                response = "Success";
                 break;
             case 401:
                 response = "Invalid Credentials";

@@ -8,7 +8,6 @@ import {
   DialogTitle,
   IconButton,
   Snackbar,
-  Tooltip,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -18,7 +17,6 @@ import {
   useOutletContext,
   useParams,
 } from "react-router-dom";
-import axios from "axios";
 import { Close } from "@mui/icons-material";
 import { 
   DataGrid
@@ -28,6 +26,7 @@ import { urlDecode } from "url-encode-base64";
 import { useCookies } from "react-cookie";
 import { dateFormatter } from "../../utils/formatDate";
 import { HomeSemesterServices } from "../../services/homeSemesterService";
+import { HomeSemesterGraduateStudiesTableService } from "../../services/homeSemesterGraduateStudiesTableService";
 
 const GraduateStudiesTable = () => {
   const [cookies, , ] = useCookies(["email"]);
@@ -205,10 +204,7 @@ const GraduateStudiesTable = () => {
       const confirmation = window.confirm(message)
       if(!confirmation) return
       setTableLoading(true);
-      const { data } = await axios.post(
-                      `${process.env.REACT_APP_API_URL}/updateGraduateStudiesGrade`,
-                      { grades: toUpdate, class_code, method: "Manual", email_used: cookies.email }
-                    );
+      const { data } = await HomeSemesterGraduateStudiesTableService.updateGraduateStudiesGrade(toUpdate, class_code, cookies);
       if (data) {
         setToUpdate([]);
         setTableLoading(false);
@@ -317,6 +313,7 @@ const GraduateStudiesTable = () => {
         </Box>
       </DialogContent>
       <DialogActions>
+        {canUpload && (
           <Button
               variant="contained"
               disabled={tableLoading || toUpdate.length < 1}
@@ -328,6 +325,7 @@ const GraduateStudiesTable = () => {
             >
               {tableLoading ? "Updating..." : "Update Record"}
             </Button>
+        )}
       </DialogActions>
     </Dialog>
   );

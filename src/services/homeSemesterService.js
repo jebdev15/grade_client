@@ -41,9 +41,9 @@ export const HomeSemesterServices = {
         const { data:students } = await axiosInstance.get(`/getClassGraduateStudiesStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`);
         return { students }
     },
-    updateGrade: async (data) => {
-        const { data: updatedData } = await axiosInstance.post(`/updateGrade`, data);
-        return { updatedData };
+    updateGrade: async (gradeData) => {
+        const { data } = await axiosInstance.post(`/updateGrade`, gradeData);
+        return { data };
     },
     submitGradeSheetConfirmation: async (semester, currentSchoolYear, encodedClassCode) => {
         const { data } = await axiosInstance.get(`/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${encodedClassCode}`);

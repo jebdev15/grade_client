@@ -122,17 +122,6 @@ const Semester = () => {
   const checkSchoolYear = dbSchoolYear === parseInt(decodedSchoolYear);
   const checkSemester = dbSemester === decodedSemester;
   const canUpload = checkDate && checkSchoolYear && checkSemester;
-  React.useEffect(() => {
-    console.log({
-      canUpload,
-      checkDate,
-      checkSchoolYear,
-      checkSemester,
-      dbSchoolYear,
-      dbSemester,
-      dbTo,
-    })
-  }, [canUpload, checkDate, checkSchoolYear, checkSemester, dbSchoolYear, dbSemester, dbTo]);
   const LoadCard = ({
     subject_code,
     status,
@@ -404,14 +393,13 @@ const Semester = () => {
 
 export const loader = async ({ params }) => {
   const { code } = params;
-  const [semester, currentSchoolYear, faculty_id] = code.split("-");
-
-  const { data } = await HomeSemesterServices.getSubjectLoadByFacultyIdYearAndSemester(faculty_id,currentSchoolYear,semester)
-  const loads = data;
+  const [semester,currentSchoolYear,faculty_id,] = code.split("-");
+  const { data:loads } = await HomeSemesterServices.getSubjectLoadByFacultyIdYearAndSemester(faculty_id,currentSchoolYear,semester)
 
   const { data:registrarActivity } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
   const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = registrarActivity || {};
   return { loads, dbSchoolYear, dbSemester, dbTo };
+  // return { dbSchoolYear, dbSemester, dbTo };
   // return { loads };
 };
 export default Semester;

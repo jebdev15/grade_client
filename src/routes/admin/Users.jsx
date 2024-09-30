@@ -1,6 +1,6 @@
 import { DataGrid } from "@mui/x-data-grid";
 import React, { useEffect, useState } from "react";
-import { IconButton, Tooltip, Typography, Box, Dialog, DialogTitle, DialogContent, FormControl, TextField, InputLabel, Select, DialogActions, MenuItem, ButtonGroup, Button, useMediaQuery, Grid } from "@mui/material";
+import { IconButton, Tooltip, Typography, Box, Dialog, DialogTitle, DialogContent, FormControl, TextField, InputLabel, Select, DialogActions, MenuItem, ButtonGroup, Button, useMediaQuery, Grid, Autocomplete } from "@mui/material";
 import { Close, PersonAddAlt1 as PersonAddAlt1Icon, ModeEdit } from "@mui/icons-material";
 import { useCookies } from "react-cookie";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,6 +10,14 @@ import { fetchColleges } from "../../features/admin/users/collegesThunks";
 import { fetchNoAccounts } from "../../features/admin/users/noAccountsThunks";
 import { AdminUsersService } from "../../services/adminUsersService";
 import { fetchProgramCodes } from "../../features/admin/users/programCodesThunks";
+
+const sleep = (duration) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, duration);
+  });
+}
 
 const Users = () => {
   const [cookies, ,] = useCookies(["email", "accessLevel"]);
@@ -27,10 +35,7 @@ const Users = () => {
   const programCodeStatus = useSelector((state) => state.programCodes.status);
 
   const noAccountData = useSelector((state) => state.noAccounts.list);
-  const addIdToNoAccountData = noAccountData?.map((data, index) => ({...data, id: ++index}))
-  React.useEffect(() => {
-    console.log({addIdToNoAccountData});
-  }, [addIdToNoAccountData])
+  // const addIdToNoAccountData = noAccountData?.map((data, index) => ({...data, id: ++index}));
   const noAccountStatus = useSelector((state) => state.noAccounts.status);
 
   const dispatch = useDispatch();
@@ -79,7 +84,6 @@ const Users = () => {
     const toEditRowData = params.row;
     const findStatus = toEditRowData.status === "Active" ? 1 : 0;
     const updatedToEditRowData = { ...toEditRowData, status: findStatus };
-    console.log(updatedToEditRowData);
     setUpdateAccountData(updatedToEditRowData);
     setUpdateDataToCheck(updatedToEditRowData);
     setTargetCurrentStatusOfAccount(findStatus);
@@ -215,6 +219,26 @@ const Users = () => {
     }
   }, [programCodeStatus, dispatch, cookies]);
   const [loading, setLoading] = useState(true);
+  const [autocompleteProps, setAutocompleteProps] = useState({
+    open: false,
+    options: [],
+    loading: false,
+  });
+  const autocompleteFunctions = {
+    handleOpen: () => {
+      setAutocompleteProps((prevState) => ({ ...prevState, open: true }));
+      (async () => {
+        setAutocompleteProps((prevState) => ({ ...prevState, loading: true }));
+        await sleep(1e3); // For demo purposes.
+        setAutocompleteProps((prevState) => ({ ...prevState, loading: false }));
+        setAutocompleteProps((prevState) => ({ ...prevState, options: [...noAccountData] }));
+      })();
+    },
+    handleClose: () => {
+      setAutocompleteProps((prevState) => ({ ...prevState, open: false }));
+      setAutocompleteProps((prevState) => ({ ...prevState, options: [] }));
+    }
+  }
   return (
     <>
       <Box 
@@ -320,7 +344,7 @@ const Users = () => {
               </Select>
             </FormControl>
             <FormControl sx={{ display: "flex", flexDirection: "row" }} fullWidth>
-              <InputLabel id="select-faculty-label">Faculty</InputLabel>
+              {/* <InputLabel id="select-faculty-label">Faculty</InputLabel>
               <Select
                 labelId="select-faculty-label"
                 id="select-faculty"
@@ -335,32 +359,49 @@ const Users = () => {
                 {noAccountData?.map(({ faculty_id, lastname, firstname, middlename, position, specialization }, index) => (
                   <MenuItem key={index} value={faculty_id}>{`${faculty_id} - ${lastname}, ${firstname} ${middlename}`}</MenuItem>
                 ))}
-              </Select>
-              {/* <Autocomplete
-                disablePortal
-                options={addIdToNoAccountData}
+              </Select> */}
+              <Autocomplete
                 fullWidth
-                getOptionLabel={(option) => option.faculty_id}
+                disabled={["Administrator", "Registrar", "Dean", "Chairperson"].includes(createUserData?.accessLevel) ? true : false}
+                // disablePortal
+                open={autocompleteProps.open}
+                onOpen={autocompleteFunctions.handleOpen}
+                onClose={autocompleteFunctions.handleClose}
+                options={autocompleteProps.options}
+                isOptionEqualToValue={(option, value) => {
+                  return option?.faculty_id === value?.faculty_id
+                }}
+                getOptionLabel={(option) => option.faculty_id || createUserData.facultyId}
+                groupBy={(option) => option?.faculty_id[0]?.toUpperCase()}
                 renderOption={(props, option) => {
                   const {key, ...optionProps} = props;
-                  console.log({
-                    optionProps,
-                    option,
-                    key
-                  });
-                  
                   return (
                     <Box 
-                      key={option.id} 
+                      key={option?.facultyId} 
                       {...optionProps}
                     >
-                      {`${option.faculty_id} - ${option.lastname}, ${option.firstname} ${option.middlename}`}
+                      {`${option?.faculty_id} - ${option?.lastname}, ${option?.firstname} ${option?.middlename}`}
                     </Box>
                   )
                   }
                 }
-                renderInput={(params) => <TextField {...params} label="Faculty ID" />}
-              /> */}
+                renderInput={(params) => 
+                <TextField 
+                {...params} 
+                  name="facultyId" 
+                  label="Faculty ID" 
+                  value={createUserData?.facultyId} 
+                  onChange={handleChange} 
+                  disabled={["Administrator", "Registrar", "Dean", "Chairperson"].includes(createUserData?.accessLevel) ? true : false}
+                  required 
+                />}
+                renderGroup={(params) => (
+                  <li key={params?.key}>
+                    <div>{params?.group}</div>  
+                    <div>{params?.children}</div>  
+                  </li>
+                )}
+              />
             </FormControl>
           </Box>
         </DialogContent>
@@ -446,7 +487,7 @@ const Users = () => {
               <Select
                 labelId="select-updateFaculty-label"
                 id="select-updateFaculty"
-                label="Faculty"
+                label="Faculty ID"
                 name="faculty_id"
                 value={updateAccountData.faculty_id}
                 onChange={handleChangeUpdateAccount}
@@ -454,8 +495,8 @@ const Users = () => {
                 disabled={["Administrator", "Registrar", "Dean", "Chairperson"].includes(updateAccountData.accessLevel) ? true : false}
                 fullWidth
               >
-                {noAccountData?.map(({ faculty_id, lastname, firstname, middlename, position, specialization }, index) => (
-                  <MenuItem key={index} value={faculty_id}>{`${lastname}, ${firstname} ${middlename} - ${faculty_id}`}</MenuItem>
+                {noAccountData?.map(({ faculty_id, lastname, firstname, middlename }, index) => (
+                  <MenuItem key={index} value={faculty_id}>{`${faculty_id} - ${lastname}, ${firstname} ${middlename}`}</MenuItem>
                 ))}
               </Select>
             </FormControl>

@@ -13,6 +13,7 @@ const Deadline = () => {
     status: "",
     from: "0000-00-00",
     to: "0000-00-00",
+    currentSem: "",
   }
   const [data, setData] = React.useState(initialState);
   const changeHandler = (event) => {
@@ -37,6 +38,7 @@ const Deadline = () => {
         status: response.data.status || "N/A",
         from: response.data.from && response.data.from !== "0000-00-00" ? dateOnlyFormatter(response.data.from) : "Invalid Date",
         to: response.data.to && response.data.to !== "0000-00-00" ? dateOnlyFormatter(response.data.to) : "Invalid Date",
+        currentSem: response.data.currentSem || "",
       };
   
       // Now you can set the state with valid data
@@ -58,6 +60,7 @@ const Deadline = () => {
     formData.append("status", data.status);
     formData.append("from", data.from);
     formData.append("to", data.to);
+    formData.append("currentSem", data.currentSem);
     const response = await AdminSettingsServices.updateRegistrarActivityById(formData);
     alert(response.data.message, response.status);
   };
@@ -172,6 +175,22 @@ const Deadline = () => {
                 required
                 fullWidth 
               />
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="select-currentSem-label">Set as Current Semester</InputLabel>
+              <Select 
+                id="select-currentSem" 
+                label="Set as Current Semester" 
+                name="currentSem" 
+                value={data.currentSem} 
+                onChange={changeHandler}
+                disabled={data.semester === ""}
+                required
+              >
+                <MenuItem value=""></MenuItem>
+                <MenuItem value="1">Yes</MenuItem>
+                <MenuItem value="0">No</MenuItem>
+              </Select>
             </FormControl>
             <Button 
               variant="contained" 

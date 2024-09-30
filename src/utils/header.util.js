@@ -17,6 +17,9 @@ export const getCampus = () => {
         case "https://ali-gs.chmsu.edu.ph" || "https://www.ali-gs.chmsu.edu.ph":
             campus= "Alijis Campus";
             break;
+        case "https://test-gs.chmsu.edu.ph" || "https://www.test-gs.chmsu.edu.ph":
+                campus= "Test Talisay Campus";
+            break;    
         default:
             campus= "Campus";
             break;
