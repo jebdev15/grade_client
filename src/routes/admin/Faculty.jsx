@@ -1,7 +1,7 @@
 import { DataGrid } from "@mui/x-data-grid";
 import React, { useEffect, useState } from "react";
 import { Box, Button, IconButton, Typography, Tooltip, useMediaQuery, ButtonGroup, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, FormControl, InputLabel, Select, MenuItem, TextField, Alert } from "@mui/material";
-import { Close, Lock, LockOpen, People, Print, Visibility as VisibilityIcon, Settings as SettingsIcon } from "@mui/icons-material";
+import { Close, Lock, LockOpen, People, Print, Subject as SubjectIcon, Settings as SettingsIcon, Subject } from "@mui/icons-material";
 import { urlEncode } from "url-encode-base64";
 import ViewStudentsDialog from "../../components/dialogs/ViewStudentsDialog";
 import { initialOpen } from "../../utils/admin-faculty.util";
@@ -227,7 +227,7 @@ const Faculty = () => {
             <ButtonGroup variant="text" color="primary" aria-label="">
               <Tooltip title="View Subject Load">
                 <IconButton name="subjectLoad" aria-label="view" variant="text" color="primary" onClick={handleOpen}>
-                  <VisibilityIcon />
+                  <SubjectIcon />
                 </IconButton>
               </Tooltip>
             </ButtonGroup>
