@@ -30,6 +30,7 @@ import {
   Print,
   Visibility,
   Task as TaskIcon,
+  Article,
 } from "@mui/icons-material";
 import { useCookies } from "react-cookie";
 import moment from "moment";
@@ -248,9 +249,14 @@ const Semester = () => {
                   disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false}
                 >
                   {
-                    (canUpload && parseInt(status) === 0)
-                      ? ( <Keyboard /> ) 
-                      : ( <Visibility /> )
+                    canUpload
+                    ? parseInt(status) === 0
+                      ? ( <Keyboard /> )
+                      : ( <Article /> )
+                    : ( <Article /> )
+                    // (canUpload && parseInt(status) === 0)
+                    //   ? ( <Keyboard /> ) 
+                    //   : ( <Article /> )
                   }
                 </IconButton>
               </span>
@@ -297,7 +303,7 @@ const Semester = () => {
                 </span>
               </Tooltip>
              )} 
-            {parseInt(status) === 1 && (
+            {(!canUpload || parseInt(status) === 1) && (
               <Tooltip title="Print Grade Sheet">
                 <span>
                   <IconButton
