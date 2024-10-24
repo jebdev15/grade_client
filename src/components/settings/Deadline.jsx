@@ -14,6 +14,7 @@ const Deadline = () => {
     from: "0000-00-00",
     to: "0000-00-00",
     currentSem: "",
+    termType: "",
   }
   const [data, setData] = React.useState(initialState);
   const changeHandler = (event) => {
@@ -39,6 +40,7 @@ const Deadline = () => {
         from: response.data.from && response.data.from !== "0000-00-00" ? dateOnlyFormatter(response.data.from) : "Invalid Date",
         to: response.data.to && response.data.to !== "0000-00-00" ? dateOnlyFormatter(response.data.to) : "Invalid Date",
         currentSem: response.data.currentSem || "",
+        termType: response.data.term_type || "",
       };
   
       // Now you can set the state with valid data
@@ -61,6 +63,7 @@ const Deadline = () => {
     formData.append("from", data.from);
     formData.append("to", data.to);
     formData.append("currentSem", data.currentSem);
+    formData.append("termType", data.termType);
     const response = await AdminSettingsServices.updateRegistrarActivityById(formData);
     alert(response.data.message, response.status);
   };
@@ -133,6 +136,21 @@ const Deadline = () => {
                 <MenuItem value="summer">Summer</MenuItem>
                 <MenuItem value="1st">1st Semester</MenuItem>
                 <MenuItem value="2nd">2nd Semester</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="select-termType-label">Term Type(Mid/Final)</InputLabel>
+              <Select 
+                id="select-termType" 
+                label="Term Type" 
+                name="termType" 
+                value={data.termType} 
+                onChange={changeHandler}
+                disabled={data.termType === ""}
+                required
+              >
+                <MenuItem value="midterm">Mid Term</MenuItem>
+                <MenuItem value="finalterm">Final Term</MenuItem>
               </Select>
             </FormControl>
             <FormControl fullWidth>

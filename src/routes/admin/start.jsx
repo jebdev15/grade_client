@@ -42,7 +42,8 @@ const Start = () => {
             semester, 
             status, 
             from, 
-            to
+            to,
+            term_type
           }, index) => (
             <Paper 
               key={index} 
@@ -56,9 +57,10 @@ const Start = () => {
               <Typography variant="body1" color="initial"><strong>{activity}</strong></Typography>
               <Typography variant="body1" color="initial">Current Status <strong>{status}</strong></Typography>
               <Typography variant="body1" color="initial">Current School Year: <strong>{`${schoolyear} - ${schoolyear + 1}`}</strong></Typography>
-              <Typography variant="body1" color="initial">Current Semester: <strong>{semester === "summer" ? "Summer" : semester }</strong></Typography>
+              <Typography variant="body1" color="initial">Current Semester: <strong>{semester === "summer" ? "Summer" : semester }({term_type === 'midterm' ? "Mid Term" : "Final Term"})</strong></Typography>
               <Typography variant="body1" color="initial">From: <strong>{dateFormatter(from)}</strong></Typography>
               <Typography variant="body1" color="initial">To: <strong>{dateFormatter(to)}</strong></Typography>
+              <Typography variant="body1" color="initial"><strong>{}</strong></Typography>
             </Paper>
           ))}
         </Box>

@@ -31,6 +31,7 @@ import {
   Visibility,
   Task as TaskIcon,
   Article,
+  TaskOutlined,
 } from "@mui/icons-material";
 import { useCookies } from "react-cookie";
 import moment from "moment";
@@ -45,7 +46,7 @@ const Semester = () => {
   const [semester, currentSchoolYear] = code.split("-");
 
   const navigate = useNavigate();
-  const { loads, dbSchoolYear, dbSemester, dbTo } = useLoaderData();
+  const { loads, dbSchoolYear, dbSemester, dbTo, dbTermType } = useLoaderData();
 
   const [manualOpen, setManualOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -289,6 +290,21 @@ const Semester = () => {
               </Tooltip>
              )}
              {canUpload && parseInt(status) === 0 && ( 
+              <Tooltip title="Submit midterm grade sheet. You may not able to edit or upload grades. To edit or upload grades, please contact your administrator.">
+                <span>
+                  <IconButton
+                    color="primary"
+                    size="large"
+                    aria-label=""
+                    onClick={() => submitGradeSheetConfirmation(encodedClassCode)}
+                    disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false || dbTermType === 'finalterm'}
+                  >
+                    <TaskOutlined />
+                  </IconButton>
+                </span>
+              </Tooltip>
+             )} 
+             {canUpload && parseInt(status) === 0 && ( 
               <Tooltip title="Submit grade sheet. You may not able to edit or upload grades. To edit or upload grades, please contact your administrator.">
                 <span>
                   <IconButton
@@ -296,13 +312,13 @@ const Semester = () => {
                     size="large"
                     aria-label=""
                     onClick={() => submitGradeSheetConfirmation(encodedClassCode)}
-                    disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false}
+                    disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false || dbTermType === 'midterm'}
                   >
                     <TaskIcon />
                   </IconButton>
                 </span>
               </Tooltip>
-             )} 
+             )}
             {(!canUpload || parseInt(status) === 1) && (
               <Tooltip title="Print Grade Sheet">
                 <span>
@@ -403,8 +419,8 @@ export const loader = async ({ params }) => {
   const { data:loads } = await HomeSemesterServices.getSubjectLoadByFacultyIdYearAndSemester(faculty_id,currentSchoolYear,semester)
 
   const { data:registrarActivity } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
-  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = registrarActivity || {};
-  return { loads, dbSchoolYear, dbSemester, dbTo };
+  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo, term_type: dbTermType } = registrarActivity || {};
+  return { loads, dbSchoolYear, dbSemester, dbTo, dbTermType };
   // return { dbSchoolYear, dbSemester, dbTo };
   // return { loads };
 };
