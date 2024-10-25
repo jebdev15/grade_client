@@ -23,3 +23,10 @@ export const submittedGradeSheetMessage = (data) => {
       const alertMessage = `Are you sure you want to submit this grade sheet? Once submitted, it cannot be edited. \n #Contact Registrar for Grades Revision\n${midTermAlert}\n${endTermAlert}`
       return alertMessage;
 }
+
+export const submittedMidtermGradeSheetMessage = (data) => {
+  const filterNoMidtermGrade = data.filter(student => ['',0,'null'].includes(student.midTermGrade))
+  const midTermAlert = filterNoMidtermGrade.length > 0 ? `There are ${filterNoMidtermGrade.length} students without a midterm grade` : "";
+  const alertMessage = `Are you sure you want to submit this midterm grade sheet?\n #Contact Registrar for Grades Revision\n${midTermAlert}`
+  return alertMessage;
+}

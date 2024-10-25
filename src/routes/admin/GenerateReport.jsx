@@ -49,7 +49,7 @@ const GenerateReport = () => {
     },
     {
       value: "deadlineLogs",
-      label: "Grade Sheet Submission Deadline Logs",
+      label: "Deadline Logs",
     },
   ];
   const semesterOptions = [

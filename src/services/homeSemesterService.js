@@ -52,5 +52,9 @@ export const HomeSemesterServices = {
     submitGradeSheet: async (formData) =>  {
         const { data } = await axiosInstance.post(`/submitGradeSheet`, formData);
         return { data }
+    },
+    submitMidtermGradeSheet: async (formData) =>  {
+        const { data } = await axiosInstance.post(`/submitMidtermGradeSheet`, formData);
+        return { data }
     }
 }

@@ -28,16 +28,15 @@ import {
   Home,
   Keyboard,
   Print,
-  Visibility,
   Task as TaskIcon,
   Article,
-  TaskOutlined,
+  InsertDriveFile,
 } from "@mui/icons-material";
 import { useCookies } from "react-cookie";
 import moment from "moment";
 import { urlEncode, urlDecode } from "url-encode-base64";
 import { dateFormatter } from "../../utils/formatDate";
-import { identifyPrintLink, submittedGradeSheetMessage } from "../../utils/semester.utils";
+import { identifyPrintLink, submittedGradeSheetMessage, submittedMidtermGradeSheetMessage } from "../../utils/semester.utils";
 import { HomeSemesterServices } from "../../services/homeSemesterService";
 
 const Semester = () => {
@@ -163,6 +162,26 @@ const Semester = () => {
       //   }
       // );
       const { data } = await HomeSemesterServices.submitGradeSheet(formData);
+      console.log(data);
+      navigate(".", { replace: true });
+      alert("Grade Sheet has been submitted.");
+    }
+
+    const submitMidtermGradeSheetConfirmation = async (classCode) => {
+      const { data } = await HomeSemesterServices.submitGradeSheetConfirmation(semester, currentSchoolYear, encodedClassCode);
+      const alertMessage = submittedMidtermGradeSheetMessage(data)
+      const confirmation = window.confirm(alertMessage)
+      if(!confirmation) return
+      await submitMidtermGradeSheetConfirmed(classCode)
+    }
+
+    const submitMidtermGradeSheetConfirmed = async (classCode) => {
+      lockGradeSheetTimer()
+      const formData = new FormData();
+      formData.append("class_code", encodedClassCode);
+      formData.append("email_used", cookies.email)
+
+      const { data } = await HomeSemesterServices.submitMidtermGradeSheet(formData);
       console.log(data);
       navigate(".", { replace: true });
       alert("Grade Sheet has been submitted.");
@@ -296,10 +315,12 @@ const Semester = () => {
                     color="primary"
                     size="large"
                     aria-label=""
-                    onClick={() => submitGradeSheetConfirmation(encodedClassCode)}
+                    onClick={() => {
+                      submitMidtermGradeSheetConfirmation(encodedClassCode)
+                    }}
                     disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false || dbTermType === 'finalterm'}
                   >
-                    <TaskOutlined />
+                    <InsertDriveFile />
                   </IconButton>
                 </span>
               </Tooltip>
@@ -311,7 +332,9 @@ const Semester = () => {
                     color="primary"
                     size="large"
                     aria-label=""
-                    onClick={() => submitGradeSheetConfirmation(encodedClassCode)}
+                    onClick={() => {
+                      submitGradeSheetConfirmation(encodedClassCode)
+                    }}
                     disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false || dbTermType === 'midterm'}
                   >
                     <TaskIcon />
@@ -352,7 +375,7 @@ const Semester = () => {
           <Typography variant="h4" fontWeight={700}>
             {` ${decodedSemester?.toUpperCase()} ${
               decodedSemester === "summer" ? "" : "SEMESTER"
-            }`}
+            }`}({dbTermType === "midterm" ? "MID TERM" : "FINAL TERM"})
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton onClick={() => navigate("/home")}>
