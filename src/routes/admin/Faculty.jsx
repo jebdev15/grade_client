@@ -114,16 +114,20 @@ const Faculty = () => {
             const { data } = await AdminFacultyService.getStudentsByClassCode(encoded.class_code);
             setViewStudents((prevState) => ({ ...prevState, rows: data.rows }));
           };
-          const openSubjectCodesGSHandler = (subjectCode) => {
-            const subjectCodeIsGS = subjectCodesGS.some((subject) => subject.subject_code === subjectCode);
-            const link = subjectCodeIsGS ? `/admin/print/${urlEncode(filterData.semester)}-${urlEncode(filterData.schoolyear)}/${urlEncode(params.row.id)}/gs` : `/admin/print/${urlEncode(filterData.semester)}-${urlEncode(filterData.schoolyear)}/${urlEncode(params.row.id)}`;
+          const openSubjectCodesGSHandler = (isGraduate) => {
+            const link = `/admin/print/${urlEncode(filterData.semester)}-${urlEncode(filterData.schoolyear)}/${urlEncode(params.row.id)}${isGraduate ? "/gs" : ""}`;
             return link;
           };
-          const printGradeSheetLink = openSubjectCodesGSHandler(params.row.subject_code);
+          const printGradeSheetLink = openSubjectCodesGSHandler(params.row.isGraduate);
           return (
             <>
-              <ButtonGroup variant="text" color="primary" aria-label="">
-                  <Tooltip title={`Currently ${params.row.status ? "Locked" : "Unlocked"}. Click to ${params.row.status ? "Unlock" : "Lock"} Subject`}>
+              <ButtonGroup variant="text" color="primary" aria-label="actions">
+                  <Tooltip title={`Midterm is Currently ${params.row.midterm_status ? "Locked" : "Unlocked"}. Click to ${params.row.midterm_status ? "Unlock" : "Lock"} Subject`}>
+                    <IconButton aria-label="view" variant="text" color="primary" onClick={handleOpenConfirmation}>
+                      {(params.row.status) ? <Lock /> : <LockOpen />}
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title={`Endterm is Currently ${params.row.status ? "Locked" : "Unlocked"}. Click to ${params.row.status ? "Unlock" : "Lock"} Subject`}>
                     <IconButton aria-label="view" variant="text" color="primary" onClick={handleOpenConfirmation}>
                       {(params.row.status) ? <Lock /> : <LockOpen />}
                     </IconButton>

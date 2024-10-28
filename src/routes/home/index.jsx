@@ -66,10 +66,6 @@ const Home = () => {
         } else if (semester === '2nd') {
           setSchoolYear((prevState) => ({ ...prevState, secondSemester: schoolyear }));
         }
-        console.log({
-          schoolyear,
-          semester
-        });
       });
     } 
   }, [data, registrarActivityStatus, error, dispatch]);

@@ -131,8 +131,10 @@ const Semester = () => {
     class_code,
     timestamp,
     method,
+    midtermSubmittedLog,
     submittedLog,
-    isGraduateStudies
+    isGraduateStudies,
+    midterm_status
   }) => {
     const encodedClassCode = urlEncode(class_code);
     const submitGradeSheetConfirmation = async (classCode) => {
@@ -187,6 +189,22 @@ const Semester = () => {
       alert("Grade Sheet has been submitted.");
     }
     const printLink = identifyPrintLink(isGraduateStudies, semester, currentSchoolYear, cookies, encodedClassCode);
+    const encodeRenderIcon = () => {
+      if (canUpload) {
+        if(dbTermType === 'midterm') {
+          if (midterm_status !== 1) {
+            return <Keyboard />;
+          }
+        } else if(dbTermType === 'finalterm') {
+          if (parseInt(status) === 0) {
+            return <Keyboard />
+          } 
+          return <Article />;
+        }
+        return <Article />;
+      }
+      return <Article />;
+    }
     return (
       <Card variant="outlined">
         <CardHeader
@@ -229,8 +247,11 @@ const Semester = () => {
                   : "-"}
                 {" - "}
                 {method || ""}</Typography>
-              <Typography variant="caption"><b>Submitted:</b> {timestamp
-                  // ? moment(submittedLog).format("MMM DD, YYYY hh:mm A")
+              {/* <Typography variant="caption"><b>Midterm:</b> {timestamp
+                  ? moment(midtermSubmittedLog).format("MMM DD, YYYY hh:mm A") === 'Invalid date' 
+                    ? '- -' : moment(midtermSubmittedLog).format("MMM DD, YYYY hh:mm A")
+                  : "- -"}</Typography> */}
+                <Typography variant="caption"><b>Submitted:</b> {timestamp
                   ? moment(submittedLog).format("MMM DD, YYYY hh:mm A") === 'Invalid date' 
                     ? '- -' : moment(submittedLog).format("MMM DD, YYYY hh:mm A")
                   : "- -"}</Typography>
@@ -268,20 +289,10 @@ const Semester = () => {
                   }}
                   disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false}
                 >
-                  {
-                    canUpload
-                    ? parseInt(status) === 0
-                      ? ( <Keyboard /> )
-                      : ( <Article /> )
-                    : ( <Article /> )
-                    // (canUpload && parseInt(status) === 0)
-                    //   ? ( <Keyboard /> ) 
-                    //   : ( <Article /> )
-                  }
+                  {encodeRenderIcon()}
                 </IconButton>
               </span>
             </Tooltip>
-            {(canUpload && parseInt(status) === 0) && (
               <Tooltip title="Grade Sheet">
                 <span>
                   <IconButton
@@ -301,30 +312,25 @@ const Semester = () => {
                         console.log("Clicked.")
                       }
                     }}
-                    disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false || Boolean(isGraduateStudies)}
+                    disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false || Boolean(isGraduateStudies) || !canUpload || parseInt(status) === 1 || (dbTermType === 'midterm' && midterm_status === 1)}
                   >
                     <FolderOpen />
                   </IconButton>
                 </span>
               </Tooltip>
-             )}
-             {canUpload && parseInt(status) === 0 && ( 
               <Tooltip title="Submit midterm grade sheet. You may not able to edit or upload grades. To edit or upload grades, please contact your administrator.">
                 <span>
                   <IconButton
                     color="primary"
                     size="large"
                     aria-label=""
-                    onClick={() => {
-                      submitMidtermGradeSheetConfirmation(encodedClassCode)
-                    }}
-                    disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false || dbTermType === 'finalterm'}
+                    onClick={() => submitMidtermGradeSheetConfirmation(encodedClassCode)}
+                    disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false || dbTermType === 'finalterm' || midterm_status === 1}
                   >
                     <InsertDriveFile />
                   </IconButton>
                 </span>
               </Tooltip>
-             )} 
              {canUpload && parseInt(status) === 0 && ( 
               <Tooltip title="Submit grade sheet. You may not able to edit or upload grades. To edit or upload grades, please contact your administrator.">
                 <span>
@@ -375,7 +381,7 @@ const Semester = () => {
           <Typography variant="h4" fontWeight={700}>
             {` ${decodedSemester?.toUpperCase()} ${
               decodedSemester === "summer" ? "" : "SEMESTER"
-            }`}({dbTermType === "midterm" ? "MID TERM" : "FINAL TERM"})
+            }`}{dbTermType === "midterm" ? "(MID TERM)" : ""}
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton onClick={() => navigate("/home")}>

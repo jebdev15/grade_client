@@ -14,9 +14,9 @@ import {
   // import { useReactToPrint } from "react-to-print";
   import chmsuLogo from "../../../assets/chmsu-small.jpg";
   import registrarUDC from "../../../assets/registrar_udc.jpg";
-  import axios from "axios";
   import { useCookies } from "react-cookie";
   import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../../api/axiosInstance";
   
   const GradeSheetHeaderContainer = styled("header")({
     '@media print': {
@@ -372,18 +372,15 @@ import {
   
     );
   };
-  
-    export const loader = async ({ params }) => {
-      const { code, class_code} = params;
-      const [semester, currentSchoolYear] = code.split("-");
-      const { data } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/getClassCodeDetails?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
-      );
-  
-      const { data: students } = await axios.get(
-        `${process.env.REACT_APP_API_URL}/getClassGraduateStudiesStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
-      );
-      return { data, students };
-    };
-    export default PrintGraduateStudiesGS;
+export const loader = async ({ params }) => {
+  const { code, class_code} = params;
+  const [semester, currentSchoolYear] = code.split("-");
+  console.log({semester, currentSchoolYear})
+  const { data } = await axiosInstance.get(`/admin/getClassCodeDetails?class_code=${class_code}`);
+
+  const { data: students } = await axiosInstance.get(`/getClassGraduateStudiesStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`);
+  return { data, students };
+};
+
+export default PrintGraduateStudiesGS;
     

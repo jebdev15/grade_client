@@ -14,9 +14,9 @@ import { urlDecode } from "url-encode-base64";
 // import { useReactToPrint } from "react-to-print";
 import chmsuLogo from "../../../assets/chmsu-small.jpg";
 import registrarUDC from "../../../assets/registrar_udc.jpg";
-import axios from "axios";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../../api/axiosInstance";
 
 const GradeSheetHeaderContainer = styled("header")({
   '@media print': {
@@ -384,13 +384,9 @@ const PrintUnderGraduateGS = () => {
 
   export const loader = async ({ params }) => {
     const { class_code} = params;
-    const { data } = await axios.get(
-      `${process.env.REACT_APP_API_URL}/admin/getClassCodeDetails?class_code=${class_code}`
-    );
+    const { data } = await axiosInstance.get(`/admin/getClassCodeDetails?class_code=${class_code}`);
 
-    const { data: students } = await axios.get(
-      `${process.env.REACT_APP_API_URL}/admin/getClassStudents?class_code=${class_code}`
-    );
+    const { data: students } = await axiosInstance.get(`/admin/getClassStudents?class_code=${class_code}`);
     return { data, students };
   };
   export default PrintUnderGraduateGS;
