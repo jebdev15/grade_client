@@ -204,9 +204,9 @@ import axiosInstance from "../../../api/axiosInstance";
                               <td>{id}</td>
                               <td height={"auto"}>{studentID}</td>
                               <td style={{ paddingLeft: '8px' }} align="left" height={"auto"}>{studentName}</td>
-                              <td height={"auto"}>{midTermGrade === 0 ? "" : midTermGrade}</td>
-                              <td height={"auto"}>{endTermGrade === 0 ? "" : endTermGrade}</td>
-                              <td height={"auto"}>{finalGrade === 0 ? "" : finalGrade}</td>
+                              <td height={"auto"}>{!midTermGrade ? "" : midTermGrade}</td>
+                              <td height={"auto"}>{!endTermGrade ? "" : endTermGrade}</td>
+                              <td height={"auto"}>{!finalGrade ? "" : finalGrade}</td>
                               <td height={"auto"}> { getStatusOrRemark(remarks) }</td>
                             </tr>
                           )
@@ -378,7 +378,7 @@ export const loader = async ({ params }) => {
   console.log({semester, currentSchoolYear})
   const { data } = await axiosInstance.get(`/admin/getClassCodeDetails?class_code=${class_code}`);
 
-  const { data: students } = await axiosInstance.get(`/getClassGraduateStudiesStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`);
+  const { data: students } = await axiosInstance.get(`/admin/getClassGraduateStudiesStudents?class_code=${class_code}`);
   return { data, students };
 };
 

@@ -122,9 +122,9 @@ const Faculty = () => {
           return (
             <>
               <ButtonGroup variant="text" color="primary" aria-label="actions">
-                  <Tooltip title={`Midterm is Currently ${params.row.midterm_status ? "Locked" : "Unlocked"}. Click to ${params.row.midterm_status ? "Unlock" : "Lock"} Subject`}>
+                  <Tooltip title={`Midterm is Currently ${params.row.midterm_status ? "Locked" : "Unlocked"}. Click to ${params.row.midterm_status ? "Lock" : "Unlock"} Subject`}>
                     <IconButton aria-label="view" variant="text" color="primary" onClick={handleOpenConfirmation}>
-                      {(params.row.status) ? <Lock /> : <LockOpen />}
+                      {(params.row.midterm_status) ? <Lock /> : <LockOpen />}
                     </IconButton>
                   </Tooltip>
                   <Tooltip title={`Endterm is Currently ${params.row.status ? "Locked" : "Unlocked"}. Click to ${params.row.status ? "Unlock" : "Lock"} Subject`}>
