@@ -24,7 +24,7 @@ const Upload = () => {
   const { code, class_code } = useParams();
   const [semester, currentSchoolYear] = code?.split("-");
   const [cookies,,] = useCookies(["name", "email"]);
-  const { loadInfoArr } = useLoaderData();
+  const { loadInfoArr, dbTermType } = useLoaderData();
   const loadInfo = loadInfoArr[0];
 
   const [...contexts] = useOutletContext();
@@ -72,6 +72,7 @@ const Upload = () => {
     formData.append("class_code", class_code);
     formData.append("method", "Upload");
     formData.append("email_used", cookies.email);
+    formData.append("term_type", dbTermType);
     // const { data } = await axios.post(
     //   `${process.env.REACT_APP_API_URL}/uploadGradeSheet`,
     //   formData,
@@ -250,6 +251,8 @@ export const loader = async ({ params }) => {
     semester,
     class_code
   )
-  return { loadInfoArr };
+  const { data: registrarActivityData } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
+  const { term_type: dbTermType } = registrarActivityData;
+  return { loadInfoArr, dbTermType };
 };
 export default Upload;

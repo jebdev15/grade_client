@@ -43,6 +43,7 @@ const GradeTable = () => {
     dbSchoolYear,
     dbSemester,
     dbTo,
+    dbTermType
   } = useLoaderData();
   const [manualOpen, setManualOpen] = useOutletContext();
   const loadInfo = loadInfoArr[0];
@@ -244,7 +245,7 @@ const GradeTable = () => {
       const confirmation = window.confirm(message)
       if(!confirmation) return
       setTableLoading(true);
-      const { data } = await HomeSemesterServices.updateGrade({grades: toUpdate, class_code, method: "Manual", email_used: cookies.email})
+      const { data } = await HomeSemesterServices.updateGrade({grades: toUpdate, class_code, method: "Manual", email_used: cookies.email, term_type: dbTermType })
       if (data) {
         setToUpdate([]);
         setTableLoading(false);
@@ -385,7 +386,7 @@ export const loader = async ({ params }) => {
   const loadInfoArr = facultyLoadData;
 
   const { data: registrarActivityData } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
-  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = registrarActivityData;
+  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo, term_type: dbTermType } = registrarActivityData;
   
   return {
     rows,
@@ -394,6 +395,7 @@ export const loader = async ({ params }) => {
     dbSchoolYear,
     dbSemester,
     dbTo,
+    dbTermType
   };
 };
 export default GradeTable;
