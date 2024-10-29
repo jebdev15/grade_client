@@ -17,4 +17,8 @@ export const AdminFacultyService = {
         const { data, status } = await axiosInstance.patch(`/admin/updateClassStatusByClassCode`, formData);
         return { data, status }
     },
+    updateMidtermClassStatusByClassCode: async (formData) => {
+        const { data, status } = await axiosInstance.patch(`/admin/updateMidtermClassStatusByClassCode`, formData);
+        return { data, status }
+    },
 }

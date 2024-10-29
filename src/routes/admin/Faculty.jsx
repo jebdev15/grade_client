@@ -27,7 +27,19 @@ const Faculty = () => {
     code: "",
     section: "",
     noOfStudents: 0,
+    midterm_status : ""
   });
+  const [midtermSubjectInfo, setMidtermSubjectInfo] = React.useState({
+    status : "",
+    classCode: "",
+    code: "",
+    section: "",
+    noOfStudents: 0,
+    midterm_status : "",
+    open: false,
+    handleOpen: () => setMidtermSubjectInfo((prevState) => ({ ...prevState, open: true })),
+    handleClose: () => setMidtermSubjectInfo((prevState) => ({ ...prevState, open: false })),
+  })
   const [filterData, setFilterData] = React.useState({
     schoolyear: new Date().getFullYear(),
     semester: ""
@@ -105,7 +117,17 @@ const Faculty = () => {
               status: params.row.status,
             }));
           };
-
+          const handleOpenMidtermConfirmation = () => {
+            setMidtermSubjectInfo((prevState) => ({ ...prevState, open: true }));
+            setMidtermSubjectInfo((prevState) => ({
+              ...prevState,
+              id: params.row.id,
+              code: params.row.subject_code,
+              section: params.row.section,
+              noOfStudents: params.row.noStudents,
+              status: params.row.midterm_status,
+            }));
+          };
           const openViewStudentsHandler = async () => {
             setOpen((prevState) => ({ ...prevState, viewStudents: true }));
             const encoded = {
@@ -123,7 +145,7 @@ const Faculty = () => {
             <>
               <ButtonGroup variant="text" color="primary" aria-label="actions">
                   <Tooltip title={`Midterm is Currently ${params.row.midterm_status ? "Locked" : "Unlocked"}. Click to ${params.row.midterm_status ? "Lock" : "Unlock"} Subject`}>
-                    <IconButton aria-label="view" variant="text" color="primary" onClick={handleOpenConfirmation}>
+                    <IconButton aria-label="view" variant="text" color="primary" onClick={handleOpenMidtermConfirmation}>
                       {(params.row.midterm_status) ? <Lock /> : <LockOpen />}
                     </IconButton>
                   </Tooltip>
@@ -177,6 +199,30 @@ const Faculty = () => {
           setSubjectInfo((prevState) => ({ ...prevState, status: data.newStatus }));
           handleCloseSubjectLoad();
           handleCloseConfirmation();
+        } else {
+          response = data.message;
+        }
+      } else {
+        response = data.message;
+      }
+    } catch (error) {
+      response = "Something went wrong. Contact Administrator";
+    }
+    alert(response);
+  };
+
+  const lockMidtermSubjectHandler = async (id, status) => {
+    const formData = new FormData();
+    formData.append("class_code", urlEncode(id));
+    formData.append("status", status);
+    let response;
+    try {
+      const { data, status } = await AdminFacultyService.updateMidtermClassStatusByClassCode(formData);
+      if (status === 200) {
+        if (data.success) {
+          response = data.message;
+          setMidtermSubjectInfo((prevState) => ({ ...prevState, status: data.newStatus, open: false }));
+          handleCloseSubjectLoad();
         } else {
           response = data.message;
         }
@@ -329,18 +375,7 @@ const Faculty = () => {
 
       {/* Dialog for Confirmation of Locking/Unlocking a Subject */}
       <Dialog open={openConfirmation} onClose={handleCloseConfirmation} aria-labelledby={"dialog-confirmation"}>
-        <DialogTitle id={"dialog-confirmation-title"}>Confirmation to {Boolean(subjectInfo.status) ? "Unlock" : "Lock"} this Subject</DialogTitle>
-        <IconButton
-          aria-label="close"
-          onClick={handleCloseConfirmation}
-          sx={{
-            position: "absolute",
-            right: 8,
-            top: 8,
-          }}
-        >
-          <Close />
-        </IconButton>
+        <DialogTitle id={"dialog-confirmation-title"}>Confirmation to {Boolean(subjectInfo.status) ? "Unlock" : "Lock"} this Subject(Endterm)</DialogTitle>
         <DialogContent dividers>
           <DialogContentText color={"initial"}>
             Do you really want to update the status as {Boolean(subjectInfo.status) ? "Unlock" : "Lock"}? <br />
@@ -367,6 +402,39 @@ const Faculty = () => {
           </ButtonGroup>
         </DialogActions>
       </Dialog>
+
+
+      {/* Dialog for Confirmation of Locking/Unlocking a Midterm Subject */}
+      <Dialog open={midtermSubjectInfo.open} onClose={midtermSubjectInfo.handleClose} aria-labelledby={"dialog-confirmation"}>
+        <DialogTitle id={"dialog-confirmation-title"}>Confirmation to {Boolean(midtermSubjectInfo.status) ? "Unlock" : "Lock"} this Subject(Midterm)</DialogTitle>
+        <DialogContent dividers>
+          <DialogContentText color={"initial"}>
+            Do you really want to update the status as {Boolean(midtermSubjectInfo.status) ? "Unlock" : "Lock"}? <br />
+          </DialogContentText>
+          <br />
+          <DialogContentText color={"initial"}>
+            Subject Code: {midtermSubjectInfo.code} <br />
+          </DialogContentText>
+          <DialogContentText color={"initial"}>
+            Program, Year&Section: {midtermSubjectInfo.section}
+            <br />
+          </DialogContentText>
+          <DialogContentText color={"initial"}>
+            No of Students: {midtermSubjectInfo.noOfStudents}
+            <br />
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <ButtonGroup variant="text" color="primary" aria-label="">
+            <Button onClick={() => lockMidtermSubjectHandler(midtermSubjectInfo.id, midtermSubjectInfo.status)} variant="standard" color="primary">
+              Confirm
+            </Button>
+            <Button onClick={midtermSubjectInfo.handleClose}>Cancel</Button>
+          </ButtonGroup>
+        </DialogActions>
+      </Dialog>
+
+
       <ViewStudentsDialog open={open.viewStudents} close={closeHandler.viewStudents} data={viewStudents} />
 
       <Dialog open={openFilterModal} onClose={handleCloseFilterYearAndSemester} aria-labelledby={"dialog-confirmation"}>
