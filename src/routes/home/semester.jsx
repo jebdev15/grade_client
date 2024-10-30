@@ -129,10 +129,12 @@ const Semester = () => {
     section,
     noStudents,
     class_code,
-    timestamp,
-    method,
-    midtermSubmittedLog,
-    submittedLog,
+    midterm_timestamp,
+    endterm_timestamp,
+    midterm_method,
+    endterm_method,
+    midterm_submittedLog,
+    endterm_submittedLog,
     isGraduateStudies,
     midterm_status
   }) => {
@@ -189,21 +191,39 @@ const Semester = () => {
       alert("Grade Sheet has been submitted.");
     }
     const printLink = identifyPrintLink(isGraduateStudies, semester, currentSchoolYear, cookies, encodedClassCode);
-    const encodeRenderIcon = () => {
-      if (canUpload) {
-        if(dbTermType === 'midterm') {
-          if (midterm_status !== 1) {
-            return <Keyboard />;
+    const semesterFunctions = {
+      encodeToolTipTitle: () => {
+        if (canUpload) {
+          if(dbTermType === 'midterm') {
+            if (midterm_status !== 1) {
+              return "Encoding of Grades";
+            }
+          } else if(dbTermType === 'finalterm') {
+            if (parseInt(status) === 0) {
+              return "Encoding of Grades"
+            } 
+            return "View Grades";
           }
-        } else if(dbTermType === 'finalterm') {
-          if (parseInt(status) === 0) {
-            return <Keyboard />
-          } 
+          return "View Grades";
+        }
+        return "View Grades";
+      },
+      encodeRenderIcon: () => {
+        if (canUpload) {
+          if(dbTermType === 'midterm') {
+            if (midterm_status !== 1) {
+              return <Keyboard />;
+            }
+          } else if(dbTermType === 'finalterm') {
+            if (parseInt(status) === 0) {
+              return <Keyboard />
+            } 
+            return <Article />;
+          }
           return <Article />;
         }
         return <Article />;
       }
-      return <Article />;
     }
     return (
       <Card variant="outlined">
@@ -242,19 +262,26 @@ const Semester = () => {
                 justifyContent: "center",
               }}
             >
-              <Typography variant="caption"><b>Encoded:</b> {timestamp
-                  ? moment(timestamp).format("MMM DD, YYYY hh:mm A")
-                  : "-"}
-                {" - "}
-                {method || ""}</Typography>
-              {/* <Typography variant="caption"><b>Midterm:</b> {timestamp
-                  ? moment(midtermSubmittedLog).format("MMM DD, YYYY hh:mm A") === 'Invalid date' 
-                    ? '- -' : moment(midtermSubmittedLog).format("MMM DD, YYYY hh:mm A")
-                  : "- -"}</Typography> */}
-                <Typography variant="caption"><b>Submitted:</b> {timestamp
-                  ? moment(submittedLog).format("MMM DD, YYYY hh:mm A") === 'Invalid date' 
-                    ? '- -' : moment(submittedLog).format("MMM DD, YYYY hh:mm A")
+              {dbTermType === 'midterm' 
+              ?<Typography variant="caption"><b>Encoded:</b> {midterm_timestamp
+                ? moment(midterm_timestamp).format("MMM DD, YYYY hh:mm A")
+                : "-"}
+              {" - "}
+              {midterm_method || ""}</Typography>
+              : <Typography variant="caption"><b>Encoded:</b> {endterm_timestamp
+                ? moment(endterm_timestamp).format("MMM DD, YYYY hh:mm A")
+                : "-"}
+              {" - "}
+              {endterm_method || ""}</Typography>}
+                {dbTermType === 'midterm' 
+                ? <Typography variant="caption"><b>Submitted:</b> {midterm_timestamp
+                  ? moment(midterm_submittedLog).format("MMM DD, YYYY hh:mm A") === 'Invalid date' 
+                    ? '- -' : moment(midterm_submittedLog).format("MMM DD, YYYY hh:mm A")
                   : "- -"}</Typography>
+                :  <Typography variant="caption"><b>Submitted:</b> {endterm_timestamp
+                  ? moment(endterm_submittedLog).format("MMM DD, YYYY hh:mm A") === 'Invalid date' 
+                    ? '- -' : moment(endterm_submittedLog).format("MMM DD, YYYY hh:mm A")
+                  : "- -"}</Typography>}
             </Box>
           </Box>
         </CardContent>
@@ -269,13 +296,7 @@ const Semester = () => {
             />
           </Tooltip>
           <ButtonGroup>
-            <Tooltip
-              title={
-                canUpload && parseInt(status) === 0
-                  ? "Encoding of Grades"
-                  : "View Grades"
-              }
-            >
+            <Tooltip title={semesterFunctions.encodeToolTipTitle()}>
               <span>
                 <IconButton
                   color="primary"
@@ -289,7 +310,7 @@ const Semester = () => {
                   }}
                   disabled={loading.manual || loading.upload || loading.lockGradeSheet || loading.print ? true : false}
                 >
-                  {encodeRenderIcon()}
+                  {semesterFunctions.encodeRenderIcon()}
                 </IconButton>
               </span>
             </Tooltip>
@@ -318,7 +339,7 @@ const Semester = () => {
                   </IconButton>
                 </span>
               </Tooltip>
-              <Tooltip title="Submit midterm grade sheet. You may not able to edit or upload grades. To edit or upload grades, please contact your administrator.">
+              <Tooltip title="Submit midterm grade sheet ONLY. You may not able to edit or upload grades. To edit or upload grades, please contact your administrator.">
                 <span>
                   <IconButton
                     color="primary"
@@ -381,7 +402,7 @@ const Semester = () => {
           <Typography variant="h4" fontWeight={700}>
             {` ${decodedSemester?.toUpperCase()} ${
               decodedSemester === "summer" ? "" : "SEMESTER"
-            }`}{dbTermType === "midterm" ? "(MID TERM)" : ""}
+            }`}{dbTermType === "midterm" ? "(Midterm)" : "(Endterm)"}
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton onClick={() => navigate("/home")}>

@@ -139,7 +139,7 @@ const Deadline = () => {
               </Select>
             </FormControl>
             <FormControl fullWidth>
-              <InputLabel id="select-termType-label">Term Type(Mid/Final)</InputLabel>
+              <InputLabel id="select-termType-label">Term Type(Midterm/Endterm)</InputLabel>
               <Select 
                 id="select-termType" 
                 label="Term Type" 
@@ -149,8 +149,8 @@ const Deadline = () => {
                 disabled={data.termType === ""}
                 required
               >
-                <MenuItem value="midterm">Mid Term</MenuItem>
-                <MenuItem value="finalterm">End Term</MenuItem>
+                <MenuItem value="midterm">Midterm</MenuItem>
+                <MenuItem value="finalterm">Endterm</MenuItem>
               </Select>
             </FormControl>
             <FormControl fullWidth>

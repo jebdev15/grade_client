@@ -75,7 +75,7 @@ const Index = () => {
           <Paper className="signin_page" sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", py: 5, px: 6, gap: { sm: 3, md: 6 } }} elevation={8}>
             <Box className="signinMsg">
               <img className="chmsuLogo" src={chmsuLogo} alt="logo" />
-              <Typography variant="h5" fontWeight={700} color="primary">
+              <Typography variant="h5" fontWeight={700} color="primary" sx={{ alignSelf: 'center' }}>
                 Carlos Hilado<span>Memorial State University</span>
               </Typography>
               <Typography variant="body1" color="primary">

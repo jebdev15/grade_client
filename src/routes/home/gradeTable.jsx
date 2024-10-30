@@ -47,7 +47,6 @@ const GradeTable = () => {
   } = useLoaderData();
   const [manualOpen, setManualOpen] = useOutletContext();
   const loadInfo = loadInfoArr[0];
-  const SubjectisLock = loadInfo.status;
 
   const [toUpdate, setToUpdate] = useState([]);
   const [tableLoading, setTableLoading] = useState(false);
@@ -60,9 +59,24 @@ const GradeTable = () => {
   const checkDate = new Date(currentDate) <= new Date(systemScheduledDueDate);
   const checkSchoolYear = dbSchoolYear === parseInt(decode.currentSchoolYear);
   const checkSemester = dbSemester === decode.semester;
-  const checkSubjectIsNotLock = SubjectisLock === 0;
 
-  const canUpload = checkDate && checkSchoolYear && checkSemester && checkSubjectIsNotLock;
+  const canUpload = checkDate && checkSchoolYear && checkSemester
+  const handleUpdateRecordVisibility = () => {
+    if (canUpload) {
+      if(dbTermType === 'midterm') {
+        if (loadInfo.midterm_status !== 1) {
+          return true;
+        }
+      } else if(dbTermType === 'finalterm') {
+        if (parseInt(loadInfo.status) === 0) {
+          return true
+        } 
+        return false
+      }
+      return false
+    }
+    return false
+  }
   const columns = [
     {
       field: "student_id",
@@ -85,7 +99,7 @@ const GradeTable = () => {
       field: "mid_grade",
       headerName: "Mid Term",
       width: 90,
-      editable: canUpload,
+      editable: handleUpdateRecordVisibility(),
       type: "number",
       hideable: false,
       sortable: true,
@@ -116,7 +130,7 @@ const GradeTable = () => {
       field: "final_grade",
       headerName: "End Term",
       width: 90,
-      editable: canUpload,
+      editable: handleUpdateRecordVisibility(),
       sortable: true,
       type: "number",
       hideable: false,
@@ -171,7 +185,7 @@ const GradeTable = () => {
       field: "addRemark",
       flex: 0.5,
       headerName: "Remark",
-      editable: canUpload,
+      editable: handleUpdateRecordVisibility(),
       sortable: true,
       type: "singleSelect",
       valueOptions: [
@@ -356,7 +370,7 @@ const GradeTable = () => {
         </Box>
       </DialogContent>
       <DialogActions>
-      {canUpload && (    
+      {handleUpdateRecordVisibility() && (    
         <Button
             variant="contained"
             disabled={tableLoading || toUpdate.length < 1}

@@ -44,6 +44,7 @@ const GraduateStudiesTable = () => {
     dbSchoolYear,
     dbSemester,
     dbTo,
+    dbTermType
   } = useLoaderData();
   const [manualOpen, setManualOpen] = useOutletContext();
   const loadInfo = loadInfoArr[0];
@@ -63,6 +64,22 @@ const GraduateStudiesTable = () => {
   const checkSubjectIsNotLock = SubjectisLock === 0;
 
   const canUpload = checkDate && checkSchoolYear && checkSemester && checkSubjectIsNotLock;
+  const handleUpdateRecordVisibility = () => {
+    if (canUpload) {
+      if(dbTermType === 'midterm') {
+        if (loadInfo.midterm_status !== 1) {
+          return true;
+        }
+      } else if(dbTermType === 'finalterm') {
+        if (parseInt(loadInfo.status) === 0) {
+          return true
+        } 
+        return false
+      }
+      return false
+    }
+    return false
+  }
   const columns = [
     {
       field: "student_id",
@@ -85,7 +102,7 @@ const GraduateStudiesTable = () => {
       field: "mid_grade",
       headerName: "Mid Term",
       width: 90,
-      editable: canUpload,
+      editable: handleUpdateRecordVisibility(),
       sortable: true,
       type: "number",
       valueGetter: ({ row }) => parseFloat(row.mid_grade),
@@ -94,7 +111,7 @@ const GraduateStudiesTable = () => {
       field: "end_grade",
       headerName: "End Term",
       width: 90,
-      editable: canUpload,
+      editable: handleUpdateRecordVisibility(),
       sortable: true,
       type: "number",
       valueGetter: ({ row }) => parseFloat(row.end_grade),
@@ -103,7 +120,7 @@ const GraduateStudiesTable = () => {
       field: "grade",
       headerName: "Grade",
       width: 90,
-      editable: canUpload,
+      editable: handleUpdateRecordVisibility(),
       sortable: true,
       type: "number",
       valueGetter: ({ row }) => parseFloat(row.grade),
@@ -128,7 +145,7 @@ const GraduateStudiesTable = () => {
       field: "addRemark",
       flex: 0.5,
       headerName: "Remark",
-      editable: canUpload,
+      editable: handleUpdateRecordVisibility(),
       sortable: true,
       type: "singleSelect",
       valueOptions: [
@@ -204,7 +221,7 @@ const GraduateStudiesTable = () => {
       const confirmation = window.confirm(message)
       if(!confirmation) return
       setTableLoading(true);
-      const { data } = await HomeSemesterGraduateStudiesTableService.updateGraduateStudiesGrade(toUpdate, class_code, cookies);
+      const { data } = await HomeSemesterGraduateStudiesTableService.updateGraduateStudiesGrade(toUpdate, class_code, cookies, dbTermType);
       if (data) {
         setToUpdate([]);
         setTableLoading(false);
@@ -313,7 +330,7 @@ const GraduateStudiesTable = () => {
         </Box>
       </DialogContent>
       <DialogActions>
-        {canUpload && (
+        {handleUpdateRecordVisibility() && (
           <Button
               variant="contained"
               disabled={tableLoading || toUpdate.length < 1}
@@ -340,7 +357,7 @@ export const loader = async ({ params }) => {
   const { facultyLoadData:loadInfoArr, status } = await HomeSemesterServices.getFacultyLoadByFacultyIdYearSemesterAndClassCode(faculty_id, currentSchoolYear, semester, class_code);
 
   const { data: registrarActivityData } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
-  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo } = registrarActivityData;
+  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo, term_type: dbTermType } = registrarActivityData;
   return {
     rows,
     loadInfoArr,
@@ -348,6 +365,7 @@ export const loader = async ({ params }) => {
     dbSchoolYear,
     dbSemester,
     dbTo,
+    dbTermType
   };
 };
 
