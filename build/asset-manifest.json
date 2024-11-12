@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/static/css/main.eefee501.css",
+    "main.js": "/static/js/main.5e4d932f.js",
+    "static/media/registrar_udc.jpg": "/static/media/registrar_udc.429437bd7fc52e6b9e85.jpg",
+    "static/media/chmsu-small.jpg": "/static/media/chmsu-small.fce676e1e9ae33c1df81.jpg",
+    "index.html": "/index.html",
+    "main.eefee501.css.map": "/static/css/main.eefee501.css.map",
+    "main.5e4d932f.js.map": "/static/js/main.5e4d932f.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.eefee501.css",
+    "static/js/main.5e4d932f.js"
+  ]
+}
