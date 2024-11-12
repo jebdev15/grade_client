@@ -223,7 +223,7 @@ export default function Admin() {
                   <ListItemIcon>
                     <Logout />
                   </ListItemIcon>
-                  <ListItemText sx={{ ml: 3 }} primary="Logout" />
+                  <ListItemText sx={{ ml: 3 }} primary="Sign Out" />
                 </MenuItem>
               </Menu>
             </MenuList>
