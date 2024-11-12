@@ -12,8 +12,6 @@ import { AuthService } from "../services/authService";
 import { AuthUtil } from "../utils/authUtil";
 const Index = () => {
   const [loading, setLoading] = useState(false);
-  const [saveCredentials, setSaveCredentials] = useState(false);
-
   const [cookies, setCookie] = useCookies(AuthUtil.siteCookies);
 
   const navigate = useNavigate();
@@ -21,7 +19,7 @@ const Index = () => {
   const setIndividualCookie = (name, value) => {
     setCookie(name, value, {
       path: "/",
-      expires: saveCredentials ? moment().add(1, "y").toDate() : moment().add(1, "day").toDate(),
+      expires: moment().add(1, "day").toDate(),
     });
   };
 
@@ -106,7 +104,6 @@ const Index = () => {
                 className="loginForm"
               >
                 {loading ? <Typography>Signing you in...</Typography> : <GoogleLogin className="googleLoginBtn" onSuccess={login} />}
-                <FormControlLabel control={<Checkbox defaultChecked={false} name="save" onChange={(e) => setSaveCredentials(!saveCredentials)} />} label="Save Credentials" />
               </Box>
             </Box>
           </Paper>

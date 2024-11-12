@@ -7,12 +7,13 @@ const ErrorPage = () => {
   return (
     <Container maxWidth="md" sx={{ textAlign: "center" }}>
       <Typography variant="h6">
-        Sorry, an unexpected error has occured.
+        Oops! Something Went Wrong
       </Typography>
+      <Typography variant="body1" color="initial">We’re sorry, but there was an issue loading this page.</Typography>
+      <Typography variant="body1" color="initial" sx={{ display: 'inline' }}>Try refreshing the page, or go back to </Typography><Link to="">Homepage</Link>
       <Typography color="error" variant="subtitle1">
         {err.statusText || err.message}
       </Typography>
-      <Link to="">Back to Home</Link>
     </Container>
   );
 };

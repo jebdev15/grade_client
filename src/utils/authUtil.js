@@ -5,13 +5,13 @@ export const AuthUtil = {
         let response = '';
         switch(status){
             case 200:
-                response = "Success";
+                response = "Sign-In Successful";
                 break;
             case 401:
-                response = "Invalid Credentials";
+                response = "Unable to Access the System. Please contact ICT-MIS";
                 break;
             case 404:
-                response = "Not Found";
+                response = "User Not Found";
                 break;
             default:
                 response = "Something went wrong. Please contact Administrator";

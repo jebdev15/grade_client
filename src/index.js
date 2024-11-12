@@ -62,6 +62,7 @@ const router = createBrowserRouter([
       {
         path: "/home/:code",
         element: <Semester />,
+        errorElement: <ErrorPage />,
         loader: semesterLoader,
         children: [
           {
@@ -86,42 +87,40 @@ const router = createBrowserRouter([
   {
     path: "/print/:code/:class_code",
     element: <PrintGradeSheet />,
-    errorElement: <h1>Error PrintGradeSheet</h1>,
+    errorElement: <ErrorPage />,
     loader: printLoader,
   },
   {
     path: "/print/:code/:class_code/graduateStudies",
     element: <PrintGraduateStudiesGradeSheet />,
-    errorElement: <h1>Error PrintGraduateStudiesGradeSheet</h1>,
+    errorElement: <ErrorPage />,
     loader: printGSLoader,
   },
   {
     path: "/admin/print/:code/:class_code",
     element: <PrintUnderGraduateGS />,
-    errorElement: <h1>Error PrintUnderGraduateGS</h1>,
+    errorElement: <ErrorPage />,
     loader: printUnderGraduateGSLoader,
   },
   {
     path: "/admin/print/:code/:class_code/gs",
     element: <PrintGraduateStudiesGS />,
-    errorElement: <h1>Error PrintGraduateStudiesGS</h1>,
+    errorElement: <ErrorPage />,
     loader: printGraduateStudiesGSLoader,
   },
   {
     path: "admin",
     element: <Admin />,
-    errorElement: <h1>Error AdminPage</h1>,
+    errorElement: <ErrorPage />,
     children: [
       { index: true, element: <AdminStart /> },
       {
         path: "students",
         element: <Students />,
-        errorElement: <h1>Error Students</h1>,
       },
       {
         path: "faculty",
         element: <Faculty />,
-        errorElement: <h1>Error Faculty</h1>,
       },
       {
         path: "users",
