@@ -14,14 +14,14 @@ export const sessionResponse = (code) => {
     if (code === 200) {
         return;
     } else if(code === 401) {
-        return "SESSION EXPIRED. PLEASE SIGN OUT AND SIGN IN AGAIN";    
+        return "Session Expired. Please Sign Out and Sign In Again";    
     } else if(code === 403) {
-        return "SESSION EXPIRED. PLEASE SIGN OUT AND SIGN IN AGAIN";
+        return "Session Expired. Please Sign Out and Sign In Again";
     } else if(code === 404) {
-        return "SESSION NOT FOUND. PLEASE SIGN OUT AND SIGN IN AGAIN";
+        return "Session Not Found. Please Sign Out and Sign In Again";
     } else if(code === 500) {
-        return "NETWORK ERROR. CONTACT ICT-MIS OFFICE ADMINISTRATOR"
+        return "Network Error. Please Contact ICT-MIS Office"
     } else {
-        return "Something went wrong. Please contact Administrator"
+        return "Something went wrong. Please contact ICT-MIS Office"
     }
 }

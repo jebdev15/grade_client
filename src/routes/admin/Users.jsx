@@ -344,7 +344,7 @@ const Users = () => {
               </Select>
             </FormControl>
             <FormControl sx={{ display: "flex", flexDirection: "row" }} fullWidth>
-              {/* <InputLabel id="select-faculty-label">Faculty</InputLabel>
+              <InputLabel id="select-faculty-label">Faculty</InputLabel>
               <Select
                 labelId="select-faculty-label"
                 id="select-faculty"
@@ -357,10 +357,10 @@ const Users = () => {
                 fullWidth
               >
                 {noAccountData?.map(({ faculty_id, lastname, firstname, middlename, position, specialization }, index) => (
-                  <MenuItem key={index} value={faculty_id}>{`${faculty_id} - ${lastname}, ${firstname} ${middlename}`}</MenuItem>
+                  <MenuItem key={index} value={faculty_id}>{`${lastname}, ${firstname} ${middlename}(${faculty_id})`}</MenuItem>
                 ))}
-              </Select> */}
-              <Autocomplete
+              </Select>
+              {/* <Autocomplete
                 fullWidth
                 disabled={["Administrator", "Registrar", "Dean", "Chairperson"].includes(createUserData?.accessLevel) ? true : false}
                 // disablePortal
@@ -401,7 +401,7 @@ const Users = () => {
                     <div>{params?.children}</div>  
                   </li>
                 )}
-              />
+              /> */}
             </FormControl>
           </Box>
         </DialogContent>
@@ -496,7 +496,7 @@ const Users = () => {
                 fullWidth
               >
                 {noAccountData?.map(({ faculty_id, lastname, firstname, middlename }, index) => (
-                  <MenuItem key={index} value={faculty_id}>{`${faculty_id} - ${lastname}, ${firstname} ${middlename}`}</MenuItem>
+                  <MenuItem key={index} value={faculty_id}>{`${lastname}, ${firstname} ${middlename}(${faculty_id})`}</MenuItem>
                 ))}
               </Select>
             </FormControl>
