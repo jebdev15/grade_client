@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Checkbox, Container, FormControlLabel, Paper, Typography } from "@mui/material";
+import { Box, Container,  Paper, Typography } from "@mui/material";
 import { GoogleLogin } from "@react-oauth/google";
 import jwt_decode from "jwt-decode";
 import { useCookies } from "react-cookie";
