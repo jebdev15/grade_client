@@ -53,6 +53,7 @@ const Home = () => {
 
   const dispatch = useDispatch();
   useEffect(() => {
+    localStorage.removeItem("activeItem");
     if (registrarActivityStatus === "idle") {
       dispatch(fetchRegistrarActivity());
     }
@@ -68,6 +69,7 @@ const Home = () => {
         }
       });
     } 
+    console.log({data, registrarActivityStatus, error});
   }, [data, registrarActivityStatus, error, dispatch]);
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
@@ -283,6 +285,7 @@ const Home = () => {
           >
             <List>
               <ListItemButton
+                  disabled={registrarActivityStatus === "loading"}
                   className={activeItem === "summer" ? "navbtn active" : "navbtn"}
                   onClick={() => {
                     // setDrawerMinimize(false);
@@ -300,6 +303,7 @@ const Home = () => {
                   {drawerMinimize ? null : <ListItemText primary="Summer" />}
                 </ListItemButton>
                 <ListItemButton
+                  disabled={registrarActivityStatus === "loading"}
                   className={activeItem === "1st" ? "navbtn active" : "navbtn"}
                   onClick={() => {
                     navigate(
@@ -319,6 +323,7 @@ const Home = () => {
                 </ListItemButton>
 
                 <ListItemButton
+                  disabled={registrarActivityStatus === "loading"}
                   className={activeItem === "2nd" ? "navbtn active" : "navbtn"}
                   onClick={() => {
                     navigate(
