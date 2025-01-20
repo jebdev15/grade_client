@@ -22,6 +22,7 @@ const Start = () => {
       setData(registrarActivityData.data)
     }
   },[registrarActivityData, registrarActivityStatus])
+  if(registrarActivityStatus === "loading") return <div>Loading...</div>;
   return (
     <React.Suspense fallback={<div>Loading...</div>}>
       <Box >
