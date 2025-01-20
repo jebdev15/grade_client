@@ -22,7 +22,6 @@ const Index = () => {
       expires: moment().add(1, "day").toDate(),
     });
   };
-
   const login = async (res) => {
     setLoading(true);
     const { credential } = res;
@@ -103,7 +102,11 @@ const Index = () => {
                 }}
                 className="loginForm"
               >
-                {loading ? <Typography>Signing you in...</Typography> : <GoogleLogin className="googleLoginBtn" onSuccess={login} />}
+                {
+                  loading 
+                  ? <Typography>Signing you in...</Typography> 
+                  : <GoogleLogin className="googleLoginBtn" onSuccess={login} />
+                }
               </Box>
             </Box>
           </Paper>
