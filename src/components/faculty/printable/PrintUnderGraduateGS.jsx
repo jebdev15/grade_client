@@ -298,23 +298,16 @@ const PrintUnderGraduateGS = () => {
   const handlePrint = () => {
     window.print();
   };
-  const { code } = useParams();
-  const [semester, currentSchoolYear] = code?.split("-");
   const { data, students } = useLoaderData();
-  const decode = {
-    semester: urlDecode(semester),
-    currentSchoolYear: urlDecode(currentSchoolYear),
-  };
-
   const ComponentToPrintProps = {
     semester:
-      decode.semester === "summer"
+      data[0].semester === "summer"
         ? "SUMMER"
-        : decode.semester === "1st"
+        : data[0].semester === "1st"
         ? "First Semester"
         : "Second Semester",
-    currentSchoolYear: `${decode.currentSchoolYear} - ${
-      parseInt(decode.currentSchoolYear) + 1
+    currentSchoolYear: `${data[0].school_year} - ${
+      parseInt(data[0].school_year) + 1
     }`,
     instructor: data[0].instructor,
     subject: data[0].subject,
