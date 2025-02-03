@@ -140,9 +140,6 @@ const Semester = () => {
   }) => {
     const encodedClassCode = urlEncode(class_code);
     const submitGradeSheetConfirmation = async (classCode) => {
-      // const { data } = await axios.get(
-      //   `${process.env.REACT_APP_API_URL}/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${encodedClassCode}`
-      // );
       const { data } = await HomeSemesterServices.submitGradeSheetConfirmation(semester, currentSchoolYear, encodedClassCode);
       const alertMessage = submittedGradeSheetMessage(data)
       const confirmation = window.confirm(alertMessage)
@@ -156,15 +153,6 @@ const Semester = () => {
       formData.append("class_code", encodedClassCode);
       formData.append("status", 0)
       formData.append("email_used", cookies.email)
-      // await axios.post(
-      //   `${process.env.REACT_APP_API_URL}/submitGradeSheet`,
-      //   formData,
-      //   {
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //   }
-      // );
       const { data } = await HomeSemesterServices.submitGradeSheet(formData);
       console.log(data);
       navigate(".", { replace: true });
@@ -369,15 +357,14 @@ const Semester = () => {
                 </span>
               </Tooltip>
              )}
-            {(!canUpload || parseInt(status) === 1) && (
+            {(!canUpload || (dbTermType === 'midterm' && midterm_status === 1) || (dbTermType === 'finalterm' && parseInt(status) === 1)) && (
               <Tooltip title="Print Grade Sheet">
                 <span>
                   <IconButton
                     color="primary"
                     size="large"
                     aria-label=""
-                    href={printLink}
-                    target="_blank"
+                    onClick={() => window.open(printLink, "_blank", `width=800,height=600,left=${(window.screen.width - 800) / 2},top=${(window.screen.height - 600) / 2}`)}
                   >
                     <Print />
                   </IconButton>
@@ -457,7 +444,6 @@ const Semester = () => {
             )}
           </Container>
         </Box>
-        {/* <Outlet context={[currentSchoolYear]} /> */}
       </Box>
     </Box>
   );
@@ -471,7 +457,5 @@ export const loader = async ({ params }) => {
   const { data:registrarActivity } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
   const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo, term_type: dbTermType } = registrarActivity || {};
   return { loads, dbSchoolYear, dbSemester, dbTo, dbTermType };
-  // return { dbSchoolYear, dbSemester, dbTo };
-  // return { loads };
 };
 export default Semester;
