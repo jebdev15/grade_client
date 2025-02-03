@@ -39,12 +39,6 @@ const Upload = () => {
   const [downloadStatus, setDownloadStatus] = useState(false)
   const download = async () => {
     setDownloadStatus(true);
-    // const { data, status } = await axios.get(
-    //   `${process.env.REACT_APP_API_URL}/getExcelFile?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}&name=${cookies.name.toUpperCase()}&classSection=${loadInfo.section}`,
-    //   {
-    //     responseType: "arraybuffer",
-    //   }
-    // );
     const { data, status } = await HomeSemesterUploadService.getExcelFile(semester, currentSchoolYear, class_code, cookies, loadInfo)
     if(status === 200) {
       let blob = new Blob([data], {
@@ -73,15 +67,6 @@ const Upload = () => {
     formData.append("method", "Upload");
     formData.append("email_used", cookies.email);
     formData.append("term_type", dbTermType);
-    // const { data } = await axios.post(
-    //   `${process.env.REACT_APP_API_URL}/uploadGradeSheet`,
-    //   formData,
-    //   {
-    //     headers: {
-    //       "Content-Type": "multipart/form-data",
-    //     },
-    //   }
-    // );
     const { data } = await HomeSemesterUploadService.uploadGradeSheet(formData)
     const { isOkay, isError } = data
     if (isOkay) {
@@ -219,7 +204,7 @@ const Upload = () => {
               onClick={upload}
               sx={{ display: uploadFile ? "flex" : "none", mt: 1 }}
             >
-              {uploading ? "Uploading..." : "Submit"}
+              {uploading ? "Uploading..." : "Upload"}
             </Button>
           </Box>
         </Box>
