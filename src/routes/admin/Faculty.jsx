@@ -164,8 +164,7 @@ const Faculty = () => {
                     aria-label="view" 
                     variant="text" 
                     color="primary" 
-                    href={printGradeSheetLink} 
-                    target="_blank"
+                    onClick={() => window.open(printGradeSheetLink, "_blank", `width=800,height=600,left=${(window.screen.width - 800) / 2},top=${(window.screen.height - 600) / 2}`)}
                   >
                     <Print />
                   </IconButton>
