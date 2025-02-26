@@ -109,7 +109,7 @@ const GenerateReport = () => {
     <>
       <Box sx={isSmallScreen ? { height: "100%", width: "100%" } : { height: 600, width: "100%" }}>
         <Typography variant="h4" fontWeight={700} component="div" marginBottom={3} sx={{ flexGrow: 1 }}>
-          Generate Report
+          Reports
         </Typography>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }} borderRadius={"10px"} border={"1px solid var(--border-default)"} className="usersTable">
           <Typography variant="caption" color="initial">
@@ -151,7 +151,7 @@ const GenerateReport = () => {
             </>
           )}
           <Button variant="contained" sx={{ backgroundColor: "var(--primary-color)", color: "var(--background-main)", padding: 2 }} startIcon={<CloudDownloadIcon />} onClick={downloadLogs}>
-            Generate
+            Generate Report
           </Button>
         </Box>
       </Box>

@@ -1,5 +1,9 @@
 import axiosInstance from "../api/axiosInstance";
 
+const getAllEmailsForExtension = async (school_year, semester) => {
+    const { data, status } = await axiosInstance.get(`/admin/getAllEmailsForExtension?school_year=${school_year}&semester=${semester}`);
+    return { data, status };
+}
 const getGraduateStudiesServices = async () => { 
     const { data, status } = await axiosInstance.get(`/getGraduateStudiesLoad`); 
     return { data, status };
@@ -51,7 +55,6 @@ const getRegistrarActivity = async () => {
 }
 const getRegistrarActivityBySemester = async (semester) => {
     const { data, status } = await axiosInstance.get(`/admin/getRegistrarActivityBySemester?semester=${semester}`);
-    console.log({data, status});
     return { data, status };
 }
 
@@ -65,6 +68,7 @@ const updateClassStatusByYearAndSemester = async (formData) => {
     return { data, status };
 }
 export const AdminSettingsServices = {
+    getAllEmailsForExtension,
     getGraduateStudiesServices,
     getCollegesServices,
     saveCollegeServices,

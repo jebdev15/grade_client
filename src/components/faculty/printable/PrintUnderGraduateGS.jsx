@@ -6,9 +6,6 @@ import axiosInstance from "../../../api/axiosInstance";
 import ComponentToPrint from "./ComponentToPrint";
 
 const PrintUnderGraduateGS = () => {
-  window.onload = () => {
-    window.print();
-  };
   const { data, students } = useLoaderData();
   const ComponentToPrintProps = {
     semester:
@@ -34,6 +31,29 @@ const PrintUnderGraduateGS = () => {
     if (!["Administrator", "Registrar"].includes(cookies.accessLevel))
       return navigate("/", { replace: true });
   }, [cookies, navigate]);
+  const [isPageLoaded, setIsPageLoaded] = React.useState(false);
+  React.useEffect(() => {
+    const handleLoad = () => {
+      setIsPageLoaded(true);
+    };
+
+    if (document.readyState === "complete") {
+      // If page is already loaded, trigger immediately
+      handleLoad();
+    } else {
+      // Otherwise, wait for load event
+      window.addEventListener("load", handleLoad);
+    }
+
+    return () => window.removeEventListener("load", handleLoad);
+  }, []);
+  React.useEffect(() => {
+    let printed = false;
+    if (isPageLoaded && !printed) {
+      window.print();
+      printed = true;
+    }
+  }, [isPageLoaded]);
   return (
     <div
       style={{
@@ -47,19 +67,20 @@ const PrintUnderGraduateGS = () => {
         backgroundColor: "var(--background-main)",
       }}
     >
-      <ComponentToPrint
-        {...ComponentToPrintProps}
-        ref={componentRef}
-      />
+      <ComponentToPrint {...ComponentToPrintProps} ref={componentRef} />
     </div>
   );
 };
 
 export const loader = async ({ params }) => {
   const { class_code } = params;
-  const { data } = await axiosInstance.get(`/admin/getClassCodeDetails?class_code=${class_code}`);
+  const { data } = await axiosInstance.get(
+    `/admin/getClassCodeDetails?class_code=${class_code}`
+  );
 
-  const { data: students } = await axiosInstance.get(`/admin/getClassStudents?class_code=${class_code}`);
+  const { data: students } = await axiosInstance.get(
+    `/admin/getClassStudents?class_code=${class_code}`
+  );
   return { data, students };
 };
 export default PrintUnderGraduateGS;

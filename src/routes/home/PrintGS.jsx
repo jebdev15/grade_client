@@ -4,7 +4,7 @@ import { urlDecode } from "url-encode-base64";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
 import { HomeSemesterServices } from "../../services/homeSemesterService";
-import ComponentToPrint from "./ComponentToPrint";
+import ComponentToPrintGS from "./ComponentToPrintGS";
 
 const PrintGraduateStudiesGradeSheet = () => {
   const { code } = useParams();
@@ -74,7 +74,7 @@ const PrintGraduateStudiesGradeSheet = () => {
         backgroundColor: "var(--background-main)",
       }}
     >
-      <ComponentToPrint {...ComponentToPrintProps} ref={componentRef} />
+      <ComponentToPrintGS {...ComponentToPrintProps} ref={componentRef} />
     </div>
   );
 };
