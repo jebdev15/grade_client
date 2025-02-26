@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import { Close, Done, CloudUpload as CloudUploadIcon } from "@mui/icons-material";
 import {
   Alert,
@@ -12,7 +13,6 @@ import {
   Snackbar,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
 import { useOutletContext, useLoaderData, useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { saveAs } from "file-saver";
@@ -20,7 +20,7 @@ import { urlDecode } from "url-encode-base64";
 import { HomeSemesterServices } from "../../services/homeSemesterService";
 import { HomeSemesterUploadService } from "../../services/homeSemesterUploadService";
 
-const Upload = () => {
+const UploadGS = () => {
   const { code, class_code } = useParams();
   const [semester, currentSchoolYear] = code?.split("-");
   const [cookies,,] = useCookies(["name", "email"]);
@@ -40,7 +40,7 @@ const Upload = () => {
   const [downloadStatus, setDownloadStatus] = useState(false)
   const download = async () => {
     setDownloadStatus(true);
-    const { data, status } = await HomeSemesterUploadService.getExcelFile(semester, currentSchoolYear, class_code, cookies, loadInfo)
+    const { data, status } = await HomeSemesterUploadService.getGSExcelFile(semester, currentSchoolYear, class_code, cookies, loadInfo)
     if(status === 200) {
       let blob = new Blob([data], {
         type: "vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8",
@@ -68,7 +68,7 @@ const Upload = () => {
     formData.append("method", "Upload");
     formData.append("email_used", cookies.email);
     formData.append("term_type", dbTermType);
-    const { data } = await HomeSemesterUploadService.uploadGradeSheet(formData)
+    const { data } = await HomeSemesterUploadService.uploadGSGradeSheet(formData)
     const { isOkay, isError } = data
     if (isOkay) {
       
@@ -100,7 +100,7 @@ const Upload = () => {
             alignItems: "center",
           }}
         >
-          Upload Grade Sheet
+          Upload Grade Sheet for Graduate Studies
           <IconButton
             onClick={() => {
               setUploadFile(null);
@@ -254,4 +254,4 @@ export const loader = async ({ params }) => {
   const { term_type: dbTermType } = registrarActivityData;
   return { loadInfoArr, dbTermType };
 };
-export default Upload;
+export default UploadGS;

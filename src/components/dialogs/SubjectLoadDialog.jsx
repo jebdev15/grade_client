@@ -6,7 +6,7 @@ import { DataGrid } from "@mui/x-data-grid";
 const SubjectLoadDialog = ({ open, close, data }) => {
   return (
     <Dialog open={open} onClose={close} aria-labelledby={"dialog-confirmation"} maxWidth={"xl"} fullWidth>
-      <DialogTitle id={"dialog-confirmation-title"}>SUBJECT LOAD</DialogTitle>
+      <DialogTitle id={"dialog-confirmation-title"}>CLASS LOAD</DialogTitle>
       <IconButton
         aria-label="close"
         onClick={close}

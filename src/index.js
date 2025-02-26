@@ -24,6 +24,7 @@ import GraduateStudiesTable, {
   loader as graduateStudiesTableLoader,
 } from "./routes/home/graduateStudiesTable";
 import Upload, { loader as uploadLoader } from "./routes/home/upload";
+import UploadGS, { loader as uploadGSLoader } from "./routes/home/uploadGS";
 import PrintGradeSheet, { loader as printLoader } from "./routes/home/PrintNew";
 import PrintGraduateStudiesGradeSheet, { loader as printGSLoader } from "./routes/home/PrintGS";
 
@@ -42,6 +43,9 @@ import { store } from "./app/store";
 import { REACT_APP_GOOGLE_CLIENT_ID } from "./utils/envVariables";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { RegistrarActivityProvider } from "./context/RegistrarActivityContext";
+import Deadline from "./components/settings/Deadline";
+import ExtendDeadline from "./components/settings/ExtendDeadline";
+import GraduateStudies from "./components/settings/GraduateStudies";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -79,6 +83,11 @@ const router = createBrowserRouter([
             path: "/home/:code/upload/:class_code",
             element: <Upload />,
             loader: uploadLoader,
+          },
+          {
+            path: "/home/:code/upload/:class_code/gs",
+            element: <UploadGS />,
+            loader: uploadGSLoader,
           },
         ],
       },
@@ -133,6 +142,20 @@ const router = createBrowserRouter([
       {
         path: "settings",
         element: <Settings />,
+        children: [
+          {
+            path: "deadline",
+            element: <Deadline />,
+          },
+          {
+            path: "extend-deadline",
+            element: <ExtendDeadline />,
+          },
+          {
+            path: "graduate-studies",
+            element: <GraduateStudies />,
+          }
+        ]
       },
       {
         path: "download",

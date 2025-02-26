@@ -6,7 +6,6 @@ import {
   Button,
   IconButton,
   List,
-  ListItemAvatar,
   ListItemButton,
   ListItemIcon,
   ListItemText,
@@ -19,16 +18,23 @@ import {
   Typography,
   Backdrop,
   useMediaQuery,
+  Collapse,
 } from "@mui/material";
 import {
-  Home as HomeIcon,
   Logout,
   Menu as MenuIcon,
-  People as PeopleIcon,
-  Schedule as ScheduleIcon,
-  Settings,
-  WorkHistory as WorkHistoryIcon,
   AccountCircle as AccountCircleIcon,
+  Home as HomeIcon,
+  People as PeopleIcon,
+  Groups as GroupsIcon,
+  Groups2 as Groups2Icon,
+  WorkHistory as WorkHistoryIcon,
+  Settings as SettingsIcon,
+  AccessTime as AccessTimeIcon,
+  MoreTime as MoreTimeIcon,
+  Subject as SubjectIcon,
+  ExpandLess,
+  ExpandMore
 } from "@mui/icons-material";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
@@ -36,35 +42,125 @@ import { googleLogout } from "@react-oauth/google";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 import { getCampus } from "../../utils/header.util";
 import { adminIndexUtil, checkAccessLevel, checkAccessLevelForMenu } from "../../utils/admin-index.util";
-// import useFetchAxiosGet from "../../hooks/useFetchAxiosGet";
+const SideNavListItems = [
+  {
+    text: "Home",
+    activeItem: "home",
+    link: '/admin',
+    icon: <HomeIcon />,
+    path: "/admin/home",
+  },
+  {
+    text: "Students",
+    activeItem: "students",
+    link: '/admin/students',
+    icon: <PeopleIcon />,
+    path: "/admin/students",
+  },
+  {
+    text: "Faculty",
+    activeItem: "faculty",
+    link: "/admin/faculty",
+    icon: <GroupsIcon />,
+    path: "/admin/faculty",
+  },
+  {
+    text: "Users",
+    activeItem: "users",
+    link: "/admin/users",
+    icon: <Groups2Icon />,
+    path: "/admin/users",
+  },
+  {
+    text: "Reports",
+    activeItem: "reports",
+    link: "/admin/reports",
+    icon: <WorkHistoryIcon />,
+    path: "/admin/reports",
+  },
+  {
+    text: "Settings",
+    activeItem: "settings",
+    link: "/admin/settings",
+    icon: <SettingsIcon />,
+    path: "/admin/settings",
+  }
+]
+
+const SettingsListItems = [
+  {
+    text: "Deadline",
+    activeItem: "deadline",
+    icon: <AccessTimeIcon />,
+    link: "/admin/settings/deadline",
+  },
+  {
+    text: "Extend Deadline",
+    activeItem: "extend-deadline",
+    icon: <MoreTimeIcon />,
+    link: "/admin/settings/extend-deadline",
+  },
+  {
+    text: "Graduate Studies",
+    activeItem: "graduate-studies",
+    icon: <SubjectIcon />,
+    link: "/admin/settings/graduate-studies",
+  }
+]
+
+const MenuPaperProps = {
+  elevation: 0,
+  sx: {
+    overflow: "visible",
+    filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+    mt: 1.5,
+    "& .MuiAvatar-root": {
+      width: 32,
+      height: 32,
+      ml: -0.5,
+      mr: 1,
+    },
+    "&:before": {
+      content: '""',
+      display: "block",
+      position: "absolute",
+      top: 0,
+      right: 20,
+      width: 10,
+      height: 10,
+      bgcolor: "background.paper",
+      transform: "translateY(-50%) rotate(45deg)",
+      zIndex: 0,
+    },
+  },
+}
 
 export default function Admin() {
   const [cookies, , removeCookie] = useCookies(adminIndexUtil.siteCookies);
+  const campusAccessing = getCampus();
+  const menuListItems = [
+    {
+      text: cookies.name,
+      icon: <AccountCircleIcon />,
+    },
+    {
+      text: campusAccessing,
+      icon: <HomeIcon />,
+    },
+    {
+      text: cookies.accessLevel,
+      icon: <AccountCircleIcon />,
+    },
+  ]
   const navigate = useNavigate();
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
-  // const initialRegistrarActivity = {
-  //   activity: "",
-  //   schoolyear: 1970,
-  //   semester: "",
-  //   status: "",
-  //   from: "0000-00-00",
-  //   to: "0000-00-00",
-  // }
-  // const initialRegistrarActivitySummer = {...initialRegistrarActivity}
-  // const initialRegistrarActivityFirstSemester = {...initialRegistrarActivity}
-  // const initialRegistrarActivitySecondSemester = {...initialRegistrarActivity}
-  // const [registrarActivitySummer, setRegistrarActivitySummer] = useState(initialRegistrarActivitySummer);
-  // const [registrarActivityFirstSemester, setRegistrarActivityFirstSemester] = useState(initialRegistrarActivityFirstSemester);
-  // const [registrarActivitySecondSemester, setRegistrarActivitySecondSemester] = useState(initialRegistrarActivitySecondSemester);
-
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
 
-  const [activeItem, setActiveItem] = useState(
-    localStorage.getItem("activeItem")
-  );
+  const [activeItem, setActiveItem] = useState(localStorage.getItem("activeItem"));
 
   const [backdropOpen, setBackdropOpen] = useState(false);
+  const [open, setOpen] = React.useState(false)
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
   useEffect(() => {
@@ -97,8 +193,9 @@ export default function Admin() {
   };
   useEffect(() => {
     setDrawerMinimize(isSmallScreen ? true : !true);
-  }, [isSmallScreen, setDrawerMinimize]);
-  const campusAccessing = getCampus();
+  }, [isSmallScreen, setDrawerMinimize, navigate]);
+  
+  const isAdminAccessing = checkAccessLevelForMenu(cookies.accessLevel);
   return (
     <Box
       sx={{
@@ -169,62 +266,24 @@ export default function Admin() {
                 anchorEl={menuAnchor}
                 open={Boolean(menuAnchor)}
                 onClose={() => setMenuAnchor(null)}
-                PaperProps={{
-                  elevation: 0,
-                  sx: {
-                    overflow: "visible",
-                    filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                    mt: 1.5,
-                    "& .MuiAvatar-root": {
-                      width: 32,
-                      height: 32,
-                      ml: -0.5,
-                      mr: 1,
-                    },
-                    "&:before": {
-                      content: '""',
-                      display: "block",
-                      position: "absolute",
-                      top: 0,
-                      right: 20,
-                      width: 10,
-                      height: 10,
-                      bgcolor: "background.paper",
-                      transform: "translateY(-50%) rotate(45deg)",
-                      zIndex: 0,
-                    },
-                  },
-                }}
+                PaperProps={MenuPaperProps}
                 transformOrigin={{ horizontal: "right", vertical: "top" }}
                 anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
               >
-                <MenuItem>
-                  <ListItemIcon>
-                    <HomeIcon />
-                  </ListItemIcon>
-                  <ListItemText sx={{ ml: 3 }} primary={campusAccessing} />
-                </MenuItem>
-                <MenuItem>
-                  <ListItemIcon>
-                    <AccountCircleIcon />
-                  </ListItemIcon>
-                  <ListItemText sx={{ ml: 3 }} primary={cookies.accessLevel} />
-                </MenuItem>
-                <MenuItem>
-                  <ListItemAvatar>
-                    <Avatar
-                      src={cookies.picture}
-                      sx={{ width: 24, height: 24 }}
-                    />
-                  </ListItemAvatar>
-                  <ListItemText primary={cookies.name} />
-                </MenuItem>
+                {menuListItems.map((item, index) => (
+                  <MenuItem key={++index}>
+                    <ListItemIcon>
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText sx={{ ml: 3 }} primary={item.text} />
+                  </MenuItem>
+                ))}
                 <MenuItem onClick={logout}>
-                  <ListItemIcon>
-                    <Logout />
-                  </ListItemIcon>
-                  <ListItemText sx={{ ml: 3 }} primary="Sign Out" />
-                </MenuItem>
+                    <ListItemIcon>
+                      <Logout />
+                    </ListItemIcon>
+                    <ListItemText sx={{ ml: 3 }} primary={"Sign Out"} />
+                  </MenuItem>
               </Menu>
             </MenuList>
           </Toolbar>
@@ -263,113 +322,76 @@ export default function Admin() {
             sx={{ height: "inherit", overflow: "auto" }}
           >
             <List>
-              {/* Home */}
-              <ListItemButton
-                className={activeItem === "home" ? "navbtn active" : "navbtn"}
-                onClick={() => {
-                  setActiveItem("home");
-                  navigate(`/admin`);
-                }}
-              >
-                <Tooltip title="Home">
-                  <ListItemIcon>
-                    <HomeIcon />
-                  </ListItemIcon>
-                </Tooltip>
-                {drawerMinimize ? null : <ListItemText primary="Home" />}
-              </ListItemButton>
-              {/* Home */}
-
-              {/* Students */}
-              <ListItemButton
-                className={activeItem === "students" ? "navbtn active" : "navbtn"}
-                onClick={() => {
-                  setActiveItem("students");
-                  navigate(`/admin/students`);
-                }}
-              >
-                <Tooltip title="Students">
-                  <ListItemIcon>
-                    <PeopleIcon />
-                  </ListItemIcon>
-                </Tooltip>
-                {drawerMinimize ? null : <ListItemText primary="Students" />}
-              </ListItemButton>
-              {/* Students */}
-
-              
-              {checkAccessLevelForMenu(cookies.accessLevel) && (
-                <>
-                {/* Faculty */}
-                <ListItemButton
-                  className={activeItem === "faculty" ? "navbtn active" : "navbtn"}
-                  onClick={() => {
-                    setActiveItem("faculty");
-                    navigate(`/admin/faculty`);
-                  }}
-                >
-                  <Tooltip title="Faculty">
-                    <ListItemIcon>
-                      <ScheduleIcon />
-                    </ListItemIcon>
-                  </Tooltip>
-                  {drawerMinimize ? null : (
-                    <ListItemText primary="Faculty" />
-                  )}
-                </ListItemButton>
-                {/* Faculty */}
-                {/* Users */}
-                <ListItemButton
-                  className={activeItem === "users" ? "navbtn active" : "navbtn"}
-                  onClick={() => {
-                    setActiveItem("users");
-                    navigate(`/admin/users`);
-                  }}
-                >
-                  <Tooltip title="Users">
-                    <ListItemIcon>
-                      <PeopleIcon />
-                    </ListItemIcon>
-                  </Tooltip>
-                  {drawerMinimize ? null : <ListItemText primary="Users" />}
-                </ListItemButton>
-                {/* Users */}
-
-                {/* Reports */}
-                <ListItemButton
-                  className={activeItem === "reports" ? "navbtn active" : "navbtn"}
-                  onClick={() => {
-                    setActiveItem("reports");
-                    navigate(`/admin/reports`);
-                  }}
-                >
-                  <Tooltip title="Reports">
-                    <ListItemIcon>
-                      <WorkHistoryIcon />
-                    </ListItemIcon>
-                  </Tooltip>
-                  {drawerMinimize ? null : <ListItemText primary="Reports" />}
-                </ListItemButton>
-                {/* Reports */}
-
-                {/* Settings */}
-                <ListItemButton
-                  className={activeItem === "settings" ? "navbtn active" : "navbtn"}
-                  onClick={() => {
-                    setActiveItem("settings");
-                    navigate(`/admin/settings`);
-                  }}
-                >
-                  <Tooltip title="Settings">
-                    <ListItemIcon>
-                      <Settings />
-                    </ListItemIcon>
-                  </Tooltip>
-                  {drawerMinimize ? null : <ListItemText primary="Settings" />}
-                </ListItemButton>
-                {/* Settings */}
-              </>
-              )}
+              {isAdminAccessing ? (
+                SideNavListItems.map((item, index) => {
+                  const isSettings = item.text === "Settings";
+                  return (
+                    <>
+                      <ListItemButton
+                        key={++index}
+                        className={activeItem === item.activeItem ? "navbtn active" : "navbtn"}
+                        onClick={() => {
+                          setActiveItem(item.activeItem);
+                          navigate(item.link);
+                          if(isSettings) setOpen(!open);
+                        }}
+                      >
+                        <Tooltip title={item.text}>
+                          <ListItemIcon>
+                            {item.icon}
+                          </ListItemIcon>
+                        </Tooltip>
+                        {drawerMinimize ? null : <ListItemText primary={item.text} />}
+                        { isSettings && (open ? <ExpandLess /> : <ExpandMore />)}
+                      </ListItemButton>
+                      {isSettings && 
+                        SettingsListItems.map((item, index) => {
+                          return (
+                            <Collapse 
+                              key={++index} 
+                              in={open} 
+                              timeout="auto" 
+                              unmountOnExit
+                              className={activeItem === item.activeItem ? "navbtn active" : "navbtn"}
+                              onClick={() => setActiveItem(item.activeItem)}
+                            >
+                              <List component="div" disablePadding>
+                                <ListItemButton sx={{ pl: 4 }} onClick={() => navigate(item.link)}>
+                                  <ListItemIcon>
+                                    {item.icon}
+                                  </ListItemIcon>
+                                  <ListItemText primary={item.text} />
+                                </ListItemButton>
+                              </List>
+                            </Collapse>
+                          )
+                        })}
+                    </>
+                  )
+                })
+              ) : SideNavListItems.filter((item) => ["Home", "Students", "Faculty"].includes(item.text)).map((item, index) => {
+                const isSettings = item.text === "Settings";
+                return (
+                  <>
+                    <ListItemButton
+                      key={++index}
+                      className={activeItem === item.activeItem ? "navbtn active" : "navbtn"}
+                      onClick={() => {
+                        setActiveItem(item.activeItem);
+                        navigate(item.link);
+                        if(isSettings) setOpen(!open);
+                      }}
+                    >
+                      <Tooltip title={item.text}>
+                        <ListItemIcon>
+                          {item.icon}
+                        </ListItemIcon>
+                      </Tooltip>
+                      {drawerMinimize ? null : <ListItemText primary={item.text} />}
+                    </ListItemButton>
+                  </>
+                )
+              })}
             </List>
           </Paper>
         </Box>
@@ -396,8 +418,6 @@ export default function Admin() {
             ></Backdrop>
           )}
           <Outlet />
-        {/* <Box sx={{ flexGrow: 1, p: 3 }}>
-          <Outlet context={[schoolyear, semester, from, to]}/> */}
         </Box>
       </Box>
     </Box>
