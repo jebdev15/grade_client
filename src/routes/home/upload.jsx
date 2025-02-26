@@ -79,6 +79,7 @@ const Upload = () => {
       setErrorUpload(isError ? true : !true);
     }
   };
+  React.useEffect(() => console.log("Uploading of gradesheet for undergrad school."),[])
   return (
     <Dialog
       open={uploadOpen}
