@@ -1,6 +1,6 @@
 import { DataGrid } from "@mui/x-data-grid";
 import React, { useEffect, useState } from "react";
-import { IconButton, Tooltip, Typography, Box, Dialog, DialogTitle, DialogContent, FormControl, TextField, InputLabel, Select, DialogActions, MenuItem, ButtonGroup, Button, useMediaQuery, Grid, Autocomplete } from "@mui/material";
+import { IconButton, Tooltip, Typography, Box, Dialog, DialogTitle, DialogContent, FormControl, TextField, InputLabel, Select, DialogActions, MenuItem, ButtonGroup, Button, useMediaQuery, Grid } from "@mui/material";
 import { Close, PersonAddAlt1 as PersonAddAlt1Icon, ModeEdit } from "@mui/icons-material";
 import { useCookies } from "react-cookie";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,14 +10,6 @@ import { fetchColleges } from "../../features/admin/users/collegesThunks";
 import { fetchNoAccounts } from "../../features/admin/users/noAccountsThunks";
 import { AdminUsersService } from "../../services/adminUsersService";
 import { fetchProgramCodes } from "../../features/admin/users/programCodesThunks";
-
-const sleep = (duration) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, duration);
-  });
-}
 
 const Users = () => {
   const [cookies, ,] = useCookies(["email", "accessLevel"]);
@@ -219,26 +211,6 @@ const Users = () => {
     }
   }, [programCodeStatus, dispatch, cookies]);
   const [loading, setLoading] = useState(true);
-  const [autocompleteProps, setAutocompleteProps] = useState({
-    open: false,
-    options: [],
-    loading: false,
-  });
-  const autocompleteFunctions = {
-    handleOpen: () => {
-      setAutocompleteProps((prevState) => ({ ...prevState, open: true }));
-      (async () => {
-        setAutocompleteProps((prevState) => ({ ...prevState, loading: true }));
-        await sleep(1e3); // For demo purposes.
-        setAutocompleteProps((prevState) => ({ ...prevState, loading: false }));
-        setAutocompleteProps((prevState) => ({ ...prevState, options: [...noAccountData] }));
-      })();
-    },
-    handleClose: () => {
-      setAutocompleteProps((prevState) => ({ ...prevState, open: false }));
-      setAutocompleteProps((prevState) => ({ ...prevState, options: [] }));
-    }
-  }
   return (
     <>
       <Box 

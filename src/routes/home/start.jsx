@@ -15,10 +15,6 @@ const Start = () => {
   const [data, setData] = React.useState([initialRegistrarActivity])
   React.useEffect(() => {
     if(registrarActivityStatus === "succeeded") {
-      console.log({
-        registrarActivityData,
-        registrarActivityStatus
-      })
       setData(registrarActivityData.data)
     }
   },[registrarActivityData, registrarActivityStatus])

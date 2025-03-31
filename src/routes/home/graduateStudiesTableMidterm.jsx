@@ -22,9 +22,7 @@ import {
   DataGrid
 } from "@mui/x-data-grid";
 import React, { useState } from "react";
-import { urlDecode } from "url-encode-base64";
 import { useCookies } from "react-cookie";
-import { dateFormatter } from "../../utils/formatDate";
 import { HomeSemesterServices } from "../../services/homeSemesterService";
 import { HomeSemesterGraduateStudiesTableService } from "../../services/homeSemesterGraduateStudiesTableService";
 
@@ -33,36 +31,21 @@ const GraduateStudiesTable = () => {
   const navigate = useNavigate();
   const { code, class_code } = useParams();
   const theme = useTheme();
-  const [semester, currentSchoolYear] = code?.split("-");
-  const decode = {
-    semester: urlDecode(semester),
-    currentSchoolYear: urlDecode(currentSchoolYear),
-  };
   const {
     rows,
     loadInfoArr,
-    dbSchoolYear,
-    dbSemester,
-    dbTo,
   } = useLoaderData();
-  const [manualOpen, setManualOpen] = useOutletContext();
   const loadInfo = loadInfoArr[0];
-  const SubjectisLock = loadInfo.status;
+
+  const [...contexts] = useOutletContext();
+  const manualOpen = contexts[0];
+  const setManualOpen = contexts[1];
+  const canUpload = (loadInfo.canUpload || loadInfo.is_deadline_extended) && !(loadInfo.classLoadStatus);
 
   const [toUpdate, setToUpdate] = useState([]);
   const [tableLoading, setTableLoading] = useState(false);
   const [updatedCount, setUpdatedCount] = useState(null);
 
-  const getcurrentDate = Date.now();
-  const currentDate = dateFormatter(getcurrentDate);
-  const systemScheduledDueDate = dateFormatter(dbTo);
-
-  const checkDate = new Date(currentDate) <= new Date(systemScheduledDueDate);
-  const checkSchoolYear = dbSchoolYear === parseInt(decode.currentSchoolYear);
-  const checkSemester = dbSemester === decode.semester;
-  const checkSubjectIsNotLock = SubjectisLock === 0;
-
-  const canUpload = checkDate && checkSchoolYear && checkSemester && checkSubjectIsNotLock;
   const columns = [
     {
       field: "student_id",
@@ -210,7 +193,6 @@ const GraduateStudiesTable = () => {
         setTableLoading(false);
         setUpdatedCount(data);
       }
-      console.log({toUpdate});
     } else {
       alert("No rows to update")
     }

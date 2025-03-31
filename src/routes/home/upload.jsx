@@ -13,7 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useState } from "react";
-import { useOutletContext, useLoaderData, useParams } from "react-router-dom";
+import { useOutletContext, useLoaderData, useParams, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { saveAs } from "file-saver";
 import { urlDecode } from "url-encode-base64";
@@ -26,11 +26,12 @@ const Upload = () => {
   const [cookies,,] = useCookies(["name", "email"]);
   const { loadInfoArr, dbTermType } = useLoaderData();
   const loadInfo = loadInfoArr[0];
+  const navigate = useNavigate();
 
   const [...contexts] = useOutletContext();
   const uploadOpen = contexts[2];
   const setUploadOpen = contexts[3];
-  const canUpload = contexts[6];
+  const canUpload = (loadInfo.canUpload || loadInfo.is_deadline_extended) && !(loadInfo.classLoadStatus);
 
   const [uploadFile, setUploadFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -71,15 +72,14 @@ const Upload = () => {
     const { data } = await HomeSemesterUploadService.uploadGradeSheet(formData)
     const { isOkay, isError } = data
     if (isOkay) {
-      
       setUploading(false);
       setOpenSnackbar(true);
       setUploadFile(null);
       setTimeout(() => setUploadOpen(false),3500)
       setErrorUpload(isError ? true : !true);
+      navigate(".", { replace: true });
     }
   };
-  React.useEffect(() => console.log("Uploading of gradesheet for undergrad school."),[])
   return (
     <Dialog
       open={uploadOpen}
@@ -218,7 +218,6 @@ const Upload = () => {
                 m: 2,
               }}
             >
-              <Typography>Uploading the grade sheet is unavailable.</Typography>
             </Box>
           )
           }

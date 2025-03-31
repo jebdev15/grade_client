@@ -67,6 +67,16 @@ const updateClassStatusByYearAndSemester = async (formData) => {
     const { data, status } = await axiosInstance.put(`/admin/updateClassStatusByYearAndSemester`, formData);
     return { data, status };
 }
+
+const extendUploadingOfGradeByClassCode = async (formData) => {
+    const { data, status } = await axiosInstance.post(`/admin/extendUploadingOfGradeByClassCode`, formData);
+    return { data, status };
+}
+
+const updateClassCodeStatusByClassCode = async (formData) => {
+    const { data, status } = await axiosInstance.put(`/admin/updateClassCodeStatusByClassCode`, formData);
+    return { data, status };
+}
 export const AdminSettingsServices = {
     getAllEmailsForExtension,
     getGraduateStudiesServices,
@@ -81,5 +91,7 @@ export const AdminSettingsServices = {
     getRegistrarActivity,
     getRegistrarActivityBySemester,
     updateRegistrarActivityById,
-    updateClassStatusByYearAndSemester
+    updateClassStatusByYearAndSemester,
+    extendUploadingOfGradeByClassCode,
+    updateClassCodeStatusByClassCode
 }

@@ -45,7 +45,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { RegistrarActivityProvider } from "./context/RegistrarActivityContext";
 import Deadline from "./components/settings/Deadline";
 import ExtendDeadline from "./components/settings/ExtendDeadline";
-import GraduateStudies from "./components/settings/GraduateStudies";
+import ClassLoad from "./components/settings/ClassLoad";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -152,8 +152,8 @@ const router = createBrowserRouter([
             element: <ExtendDeadline />,
           },
           {
-            path: "graduate-studies",
-            element: <GraduateStudies />,
+            path: "class-load",
+            element: <ClassLoad />,
           }
         ]
       },

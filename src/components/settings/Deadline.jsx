@@ -150,7 +150,7 @@ const Deadline = () => {
                 required
               >
                 <MenuItem value="midterm">Midterm</MenuItem>
-                <MenuItem value="finalterm">Endterm</MenuItem>
+                <MenuItem value="endterm">Endterm</MenuItem>
               </Select>
             </FormControl>
             <FormControl fullWidth>

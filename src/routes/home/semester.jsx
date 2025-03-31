@@ -24,21 +24,16 @@ const Semester = () => {
   const [semester, currentSchoolYear] = code.split("-");
 
   const navigate = useNavigate();
-  const { loads, dbSchoolYear, dbSemester, dbTermType, isWithinDateRange } = useLoaderData();
+  const { loads, dbTermType } = useLoaderData();
 
   const [manualOpen, setManualOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [printOpen, setPrintOpen] = useState(false);
-  
 
   const decodedSemester = urlDecode(semester);
   const decodedSchoolYear = urlDecode(currentSchoolYear);
-
-  const checkSchoolYear = dbSchoolYear === parseInt(decodedSchoolYear);
-  const checkSemester = dbSemester === decodedSemester;
-  const canUpload = isWithinDateRange && checkSchoolYear && checkSemester;
   return (
-    <Box>
+    <React.Suspense fallback={<div>loading...</div>}>
       <Box
         sx={{ 
           display: "flex",
@@ -78,7 +73,6 @@ const Semester = () => {
               setUploadOpen,
               printOpen,
               setPrintOpen,
-              canUpload,
             ]}
           />
 
@@ -91,7 +85,7 @@ const Semester = () => {
                 rowSpacing={5}
               >
                 {loads.map((load) => {
-                  const classLoad = {...load, canUpload, currentSchoolYear, semester, dbTermType, setManualOpen, setUploadOpen}
+                  const classLoad = {...load, currentSchoolYear, semester, dbTermType, setManualOpen, setUploadOpen}
                   return (
                     <Grid key={load.class_code} item xs={4} md={3}>
                       <LoadCard {...classLoad} />
@@ -110,15 +104,16 @@ const Semester = () => {
           </Container>
         </Box>
       </Box>
-    </Box>
+    </React.Suspense>
   );
 };
 
 export const loader = async ({ params }) => {
   const { code } = params;
+  
   const [semester,currentSchoolYear,faculty_id,] = code.split("-");
-  const { data:loads } = await HomeSemesterServices.getSubjectLoadByFacultyIdYearAndSemester(faculty_id,currentSchoolYear,semester)
-
+  const { data:loads } = await HomeSemesterServices.getSubjectLoadByFacultyIdYearAndSemester(faculty_id,currentSchoolYear,semester);
+  
   const { data:registrarActivity } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
   const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo, term_type: dbTermType } = registrarActivity || {};
   return { loads, dbSchoolYear, dbSemester, dbTo, dbTermType };

@@ -22,9 +22,7 @@ import {
   DataGrid
 } from "@mui/x-data-grid";
 import React, { useState } from "react";
-import { urlDecode } from "url-encode-base64";
 import { useCookies } from "react-cookie";
-import { dateFormatter } from "../../utils/formatDate";
 import { HomeSemesterServices } from "../../services/homeSemesterService";
 import { HomeSemesterGraduateStudiesTableService } from "../../services/homeSemesterGraduateStudiesTableService";
 
@@ -33,53 +31,22 @@ const GraduateStudiesTable = () => {
   const navigate = useNavigate();
   const { code, class_code } = useParams();
   const theme = useTheme();
-  const [semester, currentSchoolYear] = code?.split("-");
-  const decode = {
-    semester: urlDecode(semester),
-    currentSchoolYear: urlDecode(currentSchoolYear),
-  };
   const {
     rows,
     loadInfoArr,
-    dbSchoolYear,
-    dbSemester,
-    dbTo,
     dbTermType
   } = useLoaderData();
-  const [manualOpen, setManualOpen] = useOutletContext();
+
+  const [...contexts] = useOutletContext();
+  const manualOpen = contexts[0];
+  const setManualOpen = contexts[1];
   const loadInfo = loadInfoArr[0];
-  const SubjectisLock = loadInfo.status;
+  const canUpload = (loadInfo.canUpload || loadInfo.is_deadline_extended) && !(loadInfo.classLoadStatus);
 
   const [toUpdate, setToUpdate] = useState([]);
   const [tableLoading, setTableLoading] = useState(false);
   const [updatedCount, setUpdatedCount] = useState(null);
 
-  const getcurrentDate = Date.now();
-  const currentDate = dateFormatter(getcurrentDate);
-  const systemScheduledDueDate = dateFormatter(dbTo);
-
-  const checkDate = new Date(currentDate) <= new Date(systemScheduledDueDate);
-  const checkSchoolYear = dbSchoolYear === parseInt(decode.currentSchoolYear);
-  const checkSemester = dbSemester === decode.semester;
-  const checkSubjectIsNotLock = SubjectisLock === 0;
-
-  const canUpload = checkDate && checkSchoolYear && checkSemester && checkSubjectIsNotLock;
-  const handleUpdateRecordVisibility = () => {
-    if (canUpload) {
-      if(dbTermType === 'midterm') {
-        if (loadInfo.midterm_status !== 1) {
-          return true;
-        }
-      } else if(dbTermType === 'finalterm') {
-        if (parseInt(loadInfo.status) === 0) {
-          return true
-        } 
-        return false
-      }
-      return false
-    }
-    return false
-  }
   const columns = [
     {
       field: "student_id",
@@ -102,7 +69,7 @@ const GraduateStudiesTable = () => {
       field: "mid_grade",
       headerName: "Mid Term",
       width: 90,
-      editable: handleUpdateRecordVisibility(),
+      editable: canUpload,
       sortable: true,
       type: "number",
       valueGetter: ({ row }) => parseFloat(row.mid_grade),
@@ -111,7 +78,7 @@ const GraduateStudiesTable = () => {
       field: "end_grade",
       headerName: "End Term",
       width: 90,
-      editable: handleUpdateRecordVisibility(),
+      editable: canUpload,
       sortable: true,
       type: "number",
       valueGetter: ({ row }) => parseFloat(row.end_grade),
@@ -120,7 +87,7 @@ const GraduateStudiesTable = () => {
       field: "grade",
       headerName: "Grade",
       width: 90,
-      editable: handleUpdateRecordVisibility(),
+      editable: canUpload,
       sortable: true,
       type: "number",
       valueGetter: ({ row }) => parseFloat(row.grade),
@@ -145,7 +112,7 @@ const GraduateStudiesTable = () => {
       field: "addRemark",
       flex: 0.5,
       headerName: "Remark",
-      editable: handleUpdateRecordVisibility(),
+      editable: canUpload,
       sortable: true,
       type: "singleSelect",
       valueOptions: [
@@ -227,7 +194,6 @@ const GraduateStudiesTable = () => {
         setTableLoading(false);
         setUpdatedCount(data);
       }
-      console.log({toUpdate});
     } else {
       alert("No rows to update")
     }
@@ -288,7 +254,6 @@ const GraduateStudiesTable = () => {
             Section: <strong>{loadInfo.section}</strong>
           </Typography>
         </Box>
-        <Typography variant="body1" color="initial" sx={{ alignSelf: "flex-end" }}>*Double Click to Select Remark</Typography>
         <Box>
           <DataGrid
             getRowId={(row) => row.student_id}
@@ -330,7 +295,7 @@ const GraduateStudiesTable = () => {
         </Box>
       </DialogContent>
       <DialogActions>
-        {handleUpdateRecordVisibility() && (
+        {canUpload && (
           <Button
               variant="contained"
               disabled={tableLoading || toUpdate.length < 1}

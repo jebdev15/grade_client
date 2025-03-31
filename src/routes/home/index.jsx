@@ -39,17 +39,21 @@ import { homeIndexUtil } from "../../utils/homeIndexUtil";
 import { fetchRegistrarActivity } from "../../features/home/index/registrarActivityThunks";
 import { useDispatch, useSelector } from "react-redux";
 
+const date = new Date();
+const currentYear = date.getFullYear();
 const Home = () => {
   const [cookies, , removeCookie] = useCookies(homeIndexUtil.siteCookies);
   const navigate = useNavigate();
   const [schoolyear, setSchoolYear] = useState({
-    summer: 1970,
-    firstSemester: 1970,
-    secondSemester: 1970,
+    summer: currentYear,
+    firstSemester: currentYear,
+    secondSemester: currentYear,
   });
   const data = useSelector((state) => state.registrarActivity.list);
   const error = useSelector((state) => state.registrarActivity.error);
-  const registrarActivityStatus = useSelector((state) => state.registrarActivity.status);
+  const registrarActivityStatus = useSelector(
+    (state) => state.registrarActivity.status
+  );
 
   const dispatch = useDispatch();
   useEffect(() => {
@@ -57,19 +61,24 @@ const Home = () => {
     if (registrarActivityStatus === "idle") {
       dispatch(fetchRegistrarActivity());
     }
-    if(registrarActivityStatus === "succeeded" && !error) {
+    if (registrarActivityStatus === "succeeded" && !error) {
       data?.data.forEach(({ schoolyear, semester }) => {
         // Set the school year based on the semester
-        if (semester === 'summer') {
+        if (semester === "summer") {
           setSchoolYear((prevState) => ({ ...prevState, summer: schoolyear }));
-        } else if (semester === '1st') {
-          setSchoolYear((prevState) => ({ ...prevState, firstSemester: schoolyear }));
-        } else if (semester === '2nd') {
-          setSchoolYear((prevState) => ({ ...prevState, secondSemester: schoolyear }));
+        } else if (semester === "1st") {
+          setSchoolYear((prevState) => ({
+            ...prevState,
+            firstSemester: schoolyear,
+          }));
+        } else if (semester === "2nd") {
+          setSchoolYear((prevState) => ({
+            ...prevState,
+            secondSemester: schoolyear,
+          }));
         }
       });
-    } 
-    console.log({data, registrarActivityStatus, error});
+    }
   }, [data, registrarActivityStatus, error, dispatch]);
 
   const [drawerMinimize, setDrawerMinimize] = useState(false);
@@ -99,7 +108,9 @@ const Home = () => {
   );
 
   const logout = () => {
-    homeIndexUtil.siteCookies.forEach((cookie) => removeCookie(cookie, { path: "/" }));
+    homeIndexUtil.siteCookies.forEach((cookie) =>
+      removeCookie(cookie, { path: "/" })
+    );
     googleLogout();
     navigate("/");
     localStorage.removeItem("activeItem");
@@ -121,176 +132,186 @@ const Home = () => {
   const campusAccessing = getCampus();
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100dvh",
-        alignItems: "stretch",
-      }}
-    >
-      <Box
-        sx={{
-          width: "100%",
-          height: 67,
-          position: "fixed",
-          zIndex: "1000",
-        }}
-      >
-        <AppBar
-          className="header"
-          position="static"
-          elevation={0}
-          sx={{ position: "relative" }}
-        >
-          <Toolbar>
-            <IconButton
-              size="large"
-              edge="start"
-              color="primary.dark"
-              aria-label="menu"
-              sx={{ color: "primary.dark", mr: 1 }}
-              onClick={() => {
-                setDrawerMinimize(!drawerMinimize);
-              }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <img className="logo" src={chmsuLogo} alt="CHMSU Logo" />
-            <Typography
-              className="systemName"
-              variant="h6"
-              component="div"
-              sx={{ color: "primary.dark", flexGrow: 1, lineHeight: "1" }}
-            >
-              <span></span>
-              <span></span>
-            </Typography>
-            <Button
-              color="primary"
-              onClick={(e) => setMenuAnchor(e.currentTarget)}
-              sx={{
-                minWidth: "unset",
-                borderRadius: "50%",
-                padding: "8px",
-              }}
-            >
-              <Avatar
-                sx={{
-                  height: "35px",
-                  width: "35px",
-                  outline: "4px solid var(--border-default)",
-                }}
-                alt="name"
-                src={cookies.picture}
-              />
-            </Button>
-            <MenuList>
-              <Menu
-                anchorEl={menuAnchor}
-                open={Boolean(menuAnchor)}
-                onClose={() => setMenuAnchor(null)}
-                PaperProps={{
-                  elevation: 0,
-                  sx: {
-                    overflow: "visible",
-                    filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
-                    mt: 1.5,
-                    "& .MuiAvatar-root": {
-                      width: 32,
-                      height: 32,
-                      ml: -0.5,
-                      mr: 1,
-                    },
-                    "&:before": {
-                      content: '""',
-                      display: "block",
-                      position: "absolute",
-                      top: 0,
-                      right: 20,
-                      width: 10,
-                      height: 10,
-                      bgcolor: "background.paper",
-                      transform: "translateY(-50%) rotate(45deg)",
-                      zIndex: 0,
-                    },
-                  },
-                }}
-                transformOrigin={{ horizontal: "right", vertical: "top" }}
-                anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-              >
-                <MenuItem>
-                  <ListItemIcon>
-                    <HomeIcon />
-                  </ListItemIcon>
-                  <ListItemText sx={{ ml: 3 }} primary={campusAccessing} />
-                </MenuItem>
-                <MenuItem>
-                  <ListItemIcon>
-                    <AccountCircleIcon />
-                  </ListItemIcon>
-                  <ListItemText sx={{ ml: 3 }} primary={cookies.accessLevel} />
-                </MenuItem>
-                <MenuItem>
-                  <ListItemAvatar>
-                    <Avatar
-                      src={cookies.picture}
-                      sx={{ width: 24, height: 24 }}
-                    />
-                  </ListItemAvatar>
-                  <ListItemText primary={cookies.name} />
-                </MenuItem>
-                <MenuItem onClick={logout}>
-                  <ListItemIcon>
-                    <Logout />
-                  </ListItemIcon>
-                  <ListItemText sx={{ ml: 3 }} primary="Sign Out" />
-                </MenuItem>
-              </Menu>
-            </MenuList>
-          </Toolbar>
-        </AppBar>
-      </Box>
-
+    <React.Suspense fallback={<div>loading...</div>}>
       <Box
         sx={{
           display: "flex",
-          flexGrow: 1,
-          position: "relative",
+          flexDirection: "column",
+          height: "100dvh",
+          alignItems: "stretch",
         }}
       >
         <Box
           sx={{
-            width: drawerMinimize ? 77 : 250,
-            height: "100dvh",
+            width: "100%",
+            height: 67,
             position: "fixed",
-            overflow: "hidden",
-            zIndex: "500",
-            paddingTop: "67px",
-            transition: (theme) =>
-              theme.transitions.create("width", {
-                easing: theme.transitions.easing.easeInOut,
-                duration: theme.transitions.duration.leavingScreen,
-              }),
-            "@media (max-width: 599px)": {
-              width: drawerMinimize ? 0 : 250,
-            },
+            zIndex: "1000",
           }}
         >
-          <Paper
-            className="navigation"
-            elevation={4}
-            square
-            sx={{ height: "inherit", overflow: "auto" }}
+          <AppBar
+            className="header"
+            position="static"
+            elevation={0}
+            sx={{ position: "relative" }}
           >
-            <List>
-              <ListItemButton
+            <Toolbar>
+              <IconButton
+                size="large"
+                edge="start"
+                color="primary.dark"
+                aria-label="menu"
+                sx={{ color: "primary.dark", mr: 1 }}
+                onClick={() => {
+                  setDrawerMinimize(!drawerMinimize);
+                }}
+              >
+                <MenuIcon />
+              </IconButton>
+              <img className="logo" src={chmsuLogo} alt="CHMSU Logo" />
+              <Typography
+                className="systemName"
+                variant="h6"
+                component="div"
+                sx={{ color: "primary.dark", flexGrow: 1, lineHeight: "1" }}
+              >
+                <span></span>
+                <span></span>
+              </Typography>
+              <Button
+                color="primary"
+                onClick={(e) => setMenuAnchor(e.currentTarget)}
+                sx={{
+                  minWidth: "unset",
+                  borderRadius: "50%",
+                  padding: "8px",
+                }}
+              >
+                <Avatar
+                  sx={{
+                    height: "35px",
+                    width: "35px",
+                    outline: "4px solid var(--border-default)",
+                  }}
+                  alt="name"
+                  src={cookies.picture}
+                />
+              </Button>
+              <MenuList>
+                <Menu
+                  anchorEl={menuAnchor}
+                  open={Boolean(menuAnchor)}
+                  onClose={() => setMenuAnchor(null)}
+                  PaperProps={{
+                    elevation: 0,
+                    sx: {
+                      overflow: "visible",
+                      filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
+                      mt: 1.5,
+                      "& .MuiAvatar-root": {
+                        width: 32,
+                        height: 32,
+                        ml: -0.5,
+                        mr: 1,
+                      },
+                      "&:before": {
+                        content: '""',
+                        display: "block",
+                        position: "absolute",
+                        top: 0,
+                        right: 20,
+                        width: 10,
+                        height: 10,
+                        bgcolor: "background.paper",
+                        transform: "translateY(-50%) rotate(45deg)",
+                        zIndex: 0,
+                      },
+                    },
+                  }}
+                  transformOrigin={{ horizontal: "right", vertical: "top" }}
+                  anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+                >
+                  <MenuItem>
+                    <ListItemIcon>
+                      <HomeIcon />
+                    </ListItemIcon>
+                    <ListItemText sx={{ ml: 3 }} primary={campusAccessing} />
+                  </MenuItem>
+                  <MenuItem>
+                    <ListItemIcon>
+                      <AccountCircleIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      sx={{ ml: 3 }}
+                      primary={cookies.accessLevel}
+                    />
+                  </MenuItem>
+                  <MenuItem>
+                    <ListItemAvatar>
+                      <Avatar
+                        src={cookies.picture}
+                        sx={{ width: 24, height: 24 }}
+                      />
+                    </ListItemAvatar>
+                    <ListItemText primary={cookies.name} />
+                  </MenuItem>
+                  <MenuItem onClick={logout}>
+                    <ListItemIcon>
+                      <Logout />
+                    </ListItemIcon>
+                    <ListItemText sx={{ ml: 3 }} primary="Sign Out" />
+                  </MenuItem>
+                </Menu>
+              </MenuList>
+            </Toolbar>
+          </AppBar>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            flexGrow: 1,
+            position: "relative",
+          }}
+        >
+          <Box
+            sx={{
+              width: drawerMinimize ? 77 : 250,
+              height: "100dvh",
+              position: "fixed",
+              overflow: "hidden",
+              zIndex: "500",
+              paddingTop: "67px",
+              transition: (theme) =>
+                theme.transitions.create("width", {
+                  easing: theme.transitions.easing.easeInOut,
+                  duration: theme.transitions.duration.leavingScreen,
+                }),
+              "@media (max-width: 599px)": {
+                width: drawerMinimize ? 0 : 250,
+              },
+            }}
+          >
+            <Paper
+              className="navigation"
+              elevation={4}
+              square
+              sx={{ height: "inherit", overflow: "auto" }}
+            >
+              <List>
+                <ListItemButton
                   disabled={registrarActivityStatus === "loading"}
-                  className={activeItem === "summer" ? "navbtn active" : "navbtn"}
+                  className={
+                    activeItem === "summer" ? "navbtn active" : "navbtn"
+                  }
                   onClick={() => {
                     // setDrawerMinimize(false);
                     navigate(
-                      `/home/${params("summer", parseInt(schoolyear.summer), cookies.faculty_id)}`
+                      `/home/${params(
+                        "summer",
+                        parseInt(schoolyear.summer),
+                        cookies.faculty_id
+                      )}`
                     );
                     setActiveItem("summer");
                   }}
@@ -307,7 +328,11 @@ const Home = () => {
                   className={activeItem === "1st" ? "navbtn active" : "navbtn"}
                   onClick={() => {
                     navigate(
-                      `/home/${params("1st", parseInt(schoolyear.firstSemester), cookies.faculty_id)}`
+                      `/home/${params(
+                        "1st",
+                        parseInt(schoolyear.firstSemester),
+                        cookies.faculty_id
+                      )}`
                     );
                     setActiveItem("1st");
                   }}
@@ -327,7 +352,11 @@ const Home = () => {
                   className={activeItem === "2nd" ? "navbtn active" : "navbtn"}
                   onClick={() => {
                     navigate(
-                      `/home/${params("2nd", parseInt(schoolyear.secondSemester), cookies.faculty_id)}`
+                      `/home/${params(
+                        "2nd",
+                        parseInt(schoolyear.secondSemester),
+                        cookies.faculty_id
+                      )}`
                     );
                     setActiveItem("2nd");
                   }}
@@ -341,35 +370,36 @@ const Home = () => {
                     <ListItemText primary="Second Semester" />
                   )}
                 </ListItemButton>
-            </List>
-          </Paper>
-        </Box>
-        <Box
-          className="main"
-          sx={{
-            transition: (theme) =>
-              theme.transitions.create("margin", {
-                easing: theme.transitions.easing.easeInOut,
-                duration: theme.transitions.duration.leavingScreen,
-              }),
-            marginLeft: drawerMinimize ? "77px" : "250px",
-            flexGrow: 1,
-            p: 3,
-          }}
-        >
-          {isMobile && (
-            <Backdrop
-              open={backdropOpen}
-              sx={{
-                zIndex: "400",
-                backgroundColor: "rgba(0, 0, 0, 0.25);",
-              }}
-            ></Backdrop>
-          )}
-          <Outlet context={[schoolyear,data,registrarActivityStatus]} />
+              </List>
+            </Paper>
+          </Box>
+          <Box
+            className="main"
+            sx={{
+              transition: (theme) =>
+                theme.transitions.create("margin", {
+                  easing: theme.transitions.easing.easeInOut,
+                  duration: theme.transitions.duration.leavingScreen,
+                }),
+              marginLeft: drawerMinimize ? "77px" : "250px",
+              flexGrow: 1,
+              p: 3,
+            }}
+          >
+            {isMobile && (
+              <Backdrop
+                open={backdropOpen}
+                sx={{
+                  zIndex: "400",
+                  backgroundColor: "rgba(0, 0, 0, 0.25);",
+                }}
+              ></Backdrop>
+            )}
+            <Outlet context={[schoolyear, data, registrarActivityStatus]} />
+          </Box>
         </Box>
       </Box>
-    </Box>
+    </React.Suspense>
   );
 };
 export default Home;

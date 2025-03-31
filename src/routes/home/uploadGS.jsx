@@ -13,7 +13,7 @@ import {
   Snackbar,
   Typography,
 } from "@mui/material";
-import { useOutletContext, useLoaderData, useParams } from "react-router-dom";
+import { useOutletContext, useLoaderData, useParams, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { saveAs } from "file-saver";
 import { urlDecode } from "url-encode-base64";
@@ -26,11 +26,12 @@ const UploadGS = () => {
   const [cookies,,] = useCookies(["name", "email"]);
   const { loadInfoArr, dbTermType } = useLoaderData();
   const loadInfo = loadInfoArr[0];
+  const navigate = useNavigate();
 
   const [...contexts] = useOutletContext();
   const uploadOpen = contexts[2];
   const setUploadOpen = contexts[3];
-  const canUpload = contexts[6];
+  const canUpload = (loadInfo.canUpload || loadInfo.is_deadline_extended) && !(loadInfo.classLoadStatus);
 
   const [uploadFile, setUploadFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -71,12 +72,12 @@ const UploadGS = () => {
     const { data } = await HomeSemesterUploadService.uploadGSGradeSheet(formData)
     const { isOkay, isError } = data
     if (isOkay) {
-      
       setUploading(false);
       setOpenSnackbar(true);
       setUploadFile(null);
       setTimeout(() => setUploadOpen(false),3500)
       setErrorUpload(isError ? true : !true);
+      navigate(".", { replace: true });
     }
   };
   return (
@@ -100,7 +101,7 @@ const UploadGS = () => {
             alignItems: "center",
           }}
         >
-          Upload Grade Sheet for Graduate Studies
+          Upload Grade Sheet
           <IconButton
             onClick={() => {
               setUploadFile(null);
@@ -217,7 +218,6 @@ const UploadGS = () => {
                 m: 2,
               }}
             >
-              <Typography>Uploading the grade sheet is unavailable.</Typography>
             </Box>
           )
           }

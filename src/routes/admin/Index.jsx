@@ -101,10 +101,10 @@ const SettingsListItems = [
     link: "/admin/settings/extend-deadline",
   },
   {
-    text: "Graduate Studies",
-    activeItem: "graduate-studies",
+    text: "Class Load",
+    activeItem: "class-load",
     icon: <SubjectIcon />,
-    link: "/admin/settings/graduate-studies",
+    link: "/admin/settings/class-load",
   }
 ]
 

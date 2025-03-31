@@ -1,3 +1,4 @@
+import { urlEncode } from "url-encode-base64";
 import axiosInstance from "../api/axiosInstance";
 
 export const HomeSemesterServices = {
@@ -45,7 +46,8 @@ export const HomeSemesterServices = {
         const { data } = await axiosInstance.post(`/updateGrade`, gradeData);
         return { data };
     },
-    submitGradeSheetConfirmation: async (semester, currentSchoolYear, encodedClassCode) => {
+    submitGradeSheetConfirmation: async (semester, currentSchoolYear, class_code) => {
+        const encodedClassCode = urlEncode(class_code);
         const { data } = await axiosInstance.get(`/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${encodedClassCode}`);
         return { data };
     },
@@ -53,8 +55,4 @@ export const HomeSemesterServices = {
         const { data } = await axiosInstance.post(`/submitGradeSheet`, formData);
         return { data }
     },
-    submitMidtermGradeSheet: async (formData) =>  {
-        const { data } = await axiosInstance.post(`/submitMidtermGradeSheet`, formData);
-        return { data }
-    }
 }

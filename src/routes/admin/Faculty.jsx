@@ -7,7 +7,7 @@ import ViewStudentsDialog from "../../components/dialogs/ViewStudentsDialog";
 import { initialOpen } from "../../utils/admin-faculty.util";
 import SubjectLoadDialog from "../../components/dialogs/SubjectLoadDialog";
 import moment from "moment";
-import { momentFormatDate } from "../../utils/formatDate";
+import { momentFormatDate, momentFormatDateOnly } from "../../utils/formatDate";
 import { AdminFacultyService } from "../../services/adminFacultyService";
 
 const Faculty = () => {
@@ -72,7 +72,15 @@ const Faculty = () => {
         headerName: "Deadline Extended",
         width: 200,
         valueGetter: (params) => {
-          return momentFormatDate(params.row.deadline_extended) === "Invalid date" ? "--" : momentFormatDate(params.row.deadline_extended);
+          return momentFormatDateOnly(params.row.deadline_extended) === "Invalid date" ? "--" : momentFormatDateOnly(params.row.deadline_extended);
+        },
+      },
+      {
+        field: "status",
+        headerName: "Status",
+        width: 200,
+        valueGetter: (params) => {
+          return momentFormatDateOnly(params.row.deadline_extended) === "Invalid date" ? "--" : momentFormatDateOnly(params.row.deadline_extended);
         },
       },
       {
@@ -126,14 +134,12 @@ const Faculty = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 150 },
+    { field: "id", headerName: "ID", width: 150, hide: true },
     {
-      field: "fullName",
+      field: "facultyName",
       headerName: "Full name",
       description: "This column has a value getter and is not sortable.",
-      sortable: false,
       width: 460,
-      valueGetter: (value, row) => `${value?.row?.firstName || ""} ${value?.row?.lastName || ""}`,
     },
     {
       field: "email",
@@ -145,9 +151,7 @@ const Faculty = () => {
     {
       field: "college_code",
       headerName: "College",
-      description: "This column has a value getter and is not sortable.",
-      sortable: false,
-      width: 100,
+      width: 150,
     },
     {
       field: "action",

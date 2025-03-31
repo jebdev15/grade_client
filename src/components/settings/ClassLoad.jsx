@@ -9,11 +9,12 @@ const initialState = {
   id: 0,
   schoolyear: "",
   semester: "",
+  term_type: "",
   from: "0000-00-00",
   to: "0000-00-00",
 }
 
-const ExtendDeadline = () => {
+const ClassLoadSetting = () => {
   const [faculty, setFaculty] = React.useState([]);
   const [data, setData] = React.useState(initialState);
   const [checked, setChecked] = React.useState([]);
@@ -41,6 +42,7 @@ const ExtendDeadline = () => {
         id: response.data.id || 0,
         schoolyear: response.data.schoolyear || "N/A",
         semester: response.data.semester || "N/A",
+        term_type: response.data.term_type || "N/A",
         from: currentDate,
         to: currentDate,
       };
@@ -64,12 +66,9 @@ const ExtendDeadline = () => {
     const confirmation = window.confirm("Are you sure you want to update?");
     if (!confirmation) return;
     const formData = new FormData();
-    formData.append("schoolyear", data.schoolyear);
-    formData.append("semester", data.semester);
-    formData.append("deadline_extend_start", data.from);
-    formData.append("deadline_extend_end", data.to);
+    formData.append("term_type", `${data.term_type}_status`);
     formData.append("class_codes", checkedClassCode);
-    const response = await AdminSettingsServices.extendUploadingOfGradeByClassCode(formData);
+    const response = await AdminSettingsServices.updateClassCodeStatusByClassCode(formData);
     alert(response.data.message, response.status);
   };
 
@@ -115,7 +114,7 @@ const ExtendDeadline = () => {
           }}
         >
           <Typography variant="h5" color="initial">
-            EXTEND DEADLINE
+            Class Load
           </Typography>
           {!data.id && (
             <Alert severity="info">Select Semester to Proceed</Alert>
@@ -156,6 +155,24 @@ const ExtendDeadline = () => {
                 <MenuItem value="summer">Summer</MenuItem>
                 <MenuItem value="1st">1st Semester</MenuItem>
                 <MenuItem value="2nd">2nd Semester</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="select-termType-label">Term Type</InputLabel>
+              <Select 
+                id="select-termType" 
+                label="Term Type" 
+                name="term_type" 
+                value={data.term_type} 
+                onChange={(event) => {
+                  changeHandler(event)
+                  setTimeout(() => changeSemesterHandler(event), 500); 
+                }}
+                disabled={data.term_type === ""}
+              >
+                <MenuItem value=""></MenuItem>
+                <MenuItem value="midterm">Midterm</MenuItem>
+                <MenuItem value="endterm">Endterm</MenuItem>
               </Select>
             </FormControl>
             <FormControl fullWidth>
@@ -262,4 +279,4 @@ const ExtendDeadline = () => {
     </>
   );
 };
-export default React.memo(ExtendDeadline);
+export default React.memo(ClassLoadSetting);

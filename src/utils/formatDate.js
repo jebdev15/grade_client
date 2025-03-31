@@ -40,3 +40,7 @@ export const dateFormatter = (date) => {
 export const momentFormatDate = (timestamp) => {
   return moment(timestamp).format("MMM DD, YYYY hh:mm A")
 }
+
+export const momentFormatDateOnly = (timestamp) => {
+  return moment(timestamp).format("MMM DD, YYYY")
+}
