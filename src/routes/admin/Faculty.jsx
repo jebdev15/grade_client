@@ -62,11 +62,11 @@ const Faculty = () => {
           return momentFormatDate(params.row.timestamp) === "Invalid date" ? "--" : momentFormatDate(params.row.timestamp);
         },
       },
-      {
-        field: "method",
-        headerName: "Method",
-        width: 150,
-      },
+      // {
+      //   field: "method",
+      //   headerName: "Method",
+      //   width: 150,
+      // },
       {
         field: "deadline_extended",
         headerName: "Deadline Extended",
@@ -76,12 +76,20 @@ const Faculty = () => {
         },
       },
       {
-        field: "status",
+        field: "submittedLog",
+        headerName: "Submitted",
+        width: 200,
+        valueGetter: (params) => {
+          return momentFormatDate(params.row.submittedLog) === "Invalid date" ? "--" : momentFormatDate(params.row.submittedLog);
+        },
+      },
+      {
+        field: "classLoadStatus",
         headerName: "Status",
         width: 200,
         valueGetter: (params) => {
-          return momentFormatDateOnly(params.row.deadline_extended) === "Invalid date" ? "--" : momentFormatDateOnly(params.row.deadline_extended);
-        },
+          return params.row.classLoadStatus ? "Locked" : "";
+        }
       },
       {
         field: "action",

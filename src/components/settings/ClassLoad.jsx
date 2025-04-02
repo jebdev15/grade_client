@@ -168,6 +168,7 @@ const ClassLoadSetting = () => {
                   changeHandler(event)
                   setTimeout(() => changeSemesterHandler(event), 500); 
                 }}
+                inputProps={{ readOnly: true }}
                 disabled={data.term_type === ""}
               >
                 <MenuItem value=""></MenuItem>
