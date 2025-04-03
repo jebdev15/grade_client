@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button, Typography, useMediaQuery, Select, TextField, MenuItem, FormControl, InputLabel } from "@mui/material";
+import { Box, Button, Typography, useMediaQuery, Select, TextField, MenuItem, FormControl, InputLabel, CircularProgress } from "@mui/material";
 import { CloudDownload as CloudDownloadIcon } from "@mui/icons-material";
 import { saveAs } from "file-saver";
 import { AdminReportsService } from "../../services/adminReportsService";
@@ -7,6 +7,7 @@ import { AdminReportsService } from "../../services/adminReportsService";
 const GenerateReport = () => {
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("md"));
   const newDate = new Date().toLocaleDateString("en-PH", { year: "numeric" });
+  const [loading, setLoading] = useState(false);
   function formatDate(date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
@@ -37,19 +38,19 @@ const GenerateReport = () => {
   const generateReportOptions = [
     {
       value: "gradeSheetSubmission",
-      label: "Grade Sheet Submission",
+      label: "Grade Sheet Submission Log",
     },
     {
       value: "classStatus",
-      label: "Class Status Update Logs",
+      label: "Class Load Status Log",
     },
     {
       value: "accountLogs",
-      label: "Account Logs",
+      label: "Account Management Log",
     },
     {
       value: "deadlineLogs",
-      label: "Deadline Logs",
+      label: "Deadline Log",
     },
   ];
   const semesterOptions = [
@@ -90,16 +91,24 @@ const GenerateReport = () => {
       alert("Select Report to Generate");
       return;
     }
-    const params = ["gradeSheetSubmission", "deadlineLogs"].includes(typeOfReport.toGenerate) ? `schoolYear=${typeOfReport.schoolYear}&semester=${typeOfReport.semester}` : `from=${typeOfReport.from}&to=${typeOfReport.to}`;
-    const { data, status } = await AdminReportsService.generateReport(url, toGenerateValueInURL, params);
-    if (status === 200) {
-      const dateToday = getTodayDate();
-      let blob = new Blob([data], {
-        type: "vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8",
-      });
-      saveAs(blob, `${toGenerateValueInURL}-${dateToday}.xlsx`);
-    } else {
-      alert("Something went wrong");
+    setLoading(true);
+    try {
+      const params = ["gradeSheetSubmission", "deadlineLogs"].includes(typeOfReport.toGenerate) ? `schoolYear=${typeOfReport.schoolYear}&semester=${typeOfReport.semester}` : `from=${typeOfReport.from}&to=${typeOfReport.to}`;
+      const { data, status } = await AdminReportsService.generateReport(url, toGenerateValueInURL, params);
+      if (status === 200) {
+        const dateToday = getTodayDate();
+        let blob = new Blob([data], {
+          type: "vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8",
+        });
+        saveAs(blob, `${toGenerateValueInURL}-${dateToday}.xlsx`);
+      } else {
+        alert("Something went wrong");
+      }
+    } catch (error) {
+      alert(error);
+      console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
   const handleChangeParams = (e) => {
@@ -150,8 +159,18 @@ const GenerateReport = () => {
               </FormControl>
             </>
           )}
-          <Button variant="contained" sx={{ backgroundColor: "var(--primary-color)", color: "var(--background-main)", padding: 2 }} startIcon={<CloudDownloadIcon />} onClick={downloadLogs}>
-            Generate Report
+          <Button 
+            variant="contained" 
+            sx={{ 
+              backgroundColor: "var(--primary-color)", 
+              color: "var(--background-main)", 
+              padding: 2 
+            }} 
+            startIcon={<CloudDownloadIcon />} 
+            onClick={downloadLogs}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={20} /> : "Generate Report"}
           </Button>
         </Box>
       </Box>

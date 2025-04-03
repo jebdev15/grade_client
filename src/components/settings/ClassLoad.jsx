@@ -1,4 +1,4 @@
-import { Box, TextField, Button, FormControl, Typography, InputLabel, MenuItem, Select, Paper, Alert, ListItemIcon, ListItemText, Checkbox, List, ListItemButton, Collapse } from "@mui/material";
+import { Box, TextField, Button, FormControl, Typography, InputLabel, MenuItem, Select, Paper, Alert, ListItemIcon, ListItemText, Checkbox, List, ListItemButton, Collapse, CircularProgress } from "@mui/material";
 import React from "react";
 import { dateOnlyFormatter } from "../../utils/formatDate";
 import { AdminSettingsServices } from "../../services/adminSettingsService";
@@ -19,6 +19,8 @@ const ClassLoadSetting = () => {
   const [data, setData] = React.useState(initialState);
   const [checked, setChecked] = React.useState([]);
   const [checkedClassCode, setCheckedClassCode] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+
   const changeHandler = (event) => {
     setData({ ...data, [event.target.name]: event.target.value });
   };
@@ -65,11 +67,19 @@ const ClassLoadSetting = () => {
     console.log({checkedClassCode});
     const confirmation = window.confirm("Are you sure you want to update?");
     if (!confirmation) return;
-    const formData = new FormData();
-    formData.append("term_type", `${data.term_type}_status`);
-    formData.append("class_codes", checkedClassCode);
-    const response = await AdminSettingsServices.updateClassCodeStatusByClassCode(formData);
-    alert(response.data.message, response.status);
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("term_type", `${data.term_type}_status`);
+      formData.append("class_codes", checkedClassCode);
+      const response = await AdminSettingsServices.updateClassCodeStatusByClassCode(formData);
+      alert(response.data.message, response.status);
+    } catch (error) {
+      alert("Error updating class code status.");
+      console.error("Error fetching registrar activity:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleToggle = (faculty_id, classCodes) => () => {
@@ -199,6 +209,7 @@ const ClassLoadSetting = () => {
                 value={data.to} 
                 onChange={changeHandler} 
                 disabled={data.from === "0000-00-00"}
+                sx={{ display: 'none' }}
                 required
                 fullWidth 
               />
@@ -269,9 +280,9 @@ const ClassLoadSetting = () => {
               variant="contained" 
               type="submit" 
               sx={{ padding: 2, color: "white" }}
-              disabled={!data.id && checked.length < 1}
+              disabled={(!data.id && checked.length < 1) || loading}
             >
-              SAVE
+              {loading ? <CircularProgress size={20} /> : "Submit"}
             </Button>
           </Box>
         </Box>

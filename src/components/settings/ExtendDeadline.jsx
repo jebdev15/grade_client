@@ -1,4 +1,4 @@
-import { Box, TextField, Button, FormControl, Typography, InputLabel, MenuItem, Select, Paper, Alert, ListItemIcon, ListItemText, Checkbox, List, ListItemButton, Collapse } from "@mui/material";
+import { Box, TextField, Button, FormControl, Typography, InputLabel, MenuItem, Select, Paper, Alert, ListItemIcon, ListItemText, Checkbox, List, ListItemButton, Collapse, CircularProgress } from "@mui/material";
 import React from "react";
 import { dateOnlyFormatter } from "../../utils/formatDate";
 import { AdminSettingsServices } from "../../services/adminSettingsService";
@@ -18,6 +18,7 @@ const ExtendDeadline = () => {
   const [data, setData] = React.useState(initialState);
   const [checked, setChecked] = React.useState([]);
   const [checkedClassCode, setCheckedClassCode] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
   const changeHandler = (event) => {
     setData({ ...data, [event.target.name]: event.target.value });
   };
@@ -63,14 +64,22 @@ const ExtendDeadline = () => {
     console.log({checkedClassCode});
     const confirmation = window.confirm("Are you sure you want to update?");
     if (!confirmation) return;
-    const formData = new FormData();
-    formData.append("schoolyear", data.schoolyear);
-    formData.append("semester", data.semester);
-    formData.append("deadline_extend_start", data.from);
-    formData.append("deadline_extend_end", data.to);
-    formData.append("class_codes", checkedClassCode);
-    const response = await AdminSettingsServices.extendUploadingOfGradeByClassCode(formData);
-    alert(response.data.message, response.status);
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("schoolyear", data.schoolyear);
+      formData.append("semester", data.semester);
+      formData.append("deadline_extend_start", data.from);
+      formData.append("deadline_extend_end", data.to);
+      formData.append("class_codes", checkedClassCode);
+      const response = await AdminSettingsServices.extendUploadingOfGradeByClassCode(formData);
+      alert(response.data.message, response.status);
+    } catch (error) {
+      alert("Error extending deadline.");
+      console.error("Error fetching registrar activity:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleToggle = (faculty_id, classCodes) => () => {
@@ -251,9 +260,9 @@ const ExtendDeadline = () => {
               variant="contained" 
               type="submit" 
               sx={{ padding: 2, color: "white" }}
-              disabled={!data.id && checked.length < 1}
+              disabled={(!data.id && checked.length < 1) || loading}
             >
-              SAVE
+              {loading ? (<CircularProgress size={20} />) : "Save"}
             </Button>
           </Box>
         </Box>
