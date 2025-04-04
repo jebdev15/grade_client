@@ -227,7 +227,7 @@ const LoadCard = ({
               {dbTermType === "midterm" ? midtermTimestamp : endtermTimestamp}
             </Typography>
             <Typography variant="caption">
-              <b>Submitted:</b>{" "}
+              <b>Submitted At:</b>{" "}
               {dbTermType === "midterm" ? midtermSubmittedTimestamp : endtermSubmittedTimestamp}
             </Typography>
           </Box>

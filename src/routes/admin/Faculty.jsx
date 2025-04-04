@@ -56,31 +56,26 @@ const Faculty = () => {
       { field: "noStudents", headerName: "No of Students", width: 150 },
       {
         field: "timestamp",
-        headerName: "Encoded",
+        headerName: "Last Update",
         width: 200,
         valueGetter: (params) => {
           return momentFormatDate(params.row.timestamp) === "Invalid date" ? "--" : momentFormatDate(params.row.timestamp);
         },
       },
-      // {
-      //   field: "method",
-      //   headerName: "Method",
-      //   width: 150,
-      // },
+      {
+        field: "submittedLog",
+        headerName: "Submitted At",
+        width: 200,
+        valueGetter: (params) => {
+          return momentFormatDate(params.row.submittedLog) === "Invalid date" ? "--" : momentFormatDate(params.row.submittedLog);
+        },
+      },
       {
         field: "deadline_extended",
         headerName: "Deadline Extended",
         width: 200,
         valueGetter: (params) => {
           return momentFormatDateOnly(params.row.deadline_extended) === "Invalid date" ? "--" : momentFormatDateOnly(params.row.deadline_extended);
-        },
-      },
-      {
-        field: "submittedLog",
-        headerName: "Submitted",
-        width: 200,
-        valueGetter: (params) => {
-          return momentFormatDate(params.row.submittedLog) === "Invalid date" ? "--" : momentFormatDate(params.row.submittedLog);
         },
       },
       {
