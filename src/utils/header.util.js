@@ -6,7 +6,7 @@ export const getCampus = () => {
             campus= "Staging Campus";
             break;
         case "https://gs.chmsu.edu.ph" || "https://www.gs.chmsu.edu.ph":
-            campus= "Talisay Campus";
+            campus= "Talisay (Main) Campus";
             break;
         case "https://ft-gs.chmsu.edu.ph" || "https://www.ft-gs.chmsu.edu.ph":
             campus= "Fortune Towne Campus";
@@ -21,7 +21,7 @@ export const getCampus = () => {
                 campus= "Test Talisay Campus";
             break;    
         default:
-            campus= "Campus";
+            campus= "Localhost Campus";
             break;
     }
     return campus;

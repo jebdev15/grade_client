@@ -39,8 +39,9 @@ import { homeIndexUtil } from "../../utils/homeIndexUtil";
 import { fetchRegistrarActivity } from "../../features/home/index/registrarActivityThunks";
 import { useDispatch, useSelector } from "react-redux";
 
-const date = new Date();
-const currentYear = date.getFullYear();
+// const date = new Date();
+// const currentYear = date.getFullYear();
+const currentYear = 2024;
 const Home = () => {
   const [cookies, , removeCookie] = useCookies(homeIndexUtil.siteCookies);
   const navigate = useNavigate();

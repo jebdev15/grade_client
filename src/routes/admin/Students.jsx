@@ -92,7 +92,7 @@ const Students = () => {
             }}
             className="bg-primary"
             name="searchParam"
-            label="Search Student ID/Last Name/First Name/Middle Name"
+            label="Search by Student ID/Last Name/First Name/Middle Name"
             variant="outlined"
             value={searchParam}
             onChange={onChangeSearchParam}
@@ -105,8 +105,6 @@ const Students = () => {
             }}
             required
           />
-
-          {/* <Button type='submit'>Search</Button> */}
         </Box>
 
         {searchResultData ? (

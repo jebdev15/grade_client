@@ -34,26 +34,30 @@ import {
   MoreTime as MoreTimeIcon,
   Subject as SubjectIcon,
   ExpandLess,
-  ExpandMore
+  ExpandMore,
 } from "@mui/icons-material";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { googleLogout } from "@react-oauth/google";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 import { getCampus } from "../../utils/header.util";
-import { adminIndexUtil, checkAccessLevel, checkAccessLevelForMenu } from "../../utils/admin-index.util";
+import {
+  adminIndexUtil,
+  checkAccessLevel,
+  checkAccessLevelForMenu,
+} from "../../utils/admin-index.util";
 const SideNavListItems = [
   {
     text: "Home",
     activeItem: "home",
-    link: '/admin',
+    link: "/admin",
     icon: <HomeIcon />,
     path: "/admin/home",
   },
   {
     text: "Students",
     activeItem: "students",
-    link: '/admin/students',
+    link: "/admin/students",
     icon: <PeopleIcon />,
     path: "/admin/students",
   },
@@ -84,8 +88,8 @@ const SideNavListItems = [
     link: "/admin/settings",
     icon: <SettingsIcon />,
     path: "/admin/settings",
-  }
-]
+  },
+];
 
 const SettingsListItems = [
   {
@@ -101,12 +105,12 @@ const SettingsListItems = [
     link: "/admin/settings/extend-deadline",
   },
   {
-    text: "Class Load",
+    text: "Unlock Class Load",
     activeItem: "class-load",
     icon: <SubjectIcon />,
     link: "/admin/settings/class-load",
-  }
-]
+  },
+];
 
 const MenuPaperProps = {
   elevation: 0,
@@ -133,7 +137,7 @@ const MenuPaperProps = {
       zIndex: 0,
     },
   },
-}
+};
 
 export default function Admin() {
   const [cookies, , removeCookie] = useCookies(adminIndexUtil.siteCookies);
@@ -151,16 +155,18 @@ export default function Admin() {
       text: cookies.accessLevel,
       icon: <AccountCircleIcon />,
     },
-  ]
+  ];
   const navigate = useNavigate();
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
 
-  const [activeItem, setActiveItem] = useState(localStorage.getItem("activeItem"));
+  const [activeItem, setActiveItem] = useState(
+    localStorage.getItem("activeItem")
+  );
 
   const [backdropOpen, setBackdropOpen] = useState(false);
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
   useEffect(() => {
@@ -186,7 +192,9 @@ export default function Admin() {
   }, [cookies, navigate]);
 
   const logout = () => {
-    adminIndexUtil.siteCookies.forEach((cookie) => removeCookie(cookie, { path: "/" }));
+    adminIndexUtil.siteCookies.forEach((cookie) =>
+      removeCookie(cookie, { path: "/" })
+    );
     googleLogout();
     navigate("/");
     localStorage.removeItem("activeItem");
@@ -194,7 +202,7 @@ export default function Admin() {
   useEffect(() => {
     setDrawerMinimize(isSmallScreen ? true : !true);
   }, [isSmallScreen, setDrawerMinimize, navigate]);
-  
+
   const isAdminAccessing = checkAccessLevelForMenu(cookies.accessLevel);
   return (
     <Box
@@ -272,18 +280,16 @@ export default function Admin() {
               >
                 {menuListItems.map((item, index) => (
                   <MenuItem key={++index}>
-                    <ListItemIcon>
-                      {item.icon}
-                    </ListItemIcon>
+                    <ListItemIcon>{item.icon}</ListItemIcon>
                     <ListItemText sx={{ ml: 3 }} primary={item.text} />
                   </MenuItem>
                 ))}
                 <MenuItem onClick={logout}>
-                    <ListItemIcon>
-                      <Logout />
-                    </ListItemIcon>
-                    <ListItemText sx={{ ml: 3 }} primary={"Sign Out"} />
-                  </MenuItem>
+                  <ListItemIcon>
+                    <Logout />
+                  </ListItemIcon>
+                  <ListItemText sx={{ ml: 3 }} primary={"Sign Out"} />
+                </MenuItem>
               </Menu>
             </MenuList>
           </Toolbar>
@@ -322,76 +328,93 @@ export default function Admin() {
             sx={{ height: "inherit", overflow: "auto" }}
           >
             <List>
-              {isAdminAccessing ? (
-                SideNavListItems.map((item, index) => {
-                  const isSettings = item.text === "Settings";
-                  return (
-                    <>
-                      <ListItemButton
-                        key={++index}
-                        className={activeItem === item.activeItem ? "navbtn active" : "navbtn"}
-                        onClick={() => {
-                          setActiveItem(item.activeItem);
-                          navigate(item.link);
-                          if(isSettings) setOpen(!open);
-                        }}
-                      >
-                        <Tooltip title={item.text}>
-                          <ListItemIcon>
-                            {item.icon}
-                          </ListItemIcon>
-                        </Tooltip>
-                        {drawerMinimize ? null : <ListItemText primary={item.text} />}
-                        { isSettings && (open ? <ExpandLess /> : <ExpandMore />)}
-                      </ListItemButton>
-                      {isSettings && 
-                        SettingsListItems.map((item, index) => {
-                          return (
-                            <Collapse 
-                              key={++index} 
-                              in={open} 
-                              timeout="auto" 
-                              unmountOnExit
-                              className={activeItem === item.activeItem ? "navbtn active" : "navbtn"}
-                              onClick={() => setActiveItem(item.activeItem)}
-                            >
-                              <List component="div" disablePadding>
-                                <ListItemButton sx={{ pl: 4 }} onClick={() => navigate(item.link)}>
-                                  <ListItemIcon>
-                                    {item.icon}
-                                  </ListItemIcon>
-                                  <ListItemText primary={item.text} />
-                                </ListItemButton>
-                              </List>
-                            </Collapse>
-                          )
-                        })}
-                    </>
-                  )
-                })
-              ) : SideNavListItems.filter((item) => ["Home", "Students", "Faculty"].includes(item.text)).map((item, index) => {
-                const isSettings = item.text === "Settings";
-                return (
-                  <>
-                    <ListItemButton
-                      key={++index}
-                      className={activeItem === item.activeItem ? "navbtn active" : "navbtn"}
-                      onClick={() => {
-                        setActiveItem(item.activeItem);
-                        navigate(item.link);
-                        if(isSettings) setOpen(!open);
-                      }}
-                    >
-                      <Tooltip title={item.text}>
-                        <ListItemIcon>
-                          {item.icon}
-                        </ListItemIcon>
-                      </Tooltip>
-                      {drawerMinimize ? null : <ListItemText primary={item.text} />}
-                    </ListItemButton>
-                  </>
-                )
-              })}
+              {isAdminAccessing
+                ? SideNavListItems.map((item, index) => {
+                    const isSettings = item.text === "Settings";
+                    return (
+                      <>
+                        <ListItemButton
+                          key={++index}
+                          className={
+                            activeItem === item.activeItem
+                              ? "navbtn active"
+                              : "navbtn"
+                          }
+                          onClick={() => {
+                            setActiveItem(item.activeItem);
+                            navigate(item.link);
+                            if (isSettings) setOpen(!open);
+                          }}
+                        >
+                          <Tooltip title={item.text}>
+                            <ListItemIcon>{item.icon}</ListItemIcon>
+                          </Tooltip>
+                          {drawerMinimize ? null : (
+                            <ListItemText primary={item.text} />
+                          )}
+                          {isSettings &&
+                            (open ? <ExpandLess /> : <ExpandMore />)}
+                        </ListItemButton>
+                        {isSettings &&
+                          SettingsListItems.map((item, index) => {
+                            return (
+                              <Collapse
+                                key={++index}
+                                in={open}
+                                timeout="auto"
+                                unmountOnExit
+                                className={
+                                  activeItem === item.activeItem
+                                    ? "navbtn active"
+                                    : "navbtn"
+                                }
+                                onClick={() => setActiveItem(item.activeItem)}
+                              >
+                                <List component="div" disablePadding>
+                                  <ListItemButton
+                                    sx={{ pl: 4 }}
+                                    onClick={() => navigate(item.link)}
+                                  >
+                                    <ListItemIcon>{item.icon}</ListItemIcon>
+                                    <ListItemText primary={item.text} />
+                                  </ListItemButton>
+                                </List>
+                              </Collapse>
+                            );
+                          })}
+                      </>
+                    );
+                  })
+                : SideNavListItems.filter((item) =>
+                    ["Home", "Students", "Faculty"].includes(item.text)
+                  ).map((item, index) => {
+                    const isSettings = item.text === "Settings";
+                    if(item.text === "Faculty" && cookies.accessLevel === "Chairperson") return null;
+                    return (
+                      <>
+                        <ListItemButton
+                          key={++index}
+                          className={
+                            activeItem === item.activeItem
+                              ? "navbtn active"
+                              : "navbtn"
+                          }
+                          onClick={() => {
+                            setActiveItem(item.activeItem);
+                            navigate(item.link);
+                            if (isSettings) setOpen(!open);
+                          }}
+                        >
+                          <Tooltip title={item.text}>
+                            <ListItemIcon>{item.icon}</ListItemIcon>
+                          </Tooltip>
+                          {drawerMinimize ? null : (
+                            <ListItemText primary={item.text} />
+                          )}
+                        </ListItemButton>
+                      </>
+                    );
+                  })}
             </List>
           </Paper>
         </Box>

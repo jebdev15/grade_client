@@ -1,18 +1,22 @@
 export const initialOpen = {
-    subjectLoad: false,
-    lockConfirmation: false,
-    confirmation: false,
-    scheduler: false,
-    viewStudents: false,
-}
+  subjectLoad: false,
+  lockConfirmation: false,
+  confirmation: false,
+  scheduler: false,
+  viewStudents: false,
+  encodeGrades: true,
+  uploadGradeSheet: false,
+};
 export const initialRows = {
-    viewStudents: [],
-    subjectLoad: [],
-    emails: [],
-}
+  viewStudents: [],
+  subjectLoad: [],
+  emails: [],
+};
 
 export const initialLoading = {
-    viewStudents: true,
-    subjectLoad: true,
-    emails: true,
-}
+  fetchFaculty: false,
+  encodeGrades: false,
+  uploadGradeSheet: false,
+  classLoad: false,
+  viewStudents: false,
+};

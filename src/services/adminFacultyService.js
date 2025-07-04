@@ -1,8 +1,8 @@
 import axiosInstance from "../api/axiosInstance";
 
 export const AdminFacultyService = {
-    getFacultyBySchoolYearAndSemester: async (school_year, semester) => {
-        const { data, status } = await axiosInstance.get(`/admin/getFacultyBySchoolYearAndSemester?school_year=${school_year}&semester=${semester}`);
+    getFacultyBySchoolYearAndSemester: async (school_year, semester, accessLevel, college_code) => {
+        const { data, status } = await axiosInstance.get(`/admin/getFacultyBySchoolYearAndSemester?school_year=${school_year}&semester=${semester}&accessLevel=${accessLevel}&college_code=${college_code}`);
         return { data, status }
     },
     getSubjectLoadByFacultyIdYearAndSemester: async (faculty_id, school_year, semester) => {

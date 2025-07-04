@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Container,  Paper, Typography } from "@mui/material";
+import { Box, Container, Paper, Typography } from "@mui/material";
 import { GoogleLogin } from "@react-oauth/google";
 import jwt_decode from "jwt-decode";
 import { useCookies } from "react-cookie";
@@ -10,10 +10,11 @@ import "../style.css";
 import chmsuLogo from "../assets/chmsu-small.jpg";
 import { AuthService } from "../services/authService";
 import { AuthUtil } from "../utils/authUtil";
+import { getCampus } from "../utils/header.util";
 const Index = () => {
   const [loading, setLoading] = useState(false);
   const [cookies, setCookie] = useCookies(AuthUtil.siteCookies);
-
+  const [currentCampus, setCurrentCampus] = useState("");
   const navigate = useNavigate();
 
   const setIndividualCookie = (name, value) => {
@@ -28,11 +29,12 @@ const Index = () => {
     const jsonObj = jwt_decode(credential);
     const { name, picture, email } = jsonObj;
     try {
-      const { data, status } = await AuthService.login(credential,email);
+      const { data, status } = await AuthService.login(credential, email);
       const { token, path } = data;
       if (status === 200 && Object.entries(data).length > 0) {
         const decodedToken = jwt_decode(token);
-        const { faculty_id, accessLevel, college_code, program_code } = decodedToken.token;
+        const { faculty_id, accessLevel, college_code, program_code } =
+          decodedToken.token;
         setIndividualCookie("faculty_id", faculty_id);
         setIndividualCookie("accessLevel", accessLevel);
         setIndividualCookie("name", name);
@@ -57,7 +59,15 @@ const Index = () => {
       navigate(path);
     }
   }, [cookies, navigate]);
-
+  React.useEffect(() => {
+    const getCurrentCampus = async () => {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1000);
+      });
+      setCurrentCampus(getCampus());
+    };
+    getCurrentCampus();
+  }, []);
   return (
     <Box sx={{ bgcolor: "background.light", height: "100dvh", width: "100vw" }}>
       <Container maxWidth="lg" fixed sx={{ height: "inherit" }}>
@@ -69,14 +79,34 @@ const Index = () => {
             alignItems: "center",
           }}
         >
-          <Paper className="signin_page" sx={{ display: "flex", flexDirection: "row", justifyContent: "center", alignItems: "center", py: 5, px: 6, gap: { sm: 3, md: 6 } }} elevation={8}>
+          <Paper
+            className="signin_page"
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              py: 5,
+              px: 6,
+              gap: { sm: 3, md: 6 },
+            }}
+            elevation={8}
+          >
             <Box className="signinMsg">
               <img className="chmsuLogo" src={chmsuLogo} alt="logo" />
-              <Typography variant="h5" fontWeight={700} color="primary" sx={{ alignSelf: 'center' }}>
+              <Typography
+                variant="h5"
+                fontWeight={700}
+                color="primary"
+                sx={{ alignSelf: "center" }}
+              >
                 Carlos Hilado<span>Memorial State University</span>
               </Typography>
               <Typography variant="body1" color="primary">
-                Grading Portal
+                Grading Portal 
+              </Typography>
+              <Typography variant="body2" color="primary">
+                {currentCampus}
               </Typography>
             </Box>
             <Box
@@ -86,10 +116,20 @@ const Index = () => {
                 flexDirection: "column",
               }}
             >
-              <Typography variant="h4" fontWeight={400} textAlign={{ xs: "center", md: "left" }} sx={{ mb: 1 }}>
+              <Typography
+                variant="h4"
+                fontWeight={400}
+                textAlign={{ xs: "center", md: "left" }}
+                sx={{ mb: 1 }}
+              >
                 Sign In
               </Typography>
-              <Typography variant="body1" fontWeight={400} textAlign={{ xs: "center", md: "left" }} sx={{ mb: 2 }}>
+              <Typography
+                variant="body1"
+                fontWeight={400}
+                textAlign={{ xs: "center", md: "left" }}
+                sx={{ mb: 2 }}
+              >
                 Use your CHMSU Google Account
               </Typography>
               <Box
@@ -102,11 +142,11 @@ const Index = () => {
                 }}
                 className="loginForm"
               >
-                {
-                  loading 
-                  ? <Typography>Signing you in...</Typography> 
-                  : <GoogleLogin className="googleLoginBtn" onSuccess={login} />
-                }
+                {loading ? (
+                  <Typography>Signing you in...</Typography>
+                ) : (
+                  <GoogleLogin className="googleLoginBtn" onSuccess={login} />
+                )}
               </Box>
             </Box>
           </Paper>

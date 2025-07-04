@@ -30,7 +30,7 @@ import PrintGraduateStudiesGradeSheet, { loader as printGSLoader } from "./route
 
 // Admin Routes
 import Admin from './routes/admin/Index';
-import Faculty from "./routes/admin/Faculty";
+import Faculty, { loader as facultyLoader } from "./routes/admin/Faculty";
 import DownloadGradeSheetPdf from "./components/faculty/downloadble/DownloadGradeSheetPdf";
 import Users from "./routes/admin/Users";
 import GenerateReport from "./routes/admin/GenerateReport";
@@ -38,14 +38,15 @@ import Settings from "./routes/admin/Settings";
 import PrintUnderGraduateGS, { loader as printUnderGraduateGSLoader } from "./components/faculty/printable/PrintUnderGraduateGS";
 import PrintGraduateStudiesGS, { loader as printGraduateStudiesGSLoader } from "./components/faculty/printable/PrintGraduateStudiesGS";
 import Students from "./routes/admin/Students";
+import Deadline from "./components/settings/Deadline";
+import ExtendDeadline from "./components/settings/ExtendDeadline";
+import ClassLoad from "./components/settings/ClassLoad";
 import { Provider } from "react-redux";
 import { store } from "./app/store";
 import { REACT_APP_GOOGLE_CLIENT_ID } from "./utils/envVariables";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { RegistrarActivityProvider } from "./context/RegistrarActivityContext";
-import Deadline from "./components/settings/Deadline";
-import ExtendDeadline from "./components/settings/ExtendDeadline";
-import ClassLoad from "./components/settings/ClassLoad";
+import FacultyErrorPage from "./components/errors/FacultyErrorPage";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -130,6 +131,8 @@ const router = createBrowserRouter([
       {
         path: "faculty",
         element: <Faculty />,
+        loader: facultyLoader,
+        errorElement: <FacultyErrorPage />,
       },
       {
         path: "users",
