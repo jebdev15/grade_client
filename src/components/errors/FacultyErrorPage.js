@@ -29,7 +29,7 @@ const FacultyErrorPage = () => {
       <Button
         variant="contained"
         color="primary"
-        onClick={() => navigate('/admin')}
+        onClick={() => navigate('/admin/faculty')}
         sx={{ mt: 2 }}
       >
         Go Back to Faculty

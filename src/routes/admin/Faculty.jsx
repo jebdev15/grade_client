@@ -37,9 +37,13 @@ import { momentFormatDate, momentFormatDateOnly } from "../../utils/formatDate";
 import { AdminSettingsServices } from "../../services/adminSettingsService";
 import { AdminFacultyService } from "../../services/adminFacultyService";
 import { useCookies } from "react-cookie";
-import { useLoaderData, useNavigate } from "react-router";
-import GradeTable from "./faculty/grades/gradeTable";
+import { useLoaderData } from "react-router";
+import UnderGraduateTable from "./faculty/grades/gradeTable";
+import UploadGradeSheet from "./faculty/grades/upload";
 import useFeatureState from "../../hooks/useFeatureState";
+import GraduateStudiesTable from "./faculty/grades/graduateStudiesTable";
+import GraduateStudiesUpload from "./faculty/grades/uploadGS";
+
 const initialOpen = {
   subjectLoad: false,
   lockConfirmation: false,
@@ -58,7 +62,6 @@ export const initialLoading = {
   viewStudents: false,
 };
 const Faculty = () => {
-  const navigate = useNavigate();
   const { registrarActivityData } = useLoaderData();
   const [cookie] = useCookies(["accessLevel", "college_code"]);
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
@@ -68,7 +71,8 @@ const Faculty = () => {
   const [encodeGrades, setEncodeGrades] = useFeatureState();
   const [encodeGradesGraduate, setEncodeGradesGraduate] = useFeatureState();
   const [uploadGradeSheet, setUploadGradeSheet] = useFeatureState();
-  const [uploadGradeSheetGraduate, setUploadGradeSheetGraduate] = useFeatureState();
+  const [uploadGradeSheetGraduate, setUploadGradeSheetGraduate] =
+    useFeatureState();
   const [filterData, setFilterData] = React.useState({
     schoolyear: new Date().getFullYear(),
     semester: "summer",
@@ -82,7 +86,7 @@ const Faculty = () => {
   const [viewStudents, setViewStudents] = React.useState({
     rows: [],
     columns: [
-      { field: "id", headerName: "ID", width: 150, hide: true },
+      { field: "id", headerName: "No.", width: 50, hideable: false },
       { field: "student_id", headerName: "STUDENT ID", width: 100 },
       { field: "name", headerName: "Full Name", width: 400 },
       { field: "mid_grade", headerName: "Midterm Grade", width: 150 },
@@ -166,7 +170,11 @@ const Faculty = () => {
             const { data } = await AdminFacultyService.getStudentsByClassCode(
               encoded.class_code
             );
-            setViewStudents((prevState) => ({ ...prevState, rows: data.rows }));
+            const formattedRows = data.rows.map((row, index) => ({
+              ...row,
+              id: index + 1,
+            }));
+            setViewStudents((prevState) => ({ ...prevState, rows: formattedRows }));
           };
           const openSubjectCodesGSHandler = (isGraduate) => {
             const link = `/admin/print/${urlEncode(
@@ -188,8 +196,22 @@ const Faculty = () => {
                   data: [params.row],
                 }));
                 break;
+              case "encodeGradesGraduate":
+                setEncodeGradesGraduate((prevState) => ({
+                  ...prevState,
+                  open: true,
+                  data: [params.row],
+                }));
+                break;
               case "uploadGradeSheet":
                 setUploadGradeSheet((prevState) => ({
+                  ...prevState,
+                  open: true,
+                  data: [params.row],
+                }));
+                break;
+              case "uploadGradeSheetGraduate":
+                setUploadGradeSheetGraduate((prevState) => ({
                   ...prevState,
                   open: true,
                   data: [params.row],
@@ -198,9 +220,6 @@ const Faculty = () => {
               default:
                 console.warn(`No action defined for ${name}`);
             }
-            // Here you can add the logic for each action
-            // Simulate async action
-            // await new Promise((res) => setTimeout(res, 2000));
           };
           return (
             <>
@@ -209,11 +228,17 @@ const Faculty = () => {
                   <IconButton
                     aria-label="encode-grades"
                     color="primary"
-                    onClick={() => handleClick(params.row.isGraduate ? "encodeGradesGraduate" : "encodeGrades")}
-                    disabled={loading.encodeGrades}
+                    onClick={() =>
+                      handleClick(
+                        params.row.isGraduate
+                          ? "encodeGradesGraduate"
+                          : "encodeGrades"
+                      )
+                    }
+                    disabled={encodeGrades.loading}
                   >
-                    {loading.encodeGrades ? (
-                      <UploadFileIcon />
+                    {encodeGrades.loading ? (
+                      <CircularProgress size={24} />
                     ) : (
                       <KeyboardIcon />
                     )}
@@ -224,10 +249,10 @@ const Faculty = () => {
                   <IconButton
                     aria-label="upload-grade-sheet"
                     color="primary"
-                    onClick={() => handleClick("uploadGradeSheet")}
-                    disabled={loading.uploadGradeSheet}
+                    onClick={() => handleClick(params.row.isGraduate ? "uploadGradeSheetGraduate" : "uploadGradeSheet")}
+                    disabled={uploadGradeSheet.loading}
                   >
-                    {loading.uploadGradeSheet ? (
+                    {uploadGradeSheet.loading ? (
                       <CircularProgress size={24} />
                     ) : (
                       <UploadFileIcon />
@@ -383,12 +408,6 @@ const Faculty = () => {
       handleFetchFacultyList();
     }
   }, [registrarActivityData]);
-  React.useEffect(() => {
-    console.log("Encode Grades State: ", encodeGrades);
-  }, [encodeGrades]);
-  React.useEffect(() => {
-    console.log("Upload Grade Sheet State: ", uploadGradeSheet);
-  }, [uploadGradeSheet]);
   return (
     <>
       <Alert severity="info">
@@ -435,7 +454,7 @@ const Faculty = () => {
           }}
         >
           <Typography variant="h6" gutterBottom>
-            {`Academic Year: ${
+            {`${
               filterData.semester === "summer"
                 ? filterData.schoolyear
                 : filterData.schoolyear +
@@ -560,19 +579,36 @@ const Faculty = () => {
           </Box>
         </DialogContent>
       </Dialog>
+
       {encodeGrades.open && (
-        <GradeTable
+        <UnderGraduateTable
           open={true}
           handleClose={encodeGrades.handleClose}
-          data={encodeGrades.data}
+          classLoadData={encodeGrades.data}
         />
       )}
 
       {encodeGradesGraduate.open && (
-        <GradeTable
+        <GraduateStudiesTable
           open={true}
           handleClose={encodeGradesGraduate.handleClose}
-          data={encodeGradesGraduate.data}
+          classLoadData={encodeGradesGraduate.data}
+        />
+      )}
+
+      {uploadGradeSheet.open && (
+        <UploadGradeSheet
+          open={true}
+          handleClose={uploadGradeSheet.handleClose}
+          classLoadData={uploadGradeSheet.data}
+        />
+      )}
+
+      {uploadGradeSheetGraduate.open && (
+        <GraduateStudiesUpload
+          open={true}
+          handleClose={uploadGradeSheetGraduate.handleClose}
+          classLoadData={uploadGradeSheetGraduate.data}
         />
       )}
     </>

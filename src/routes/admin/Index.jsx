@@ -189,15 +189,18 @@ export default function Admin() {
     if (!checkAccessLevel(cookies)) {
       navigate("/");
     }
-  }, [cookies, navigate]);
+  }, [cookies]);
 
+  useEffect(() => {
+    if(!cookies.token) {
+      logout();
+    }
+  },[cookies.token])
   const logout = () => {
-    adminIndexUtil.siteCookies.forEach((cookie) =>
-      removeCookie(cookie, { path: "/" })
-    );
+    adminIndexUtil.siteCookies.map((cookie) => removeCookie(cookie, { path: "/" }));
     googleLogout();
-    navigate("/");
     localStorage.removeItem("activeItem");
+    navigate("/");
   };
   useEffect(() => {
     setDrawerMinimize(isSmallScreen ? true : !true);

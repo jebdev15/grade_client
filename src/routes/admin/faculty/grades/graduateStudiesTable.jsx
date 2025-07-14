@@ -11,31 +11,23 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import {
-  useLoaderData,
-  useNavigate,
-  useOutletContext,
-  useParams,
-} from "react-router-dom";
 import { Close } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
-import React, { useState } from "react";
-import { useCookies } from "react-cookie";
-import { HomeSemesterServices } from "../../services/homeSemesterService";
-import { HomeSemesterGraduateStudiesTableService } from "../../services/homeSemesterGraduateStudiesTableService";
-import axiosInstance from "../../../../api/axiosInstance";
+import React from "react";
+import axiosInstance from "@/api/axiosInstance";
+import { useEncodedFeatureState } from "@hooks/useFeatureState";
 
-const GraduateStudiesTable = ({ open, handleClose, data }) => {
-  const [cookies, ,] = useCookies(["email"]);
-  const navigate = useNavigate();
-  const { code, class_code } = useParams();
+const GraduateStudiesTable = ({ open, handleClose, classLoadData }) => {
+  const class_code = classLoadData[0]?.id;
   const theme = useTheme();
-
-  const [toUpdate, setToUpdate] = useState([]);
-  const [tableLoading, setTableLoading] = useState(false);
-  const [updatedCount, setUpdatedCount] = useState(null);
-
+  const [encoded, setEncoded] = useEncodedFeatureState();
   const columns = [
+    {
+      field: "id",
+      headerName: "No.",
+      width: 50,
+      hideable: false,
+    },
     {
       field: "student_id",
       headerName: "Student ID",
@@ -57,7 +49,7 @@ const GraduateStudiesTable = ({ open, handleClose, data }) => {
       field: "mid_grade",
       headerName: "Mid Term",
       width: 90,
-      editable: canUpload,
+      editable: true,
       sortable: true,
       type: "number",
       valueGetter: ({ row }) => parseFloat(row.mid_grade),
@@ -66,7 +58,7 @@ const GraduateStudiesTable = ({ open, handleClose, data }) => {
       field: "end_grade",
       headerName: "End Term",
       width: 90,
-      editable: canUpload,
+      editable: true,
       sortable: true,
       type: "number",
       valueGetter: ({ row }) => parseFloat(row.end_grade),
@@ -75,7 +67,7 @@ const GraduateStudiesTable = ({ open, handleClose, data }) => {
       field: "grade",
       headerName: "Grade",
       width: 90,
-      editable: canUpload,
+      editable: true,
       sortable: true,
       type: "number",
       valueGetter: ({ row }) => parseFloat(row.grade),
@@ -100,7 +92,7 @@ const GraduateStudiesTable = ({ open, handleClose, data }) => {
       field: "addRemark",
       flex: 0.5,
       headerName: "Remark",
-      editable: canUpload,
+      editable: true,
       sortable: true,
       type: "singleSelect",
       valueOptions: [
@@ -157,41 +149,118 @@ const GraduateStudiesTable = ({ open, handleClose, data }) => {
   const handleProcessRowUpdate = (row, prev) => {
     const isSame = JSON.stringify(row) === JSON.stringify(prev);
     if (!isSame) {
-      const duplicate = toUpdate.find((r) => r.sg_id === row.sg_id);
+      const duplicate = encoded.toUpdate.find((r) => r.sg_id === row.sg_id);
       let newArr = null;
       if (duplicate) {
-        newArr = toUpdate.filter((r) => r.sg_id !== duplicate.sg_id);
-        setToUpdate([...newArr, row]);
+        newArr = encoded.toUpdate.filter((r) => r.sg_id !== duplicate.sg_id);
+        setEncoded((prev) => ({ ...prev, toUpdate: [...newArr, row] }));
       } else {
-        setToUpdate((prev) => [...prev, row]);
+        setEncoded((prev) => ({ ...prev, toUpdate: [...prev.toUpdate, row] }));
       }
     }
     return row;
   };
   const handleCheckNotUpdated = async () => {
-    if (toUpdate.length > 0) {
+    if (encoded.toUpdate.length > 0) {
       let message = `Are you sure you want to update?`;
-
       const confirmation = window.confirm(message);
       if (!confirmation) return;
-      setTableLoading(true);
-      const { data } =
-        await axiosInstance.get(`/admin-student/grades/${class_code}`);
-      if (data) {
-        setToUpdate([]);
-        setTableLoading(false);
-        setUpdatedCount(data);
-      }
+      await handleUpdateGrades();
     } else {
-      alert("No rows to update");
+      setEncoded((prev) => ({
+        ...prev,
+        error: true,
+        message: "No changes detected. Please update at least one row.",
+      }));
     }
   };
+  const handleUpdateGrades = async () => {
+    setEncoded((prev) => ({
+      ...prev,
+      loading: true,
+    }));
+    try {
+      const payload = {
+        class_code,
+        term_type: classLoadData[0].term_type,
+        grades: encoded.toUpdate,
+      };
+      const response = await axiosInstance.put(
+        `/admin-student/grades/graduate-studies`,
+        payload
+      );
+      if (response.data) {
+        setEncoded((prev) => ({
+          ...prev,
+          toUpdate: [],
+          updatedCount: response.data.totalAffectedRows,
+          message: response.data.message,
+        }));
+      }
+    } catch (error) {
+      // Handle error appropriately
+      setEncoded((prev) => ({
+        ...prev,
+        error: true,
+        message: "There was an error updating the grades. Please try again.",
+      }));
+    } finally {
+      setEncoded((prev) => ({
+        ...prev,
+        openSnackbar: true,
+        loading: false,
+      }));
+    }
+  };
+
+  React.useEffect(() => {
+    const fetchStudentsWithGrades = async () => {
+      setEncoded((prev) => ({
+        ...prev,
+        loading: true,
+      }));
+      try {
+        const { data: students } = await axiosInstance.get(
+          `/admin-student/grades/${class_code}/graduate`
+        );
+        if (students.rows.length > 0) {
+          const formattedRows = students.rows.map((row, index) => ({
+            ...row,
+            id: index + 1,
+          }));
+          setEncoded((prev) => ({
+            ...prev,
+            rows: formattedRows,
+          }));
+          return;
+        }
+        setEncoded((prev) => ({
+          ...prev,
+          rows: [],
+        }));
+      } catch (error) {
+        console.error("Error fetching students:", error);
+        setEncoded((prev) => ({
+          ...prev,
+          error: true,
+          message: "Failed to fetch students with grades. Please try again.",
+          rows: [],
+        }));
+      } finally {
+        setEncoded((prev) => ({
+          ...prev,
+          loading: false,
+        }));
+      }
+    };
+    fetchStudentsWithGrades();
+  }, [class_code]);
   return (
     <Dialog
       open={open}
       onClose={(e, reason) => {
         if (reason !== "backdropClick") {
-          handleClose()
+          handleClose();
         }
       }}
       fullWidth
@@ -215,8 +284,8 @@ const GraduateStudiesTable = ({ open, handleClose, data }) => {
           Grade Sheet
           <IconButton
             onClick={() => {
-              setToUpdate([]);
-              handleClose()
+              setEncoded((prev) => ({ ...prev, toUpdate: [] }));
+              handleClose();
             }}
           >
             <Close sx={{ color: "text.light" }} />
@@ -236,20 +305,20 @@ const GraduateStudiesTable = ({ open, handleClose, data }) => {
         >
           <Typography>
             Subject Code:{" "}
-            <strong>{`${data[0]?.subject_code}(Graduate Studies)`}</strong>
+            <strong>{`${classLoadData[0]?.subject_code}(Graduate Studies)`}</strong>
           </Typography>
           <Typography>
-            Section: <strong>{data[0]?.section}</strong>
+            Section: <strong>{classLoadData[0]?.section}</strong>
           </Typography>
         </Box>
         <Box>
           <DataGrid
             getRowId={(row) => row.student_id}
             columns={columns}
-            rows={rows}
+            rows={encoded.rows}
             rowHeight={32}
             autoHeight
-            loading={tableLoading}
+            loading={encoded.loading}
             editMode="row"
             disableColumnMenu
             hideFooter
@@ -269,30 +338,36 @@ const GraduateStudiesTable = ({ open, handleClose, data }) => {
             processRowUpdate={handleProcessRowUpdate}
           />
           <Snackbar
-            open={Boolean(updatedCount)}
-            onClose={() => setUpdatedCount(null)}
-            autoHideDuration={2000}
+            open={encoded.openSnackbar}
+            autoHideDuration={5000}
+            onClose={(e, reason) => {
+              if (reason === "clickaway") return;
+              setEncoded((prev) => ({
+                ...prev,
+                openSnackbar: false,
+              }));
+            }}
           >
             <Alert
-              severity="success"
+              severity={encoded.error ? "error" : "success"}
               sx={{ width: "100%" }}
-            >{`${updatedCount} row${
-              updatedCount > 1 ? "s" : ""
-            } updated.`}</Alert>
+            >
+              {encoded.message}
+            </Alert>
           </Snackbar>
         </Box>
       </DialogContent>
       <DialogActions>
         <Button
           variant="contained"
-          disabled={tableLoading || toUpdate.length < 1}
+          disabled={encoded.loading || encoded.toUpdate.length < 1}
           sx={{
             mt: 2,
             justifySelf: "center",
           }}
           onClick={handleCheckNotUpdated}
         >
-          {tableLoading ? "Updating..." : "Update Record"}
+          {encoded.loading ? "Updating..." : "Update Record"}
         </Button>
       </DialogActions>
     </Dialog>

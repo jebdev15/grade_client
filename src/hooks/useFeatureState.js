@@ -8,6 +8,32 @@ const useFeatureState = () => {
     loading: false
   });
   return [state, setState];
-};
+}
+
+export const useUploadFeatureState = () => {
+  const [state, setState] = useState({
+    file: null,
+    loading: false,
+    openSnackbar: false,
+    error: false,
+    status: false,
+    message: "",
+  });
+  return [state, setState];
+}
+
+export const useEncodedFeatureState = () => {
+  const [state, setState] = useState({
+    rows: [],
+    toUpdate: [],
+    updatedCount: null,
+    loading: false,
+    openSnackbar: false,
+    error: false,
+    status: false,
+    message: "",
+  });
+  return [state, setState];
+}
 
 export default useFeatureState;
