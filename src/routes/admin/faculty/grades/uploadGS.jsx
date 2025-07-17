@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Close,
   Done,
@@ -25,9 +25,6 @@ import { useUploadFeatureState } from "@hooks/useFeatureState";
 const UploadGS = ({ open, handleClose, classLoadData }) => {
   const class_code = classLoadData[0]?.id;
   const [cookies, ,] = useCookies(["name", "email"]);
-
-  const [uploadFile, setUploadFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
   const [download, setDownload] = useUploadFeatureState();
   const [upload, setUpload] = useUploadFeatureState();
   const downloadExcel = async () => {
@@ -71,7 +68,10 @@ const UploadGS = ({ open, handleClose, classLoadData }) => {
   };
 
   const handleChangeFile = (e) => {
-    setUploadFile(e.target.files[0]);
+    setUpload((prev) => ({
+      ...prev,
+      file: e.target.files[0],
+    }))
   };
   const uploadExcel = async () => {
     setUpload((prev) => ({
@@ -80,34 +80,33 @@ const UploadGS = ({ open, handleClose, classLoadData }) => {
     }));
     try {
       const formData = new FormData();
-      formData.append("uploadFile", uploadFile);
+      formData.append("uploadFile", upload.file);
       formData.append("class_code", class_code);
       formData.append("method", "Upload");
       formData.append("email_used", cookies.email);
       formData.append("term_type", classLoadData[0].term_type);
-      const { data } = await axiosInstance.put(
-        "/admin-student/grades/upload-graduate-studies",
-        formData
+      const { data } = await axiosInstance.post(
+        "/admin-student/grades/upload-grade-sheet/graduate-studies",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
-      const { isOkay, isError } = data;
       setUpload((prev) => ({
         ...prev,
+        status: data.status,
+        message: data.message,
         file: null,
-        error: isError ? true : false,
-        message: isOkay
-          ? "Uploaded Successfully"
-          : "The file you uploaded either didn'\t upload correctly or does not match the subject.",
       }));
     } catch (error) {
       console.error("Error uploading file:", error);
-      setUploading(false);
       setUpload((prev) => ({
         ...prev,
         error: true,
-        message: "The file you uploaded either didn'\t upload correctly or does not match the subject."
+        message: error.response.data.message || "The file you uploaded either didn'\t upload correctly or does not match the subject."
       }));
-      setUploadFile(null);
-      return;
     } finally {
       setUpload((prev) => ({
         ...prev,
@@ -122,7 +121,7 @@ const UploadGS = ({ open, handleClose, classLoadData }) => {
       open={open}
       onClose={(e, reason) => {
         if (reason !== "backdropClick") {
-          setUploadFile(null);
+          setUpload((prev) => ({ ...prev, file: null, status: null, message: null }));
           handleClose();
         }
       }}
@@ -141,7 +140,7 @@ const UploadGS = ({ open, handleClose, classLoadData }) => {
           Upload Grade Sheet(GS)
           <IconButton
             onClick={() => {
-              setUploadFile(null);
+              setUpload((prev) => ({ ...prev, file: null, status: null, message: null }));
               handleClose();
             }}
           >
@@ -170,7 +169,7 @@ const UploadGS = ({ open, handleClose, classLoadData }) => {
                 Load Info
               </Typography>
               <Box sx={{ p: 2 }}>
-                <Typography>{`Class Code: ${classLoadData[0].class_code}`}</Typography>
+                <Typography>{`Class Code: ${class_code}`}</Typography>
                 <Typography>{`Subject Code: ${classLoadData[0].subject_code}`}</Typography>
                 <Typography>{`Faculty: ${cookies.name}`}</Typography>
                 <Typography>{`Section: ${classLoadData[0].section}`}</Typography>
@@ -179,7 +178,7 @@ const UploadGS = ({ open, handleClose, classLoadData }) => {
               <Button
                 variant="contained"
                 onClick={downloadExcel}
-                disabled={download.loading || uploading ? true : false}
+                disabled={download.loading || upload.loading ? true : false}
               >
                 {/* Download Grade Sheet */}
                 {download.loading ? "Downloading..." : "Download Grade Sheet"}
@@ -211,15 +210,15 @@ const UploadGS = ({ open, handleClose, classLoadData }) => {
                   cursor: "pointer",
                   flexDirection: "column",
                 }}
-                disabled={uploading}
+                disabled={upload.loading}
               >
-                {uploadFile ? (
+                {upload.file ? (
                   <Box sx={{ textAlign: "center" }}>
                     <Done color="primary" fontSize="large" />
                     <Typography variant="h6" sx={{ mt: 2 }}>
                       File Inserted!
                     </Typography>
-                    <Typography>{uploadFile.name}</Typography>
+                    <Typography>{upload.file.name}</Typography>
                   </Box>
                 ) : (
                   <Button
@@ -248,7 +247,7 @@ const UploadGS = ({ open, handleClose, classLoadData }) => {
               fullWidth
               disabled={upload.loading}
               onClick={uploadExcel}
-              sx={{ display: uploadFile ? "flex" : "none", mt: 1 }}
+              sx={{ display: upload.file ? "flex" : "none", mt: 1 }}
             >
               {upload.loading ? "Uploading..." : "Upload"}
             </Button>

@@ -98,7 +98,7 @@ const UploadGradeSheet = ({ open, handleClose, classLoadData }) => {
       formData.append("email_used", cookies.email);
       formData.append("term_type", classLoadData[0].term_type);
       const { data } = await axiosInstance.post(
-        "/admin-student/grades/upload-grade-sheet",
+        "/admin-student/grades/upload-grade-sheet/undergraduate",
         formData,
         {
           headers: {
@@ -110,6 +110,7 @@ const UploadGradeSheet = ({ open, handleClose, classLoadData }) => {
         ...prev,
         status: data.status,
         message: data.message,
+        file: null,
       }));
       setTimeout(() => handleClose(), 3500);
     } catch (error) {
@@ -189,7 +190,7 @@ const UploadGradeSheet = ({ open, handleClose, classLoadData }) => {
                 Load Info
               </Typography>
               <Box sx={{ p: 2 }}>
-                <Typography>{`Class Code: ${classLoadData[0].id}`}</Typography>
+                <Typography>{`Class Code: ${class_code}`}</Typography>
                 <Typography>{`Subject Code: ${classLoadData[0].subject_code}`}</Typography>
                 <Typography>{`Faculty: ${cookies.name}`}</Typography>
                 <Typography>{`Section: ${classLoadData[0].section}`}</Typography>
@@ -200,7 +201,6 @@ const UploadGradeSheet = ({ open, handleClose, classLoadData }) => {
                 onClick={downloadExcel}
                 disabled={(download.loading || upload.loading) ? true : false}
               >
-                {/* Download Grade Sheet */}
                 {download.loading ? "Downloading..." : "Download Grade Sheet"}
               </Button>
             </Paper>

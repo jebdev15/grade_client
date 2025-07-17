@@ -6,9 +6,9 @@ export const fetchUsers = createAsyncThunk('students/fetchUsers', async (cookies
     
     const { data } = await axiosInstance.get(`/admin/getAllEmails`);
     if(cookies.accessLevel !== 'Administrator') {
-        const filteredData = data.filter(user => user.accessLevel !== 'Administrator')
+        const filteredData = data.filter(user => user.accessLevel !== 'Administrator' && user.email !== cookies.email);
         return filteredData
       } else {
-        return data 
+        return data.filter(user => user.email !== cookies.email); 
       }
 });

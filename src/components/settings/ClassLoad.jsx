@@ -124,7 +124,7 @@ const ClassLoadSetting = () => {
           }}
         >
           <Typography variant="h5" color="initial">
-            Class Load
+            Manage Class Load Unlocking
           </Typography>
           {!data.id && (
             <Alert severity="info">Select Semester to Proceed</Alert>

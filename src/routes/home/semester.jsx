@@ -53,7 +53,7 @@ const Semester = () => {
             </IconButton>
             <span>/</span>
             <Typography variant="caption" fontSize={12} sx={{ mx: 1 }}>
-              {`${decodedSchoolYear} - ${parseInt(decodedSchoolYear) + 1}`}
+              {decodedSemester === "summer" ? `${decodedSchoolYear}` : `${decodedSchoolYear} - ${parseInt(decodedSchoolYear) + 1}`}
             </Typography>
             <span>/</span>
             <Typography variant="caption" fontSize={12} sx={{ mx: 1 }}>

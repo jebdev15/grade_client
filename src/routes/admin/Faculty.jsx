@@ -245,7 +245,7 @@ const Faculty = () => {
                   </IconButton>
                 </Tooltip>
 
-                <Tooltip title="Upload Grade Sheet">
+                {/* <Tooltip title="Upload Grade Sheet">
                   <IconButton
                     aria-label="upload-grade-sheet"
                     color="primary"
@@ -258,7 +258,7 @@ const Faculty = () => {
                       <UploadFileIcon />
                     )}
                   </IconButton>
-                </Tooltip>
+                </Tooltip> */}
 
                 <Tooltip title="View Students">
                   <IconButton
@@ -430,7 +430,7 @@ const Faculty = () => {
           marginBottom={3}
           sx={{ flexGrow: 1 }}
         >
-          LIST OF FACULTY
+          List of Faculty
         </Typography>
         <Button
           variant="contained"

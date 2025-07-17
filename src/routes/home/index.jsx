@@ -19,6 +19,7 @@ import {
   Typography,
   Backdrop,
   useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
 import {
   BeachAccess,
@@ -36,12 +37,10 @@ import { urlEncode } from "url-encode-base64";
 import chmsuLogo from "../../assets/chmsu-small.jpg";
 import { getCampus } from "../../utils/header.util";
 import { homeIndexUtil } from "../../utils/homeIndexUtil";
-import { fetchRegistrarActivity } from "../../features/home/index/registrarActivityThunks";
-import { useDispatch, useSelector } from "react-redux";
+import axiosInstance from "api/axiosInstance";
 
-// const date = new Date();
-// const currentYear = date.getFullYear();
-const currentYear = 2024;
+const currentYear = new Date().getFullYear();
+
 const Home = () => {
   const [cookies, , removeCookie] = useCookies(homeIndexUtil.siteCookies);
   const navigate = useNavigate();
@@ -50,63 +49,16 @@ const Home = () => {
     firstSemester: currentYear,
     secondSemester: currentYear,
   });
-  const data = useSelector((state) => state.registrarActivity.list);
-  const error = useSelector((state) => state.registrarActivity.error);
-  const registrarActivityStatus = useSelector(
-    (state) => state.registrarActivity.status
-  );
-
-  const dispatch = useDispatch();
-  useEffect(() => {
-    localStorage.removeItem("activeItem");
-    if (registrarActivityStatus === "idle") {
-      dispatch(fetchRegistrarActivity());
-    }
-    if (registrarActivityStatus === "succeeded" && !error) {
-      data?.data.forEach(({ schoolyear, semester }) => {
-        // Set the school year based on the semester
-        if (semester === "summer") {
-          setSchoolYear((prevState) => ({ ...prevState, summer: schoolyear }));
-        } else if (semester === "1st") {
-          setSchoolYear((prevState) => ({
-            ...prevState,
-            firstSemester: schoolyear,
-          }));
-        } else if (semester === "2nd") {
-          setSchoolYear((prevState) => ({
-            ...prevState,
-            secondSemester: schoolyear,
-          }));
-        }
-      });
-    }
-  }, [data, registrarActivityStatus, error, dispatch]);
-
+  const [data, setData] = useState({});
   const [drawerMinimize, setDrawerMinimize] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState(null);
 
   const [activeItem, setActiveItem] = useState(
     localStorage.getItem("activeItem")
   );
-
+  const [loading, setLoading] = useState(false);
   const [backdropOpen, setBackdropOpen] = useState(false);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down("sm"));
-
-  useEffect(() => {
-    localStorage.setItem("activeItem", activeItem);
-  }, [activeItem]);
-
-  useEffect(
-    () => {
-      if (drawerMinimize) {
-        setBackdropOpen(false);
-      } else {
-        setBackdropOpen(true);
-      }
-    },
-    [drawerMinimize],
-    [isMobile]
-  );
 
   const logout = () => {
     homeIndexUtil.siteCookies.forEach((cookie) =>
@@ -125,13 +77,57 @@ const Home = () => {
     return `${encodedSemester}-${encodedSchoolYear}-${encodedFacultyID}`;
   };
 
+  const campusAccessing = getCampus();
+
   useEffect(() => {
     if (!homeIndexUtil.checkHomeAccessLevel(cookies)) {
       navigate("/");
+      console.log("not authorized");
+      return;
     }
-  }, [cookies, navigate]);
-  const campusAccessing = getCampus();
+  }, []);
+  React.useEffect(() => {
+    const fetchRegistrarActivity = async () => {
+      setLoading(true);
+      try {
+        const response = await axiosInstance.get(
+          "/getRegistrarActivity"
+        );
+        if (response.status === 200 && response.data.length > 0) {
+          const newState = response.data.reduce((acc, { schoolyear, semester }) => {
+            if (semester === "summer") acc.summer = schoolyear;
+            else if (semester === "1st") acc.firstSemester = schoolyear;
+            else if (semester === "2nd") acc.secondSemester = schoolyear;
+            return acc;
+          }, {});
+          setData(response.data);
+          setSchoolYear((prevState) => ({ ...prevState, ...newState }));
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRegistrarActivity();
+  },[]);
 
+  useEffect(() => {
+    localStorage.setItem("activeItem", activeItem);
+  }, [activeItem]);
+
+  useEffect(
+    () => {
+      if (drawerMinimize) {
+        setBackdropOpen(false);
+      } else {
+        setBackdropOpen(true);
+      }
+    },
+    [drawerMinimize],
+    [isMobile]
+  );
+  if(loading) return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%" }} />
   return (
     <React.Suspense fallback={<div>loading...</div>}>
       <Box
@@ -301,7 +297,7 @@ const Home = () => {
             >
               <List>
                 <ListItemButton
-                  disabled={registrarActivityStatus === "loading"}
+                  disabled={loading}
                   className={
                     activeItem === "summer" ? "navbtn active" : "navbtn"
                   }
@@ -325,7 +321,7 @@ const Home = () => {
                   {drawerMinimize ? null : <ListItemText primary="Summer" />}
                 </ListItemButton>
                 <ListItemButton
-                  disabled={registrarActivityStatus === "loading"}
+                  disabled={loading}
                   className={activeItem === "1st" ? "navbtn active" : "navbtn"}
                   onClick={() => {
                     navigate(
@@ -349,7 +345,7 @@ const Home = () => {
                 </ListItemButton>
 
                 <ListItemButton
-                  disabled={registrarActivityStatus === "loading"}
+                  disabled={loading}
                   className={activeItem === "2nd" ? "navbtn active" : "navbtn"}
                   onClick={() => {
                     navigate(
@@ -396,7 +392,7 @@ const Home = () => {
                 }}
               ></Backdrop>
             )}
-            <Outlet context={[schoolyear, data, registrarActivityStatus]} />
+            <Outlet context={[schoolyear, data, loading]} />
           </Box>
         </Box>
       </Box>

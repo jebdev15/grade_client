@@ -301,7 +301,7 @@ const GradeTable = ({ open, handleClose, classLoadData }) => {
       }
     };
     fetchStudentsWithGrades();
-  }, []);
+  }, [class_code]);
   return (
     <Dialog
       open={open}

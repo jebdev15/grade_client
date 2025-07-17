@@ -124,7 +124,7 @@ const ExtendDeadline = () => {
           }}
         >
           <Typography variant="h5" color="initial">
-            EXTEND DEADLINE
+            Extend Grade Submission Deadline
           </Typography>
           {!data.id && (
             <Alert severity="info">Select Semester to Proceed</Alert>

@@ -84,7 +84,7 @@ const Deadline = () => {
           }}
         >
           <Typography variant="h5" color="initial">
-            MANAGE DEADLINE
+            Manage Submission Deadlines
           </Typography>
           {!data.id && (
             <Alert severity="info">Select Semester to Proceed</Alert>

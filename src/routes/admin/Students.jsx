@@ -111,7 +111,7 @@ const Students = () => {
           searchResultData.length > 0 ? (
             <>
               <Typography variant="h4" fontWeight={700} component="div" marginBottom={3} marginTop={3} sx={{ flexGrow: 1 }}>
-                LIST OF STUDENTS
+                Enrolled Students List
               </Typography>
               <Box borderRadius={"10px"} border={"1px solid var(--border-default)"} className="usersTable" height={600}>
                 <DataGrid

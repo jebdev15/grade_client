@@ -47,6 +47,7 @@ import { REACT_APP_GOOGLE_CLIENT_ID } from "./utils/envVariables";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { RegistrarActivityProvider } from "./context/RegistrarActivityContext";
 import FacultyErrorPage from "./components/errors/FacultyErrorPage";
+import CreditsComponent from "@components/settings/CreditsComponent";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -157,6 +158,10 @@ const router = createBrowserRouter([
           {
             path: "class-load",
             element: <ClassLoad />,
+          },
+          {
+            path: "credits",
+            element: <CreditsComponent />,
           }
         ]
       },

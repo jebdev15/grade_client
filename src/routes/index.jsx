@@ -5,12 +5,12 @@ import jwt_decode from "jwt-decode";
 import { useCookies } from "react-cookie";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
-import "../assets/custom.css";
-import "../style.css";
-import chmsuLogo from "../assets/chmsu-small.jpg";
-import { AuthService } from "../services/authService";
-import { AuthUtil } from "../utils/authUtil";
-import { getCampus } from "../utils/header.util";
+import "@/assets/custom.css";
+import "@/style.css";
+import chmsuLogo from "@/assets/chmsu-small.jpg";
+import { AuthService } from "@/services/authService";
+import { AuthUtil } from "@/utils/authUtil";
+import { getCampus } from "@/utils/header.util";
 const Index = () => {
   const [loading, setLoading] = useState(false);
   const [cookies, setCookie] = useCookies(AuthUtil.siteCookies);

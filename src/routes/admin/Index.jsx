@@ -21,20 +21,21 @@ import {
   Collapse,
 } from "@mui/material";
 import {
-  Logout,
-  Menu as MenuIcon,
   AccountCircle as AccountCircleIcon,
-  Home as HomeIcon,
-  People as PeopleIcon,
-  Groups as GroupsIcon,
-  Groups2 as Groups2Icon,
-  WorkHistory as WorkHistoryIcon,
-  Settings as SettingsIcon,
   AccessTime as AccessTimeIcon,
-  MoreTime as MoreTimeIcon,
-  Subject as SubjectIcon,
   ExpandLess,
   ExpandMore,
+  Groups as GroupsIcon,
+  Groups2 as Groups2Icon,
+  Home as HomeIcon,
+  Logout,
+  Menu as MenuIcon,
+  MilitaryTech as MilitaryTechIcon,
+  MoreTime as MoreTimeIcon,
+  People as PeopleIcon,
+  Settings as SettingsIcon,
+  Subject as SubjectIcon,
+  WorkHistory as WorkHistoryIcon,
 } from "@mui/icons-material";
 import { Outlet, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
@@ -109,6 +110,12 @@ const SettingsListItems = [
     activeItem: "class-load",
     icon: <SubjectIcon />,
     link: "/admin/settings/class-load",
+  },
+  {
+    text: "Credits",
+    activeItem: "credits",
+    icon: <MilitaryTechIcon />,
+    link: "/admin/settings/credits",
   },
 ];
 
@@ -284,14 +291,14 @@ export default function Admin() {
                 {menuListItems.map((item, index) => (
                   <MenuItem key={++index}>
                     <ListItemIcon>{item.icon}</ListItemIcon>
-                    <ListItemText sx={{ ml: 3 }} primary={item.text} />
+                    <ListItemText primary={item.text} />
                   </MenuItem>
                 ))}
                 <MenuItem onClick={logout}>
                   <ListItemIcon>
                     <Logout />
                   </ListItemIcon>
-                  <ListItemText sx={{ ml: 3 }} primary={"Sign Out"} />
+                  <ListItemText primary={"Sign Out"} />
                 </MenuItem>
               </Menu>
             </MenuList>
@@ -379,7 +386,7 @@ export default function Admin() {
                                     onClick={() => navigate(item.link)}
                                   >
                                     <ListItemIcon>{item.icon}</ListItemIcon>
-                                    <ListItemText primary={item.text} />
+                                    <ListItemText sx={{ flexGrow: 1 }} primary={item.text} />
                                   </ListItemButton>
                                 </List>
                               </Collapse>

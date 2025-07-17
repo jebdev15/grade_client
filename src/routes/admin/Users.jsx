@@ -224,14 +224,14 @@ const Users = () => {
         }}
       >
         <Typography variant="h4" fontWeight={700} component="div">
-          LIST OF USERS
+          User Accounts List
         </Typography>
         <Grid>
           <Grid item>
             <ButtonGroup variant="text" color="primary" aria-label="">
               <Tooltip title="Create Account">
                 <Button sx={{ color: "white" }} variant="contained" color="primary" startIcon={<PersonAddAlt1Icon />} onClick={handleOpenCreateUsersDialog}>
-                  Create Account
+                  Create User Account
                 </Button>
               </Tooltip>
             </ButtonGroup>
@@ -389,7 +389,7 @@ const Users = () => {
 
       {/* Modal for Editing Account in the System*/}
       <Dialog open={openEditAccountDialog} onClose={handleCloseEditAccountDialog} aria-labelledby={"dialog-confirmation"}>
-        <DialogTitle id={"dialog-confirmation-title"}>Edit Account</DialogTitle>
+        <DialogTitle id={"dialog-confirmation-title"}>Edit User Account</DialogTitle>
         <IconButton
           aria-label="close"
           onClick={handleCloseEditAccountDialog}

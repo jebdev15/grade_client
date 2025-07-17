@@ -76,11 +76,11 @@ const GraduateStudiesTable = ({ open, handleClose, classLoadData }) => {
       field: "status",
       headerName: "Status",
       valueGetter: ({ row }) => {
-        if (row.grade > 0) {
-          return row.grade >= 1 && row.grade <= 2 ? "Passed" : "Failed";
-        } else {
-          return "";
+        const grade = Number(row.grade);
+        if (grade > 0) {
+          return grade >= 1 && grade <= 2 ? "Passed" : "Failed";
         }
+        return "";
       },
     },
     {
@@ -149,14 +149,26 @@ const GraduateStudiesTable = ({ open, handleClose, classLoadData }) => {
   const handleProcessRowUpdate = (row, prev) => {
     const isSame = JSON.stringify(row) === JSON.stringify(prev);
     if (!isSame) {
+      // Recompute status and attach to the row
+      const grade = Number(row.grade);
+      const status =
+        grade > 0 ? (grade >= 1 && grade <= 2 ? "passed" : "failed") : "";
+
+      const updatedRow = { ...row, status };
+
       const duplicate = encoded.toUpdate.find((r) => r.sg_id === row.sg_id);
       let newArr = null;
       if (duplicate) {
         newArr = encoded.toUpdate.filter((r) => r.sg_id !== duplicate.sg_id);
-        setEncoded((prev) => ({ ...prev, toUpdate: [...newArr, row] }));
+        setEncoded((prev) => ({ ...prev, toUpdate: [...newArr, updatedRow] }));
       } else {
-        setEncoded((prev) => ({ ...prev, toUpdate: [...prev.toUpdate, row] }));
+        setEncoded((prev) => ({
+          ...prev,
+          toUpdate: [...prev.toUpdate, updatedRow],
+        }));
       }
+
+      return updatedRow;
     }
     return row;
   };
