@@ -136,6 +136,7 @@ const Home = () => {
           flexDirection: "column",
           height: "100dvh",
           alignItems: "stretch",
+          // backgroundColor: "#E4E4E4",
         }}
       >
         <Box

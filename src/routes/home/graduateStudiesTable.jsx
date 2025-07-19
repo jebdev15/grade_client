@@ -1,5 +1,4 @@
 import {
-  Alert,
   Box,
   Button,
   Dialog,
@@ -7,7 +6,6 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  Snackbar,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -18,36 +16,36 @@ import {
   useParams,
 } from "react-router-dom";
 import { Close } from "@mui/icons-material";
-import { 
-  DataGrid
-} from "@mui/x-data-grid";
-import React, { useState } from "react";
+import { DataGrid } from "@mui/x-data-grid";
+import React from "react";
 import { useCookies } from "react-cookie";
 import { HomeSemesterServices } from "../../services/homeSemesterService";
-import { HomeSemesterGraduateStudiesTableService } from "../../services/homeSemesterGraduateStudiesTableService";
+import { useEncodedFeatureState } from "@hooks/useFeatureState";
+import axiosInstance from "api/axiosInstance";
+import GPSnackbar from "@components/GPSnackbar";
 
 const GraduateStudiesTable = () => {
-  const [cookies, , ] = useCookies(["email"]);
+  const [cookies, ,] = useCookies(["email"]);
   const navigate = useNavigate();
   const { code, class_code } = useParams();
   const theme = useTheme();
-  const {
-    rows,
-    loadInfoArr,
-    dbTermType
-  } = useLoaderData();
+  const { rows, loadInfoArr, dbTermType } = useLoaderData();
 
   const [...contexts] = useOutletContext();
   const manualOpen = contexts[0];
   const setManualOpen = contexts[1];
   const loadInfo = loadInfoArr[0];
-  const canUpload = (loadInfo.canUpload || loadInfo.is_deadline_extended) && !(loadInfo.classLoadStatus);
-
-  const [toUpdate, setToUpdate] = useState([]);
-  const [tableLoading, setTableLoading] = useState(false);
-  const [updatedCount, setUpdatedCount] = useState(null);
-
+  const canUpload =
+    (loadInfo.canUpload || loadInfo.is_deadline_extended) &&
+    !loadInfo.classLoadStatus;
+  const [encode, setEncode] = useEncodedFeatureState();
   const columns = [
+    {
+      field: "id",
+      headerName: "No.",
+      width: 90,
+      hideable: false,
+    },
     {
       field: "student_id",
       headerName: "Student ID",
@@ -75,13 +73,13 @@ const GraduateStudiesTable = () => {
       valueGetter: ({ row }) => parseFloat(row.mid_grade),
     },
     {
-      field: "end_grade",
+      field: "final_grade",
       headerName: "End Term",
       width: 90,
       editable: canUpload,
       sortable: true,
       type: "number",
-      valueGetter: ({ row }) => parseFloat(row.end_grade),
+      valueGetter: ({ row }) => parseFloat(row.final_grade),
     },
     {
       field: "grade",
@@ -96,12 +94,12 @@ const GraduateStudiesTable = () => {
       field: "status",
       headerName: "Status",
       valueGetter: ({ row }) => {
-        if(row.grade > 0) {
-          return (row.grade >= 1 && row.grade <= 2 ) ? "Passed" : "Failed";
+        if (row.grade > 0) {
+          return row.grade >= 1 && row.grade <= 2 ? "Passed" : "Failed";
         } else {
-          return ""
+          return "";
         }
-      }
+      },
     },
     {
       field: "dbRemark",
@@ -169,35 +167,63 @@ const GraduateStudiesTable = () => {
   const handleProcessRowUpdate = (row, prev) => {
     const isSame = JSON.stringify(row) === JSON.stringify(prev);
     if (!isSame) {
-      const duplicate = toUpdate.find((r) => r.sg_id === row.sg_id);
+      const duplicate = encode.toUpdate.find((r) => r.sg_id === row.sg_id);
       let newArr = null;
       if (duplicate) {
-        newArr = toUpdate.filter((r) => r.sg_id !== duplicate.sg_id);
-        setToUpdate([...newArr, row]);
+        newArr = encode.toUpdate.filter((r) => r.sg_id !== duplicate.sg_id);
+        setEncode((prev) => ({ ...prev, toUpdate: [...newArr, row] }));
       } else {
-        setToUpdate((prev) => [...prev, row]);
+        setEncode((prev) => ({ ...prev, toUpdate: [...prev.toUpdate, row] }));
       }
-    } 
-    return row;
-  }
-  const handleCheckNotUpdated = async () => {
-    if(toUpdate.length > 0) {
-
-      let message = `Are you sure you want to update?`;
-      
-      const confirmation = window.confirm(message)
-      if(!confirmation) return
-      setTableLoading(true);
-      const { data } = await HomeSemesterGraduateStudiesTableService.updateGraduateStudiesGrade(toUpdate, class_code, cookies, dbTermType);
-      if (data) {
-        setToUpdate([]);
-        setTableLoading(false);
-        setUpdatedCount(data);
-      }
-    } else {
-      alert("No rows to update")
     }
-  }
+    return row;
+  };
+
+  const handleCheckNotUpdated = async () => {
+    if (encode.toUpdate.length > 0) {
+      let message = `Are you sure you want to update?`;
+      const confirmation = window.confirm(message);
+
+      if (!confirmation) return;
+      await handleUpdateGrades();
+    } else {
+      alert("No rows to update");
+    }
+  };
+
+  const handleUpdateGrades = async () => {
+    setEncode((prev) => ({ ...prev, loading: true }));
+    try {
+      const payload = {
+        grades: encode.toUpdate,
+        class_code,
+        method: "Manual",
+        email_used: cookies.email,
+        term_type: dbTermType,
+      };
+      const { data } = await axiosInstance.post(
+        `/student-grades/update-grade/graduate-studies`,
+        payload
+      );
+      if (data.affectedRows < 0) {
+        return setEncode((prev) => ({
+          ...prev,
+          error: true,
+          message: "Failed to update. Please try again later.",
+        }));
+      }
+      setEncode((prev) => ({
+        ...prev,
+        toUpdate: [],
+        message: "Successfully updated",
+        updatedCount: data.affectedRows,
+      }));
+    } catch (error) {
+      setEncode((prev) => ({ ...prev, error: true, message: error.message }));
+    } finally {
+      setEncode((prev) => ({ ...prev, openSnackbar: true, loading: false }));
+    }
+  };
   return (
     <Dialog
       open={manualOpen}
@@ -227,8 +253,7 @@ const GraduateStudiesTable = () => {
           Grade Sheet
           <IconButton
             onClick={() => {
-              setToUpdate([]);
-              setManualOpen(false);
+              setEncode((prev) => ({ ...prev, toUpdate: [], open: false }));
               navigate(`/home/${code}`);
             }}
           >
@@ -248,7 +273,8 @@ const GraduateStudiesTable = () => {
           }}
         >
           <Typography>
-            Subject Code: <strong>{`${loadInfo.subject_code}(Graduate Studies)`}</strong>
+            Subject Code:{" "}
+            <strong>{`${loadInfo.subject_code}(Graduate Studies)`}</strong>
           </Typography>
           <Typography>
             Section: <strong>{loadInfo.section}</strong>
@@ -261,7 +287,7 @@ const GraduateStudiesTable = () => {
             rows={rows}
             rowHeight={32}
             autoHeight
-            loading={tableLoading}
+            loading={encode.loading}
             editMode="row"
             disableColumnMenu
             hideFooter
@@ -280,33 +306,29 @@ const GraduateStudiesTable = () => {
             }}
             processRowUpdate={handleProcessRowUpdate}
           />
-          <Snackbar
-            open={Boolean(updatedCount)}
-            onClose={() => setUpdatedCount(null)}
-            autoHideDuration={2000}
-          >
-            <Alert
-              severity="success"
-              sx={{ width: "100%" }}
-            >{`${updatedCount} row${
-              updatedCount > 1 ? "s" : ""
-            } updated.`}</Alert>
-          </Snackbar>
+          <GPSnackbar
+            open={encode.openSnackbar}
+            onClose={() =>
+              setEncode((prev) => ({ ...prev, openSnackbar: false }))
+            }
+            error={encode.error}
+            message={encode.message}
+          />
         </Box>
       </DialogContent>
       <DialogActions>
         {canUpload && (
           <Button
-              variant="contained"
-              disabled={tableLoading || toUpdate.length < 1}
-              sx={{
-                mt: 2,
-                justifySelf: "center",
-              }}
-              onClick={handleCheckNotUpdated}
-            >
-              {tableLoading ? "Updating..." : "Update Record"}
-            </Button>
+            variant="contained"
+            disabled={encode.loading || encode.toUpdate.length < 1}
+            sx={{
+              mt: 2,
+              justifySelf: "center",
+            }}
+            onClick={handleCheckNotUpdated}
+          >
+            {encode.loading ? "Updating..." : "Update Record"}
+          </Button>
         )}
       </DialogActions>
     </Dialog>
@@ -315,14 +337,31 @@ const GraduateStudiesTable = () => {
 export const loader = async ({ params }) => {
   const { code, class_code } = params;
   const [semester, currentSchoolYear, faculty_id] = code.split("-");
-  const { data } = await HomeSemesterServices.getGraduateStudiesStudentsByYearSemesterAndClassCode(currentSchoolYear,semester,class_code);
+  const { data } =
+    await HomeSemesterServices.getGraduateStudiesStudentsByYearSemesterAndClassCode(
+      currentSchoolYear,
+      semester,
+      class_code
+    );
 
   const rows = data;
 
-  const { facultyLoadData:loadInfoArr, status } = await HomeSemesterServices.getFacultyLoadByFacultyIdYearSemesterAndClassCode(faculty_id, currentSchoolYear, semester, class_code);
+  const { facultyLoadData: loadInfoArr, status } =
+    await HomeSemesterServices.getFacultyLoadByFacultyIdYearSemesterAndClassCode(
+      faculty_id,
+      currentSchoolYear,
+      semester,
+      class_code
+    );
 
-  const { data: registrarActivityData } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
-  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo, term_type: dbTermType } = registrarActivityData;
+  const { data: registrarActivityData } =
+    await HomeSemesterServices.getRegistrarActivityBySemester(semester);
+  const {
+    schoolyear: dbSchoolYear,
+    semester: dbSemester,
+    to: dbTo,
+    term_type: dbTermType,
+  } = registrarActivityData;
   return {
     rows,
     loadInfoArr,
@@ -330,7 +369,7 @@ export const loader = async ({ params }) => {
     dbSchoolYear,
     dbSemester,
     dbTo,
-    dbTermType
+    dbTermType,
   };
 };
 

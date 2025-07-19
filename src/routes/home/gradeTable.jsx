@@ -1,5 +1,4 @@
 import {
-  Alert,
   Box,
   Button,
   Dialog,
@@ -7,7 +6,6 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  Snackbar,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -18,34 +16,36 @@ import {
   useParams,
 } from "react-router-dom";
 import { Close } from "@mui/icons-material";
-import { 
-  DataGrid
-} from "@mui/x-data-grid";
-import React, { useState } from "react";
+import { DataGrid } from "@mui/x-data-grid";
+import React from "react";
 import { useCookies } from "react-cookie";
-import { HomeSemesterServices } from "../../services/homeSemesterService";
+import { HomeSemesterServices } from "@services/homeSemesterService";
+import axiosInstance from "api/axiosInstance";
+import GPSnackbar from "@components/GPSnackbar";
+import { useEncodedFeatureState } from "@hooks/useFeatureState";
 
 const GradeTable = () => {
-  const [cookies, , ] = useCookies(["email"]);
+  const [cookies, ,] = useCookies(["email"]);
   const navigate = useNavigate();
   const { code, class_code } = useParams();
   const theme = useTheme();
 
-  const {
-    rows,
-    loadInfoArr,
-    dbTermType
-  } = useLoaderData();
+  const { rows, loadInfoArr, dbTermType } = useLoaderData();
   const loadInfo = loadInfoArr[0];
   const [...contexts] = useOutletContext();
   const manualOpen = contexts[0];
   const setManualOpen = contexts[1];
-  const canUpload = (loadInfo.canUpload || loadInfo.is_deadline_extended) && !(loadInfo.classLoadStatus);
-  const [toUpdate, setToUpdate] = useState([]);
-  const [tableLoading, setTableLoading] = useState(false);
-  const [updatedCount, setUpdatedCount] = useState(null);
-
+  const canUpload =
+    (loadInfo.canUpload || loadInfo.is_deadline_extended) &&
+    !loadInfo.classLoadStatus;
+  const [encode, setEncode] = useEncodedFeatureState();
   const columns = [
+    {
+      field: "id",
+      headerName: "No.",
+      width: 90,
+      hideable: false,
+    },
     {
       field: "student_id",
       headerName: "Student ID",
@@ -81,14 +81,18 @@ const GradeTable = () => {
         //   (parseFloat(value) + parseFloat(row.final_grade)) / 2
         // );
         // fix to fetch mid term grade
-        const midTermGrade = (value === "" || isNaN(value)) ? 0 : parseFloat(value);
-        const endTermGrade = (row.final_grade === "" || isNaN(row.final_grade)) ? 0 : parseFloat(row.final_grade);
+        const midTermGrade =
+          value === "" || isNaN(value) ? 0 : parseFloat(value);
+        const endTermGrade =
+          row.final_grade === "" || isNaN(row.final_grade)
+            ? 0
+            : parseFloat(row.final_grade);
         const ave = (midTermGrade + endTermGrade) / 2;
         let status = "";
         const checkGrades = midTermGrade > 0 && endTermGrade > 0;
         const average = checkGrades ? Math.round(ave) : 0;
         if (checkGrades) {
-          status = average > 74 ? "passed" :'failed';
+          status = average > 74 ? "passed" : "failed";
         }
         return { ...row, average, status, mid_grade: midTermGrade };
       },
@@ -106,14 +110,18 @@ const GradeTable = () => {
         return { ...props, error: hasError };
       },
       valueSetter: ({ row, value }) => {
-        const midTermGrade = (row.mid_grade === "" || isNaN(row.mid_grade)) ? 0 : parseFloat(row.mid_grade);
-        const endTermGrade = (value === "" || isNaN(value)) ? 0 : parseFloat(value);
-        const ave =  (midTermGrade + endTermGrade) / 2;
+        const midTermGrade =
+          row.mid_grade === "" || isNaN(row.mid_grade)
+            ? 0
+            : parseFloat(row.mid_grade);
+        const endTermGrade =
+          value === "" || isNaN(value) ? 0 : parseFloat(value);
+        const ave = (midTermGrade + endTermGrade) / 2;
         const checkGrades = midTermGrade > 0 && endTermGrade > 0;
         const average = checkGrades ? Math.round(ave) : 0;
         let status = "";
-        if(checkGrades) { 
-          status = average > 74 ? "passed" : "failed"; 
+        if (checkGrades) {
+          status = average > 74 ? "passed" : "failed";
         }
         return { ...row, average, status, final_grade: endTermGrade };
       },
@@ -126,7 +134,8 @@ const GradeTable = () => {
       type: "number",
       valueGetter: ({ row }) => {
         if (row.mid_grade > 0 && row.final_grade > 0) {
-          const average = (parseFloat(row.mid_grade) + parseFloat(row.final_grade)) / 2;
+          const average =
+            (parseFloat(row.mid_grade) + parseFloat(row.final_grade)) / 2;
           return Math.round(average);
         } else return "";
       },
@@ -208,34 +217,64 @@ const GradeTable = () => {
   const handleProcessRowUpdate = (row, prev) => {
     const isSame = JSON.stringify(row) === JSON.stringify(prev);
     if (!isSame) {
-      const duplicate = toUpdate.find((r) => r.sg_id === row.sg_id);
+      const duplicate = encode.toUpdate.find((r) => r.sg_id === row.sg_id);
       let newArr = null;
       if (duplicate) {
-        newArr = toUpdate.filter((r) => r.sg_id !== duplicate.sg_id);
-        setToUpdate([...newArr, row]);
+        newArr = encode.toUpdate.filter((r) => r.sg_id !== duplicate.sg_id);
+        setEncode((prev) => ({ ...prev, toUpdate: [...newArr, row] }));
       } else {
-        setToUpdate((prev) => [...prev, row]);
+        setEncode((prev) => ({ ...prev, toUpdate: [...prev.toUpdate, row] }));
       }
-    } 
-    return row;
-  }
-  const handleCheckNotUpdated = async () => {
-    if(toUpdate.length > 0) {
-      let message = `Are you sure you want to update?`;
-      
-      const confirmation = window.confirm(message)
-      if(!confirmation) return
-      setTableLoading(true);
-      const { data } = await HomeSemesterServices.updateGrade({grades: toUpdate, class_code, method: "Manual", email_used: cookies.email, term_type: dbTermType })
-      if (data) {
-        setToUpdate([]);
-        setTableLoading(false);
-        setUpdatedCount(data);
-      }
-    } else {
-      alert("No rows to update")
     }
-  }
+    return row;
+  };
+  const handleCheckNotUpdated = async () => {
+    if (encode.toUpdate.length > 0) {
+      let message = `Are you sure you want to update?`;
+      const confirmation = window.confirm(message);
+      if (!confirmation) return;
+      await handleUpdateGrades();
+    } else {
+      setEncode((prev) => ({
+        ...prev,
+        error: true,
+        message: "No changes detected. Please update at least one row.",
+      }));
+    }
+  };
+  const handleUpdateGrades = async () => {
+    setEncode((prev) => ({ ...prev, loading: true }));
+    try {
+      const payload = {
+        grades: encode.toUpdate,
+        class_code,
+        method: "Manual",
+        email_used: cookies.email,
+        term_type: dbTermType,
+      };
+      const { data } = await axiosInstance.post(
+        `/student-grades/update-grade/undergraduate`,
+        payload
+      );
+      if (data.affectedRows < 0) {
+        return setEncode((prev) => ({
+          ...prev,
+          error: true,
+          message: "Failed to update. Please try again later.",
+        }));
+      }
+      setEncode((prev) => ({
+        ...prev,
+        toUpdate: [],
+        message: "Successfully updated",
+        updatedCount: data.affectedRows,
+      }));
+    } catch (error) {
+      setEncode((prev) => ({ ...prev, error: true, message: error.message }));
+    } finally {
+      setEncode((prev) => ({ ...prev, openSnackbar: true, loading: false }));
+    }
+  };
   return (
     <Dialog
       open={manualOpen}
@@ -265,8 +304,7 @@ const GradeTable = () => {
           Grade Sheet
           <IconButton
             onClick={() => {
-              setToUpdate([]);
-              setManualOpen(false);
+              setEncode((prev) => ({ ...prev, toUpdate: [], open: false }));
               navigate(`/home/${code}`);
             }}
           >
@@ -300,7 +338,7 @@ const GradeTable = () => {
               rows={rows}
               rowHeight={32}
               autoHeight
-              loading={tableLoading}
+              loading={encode.loading}
               editMode="row"
               disableColumnMenu
               hideFooter
@@ -320,37 +358,32 @@ const GradeTable = () => {
               processRowUpdate={handleProcessRowUpdate}
             />
           )}
-          
-          <Snackbar
-            open={Boolean(updatedCount)}
-            onClose={() => setUpdatedCount(null)}
-            autoHideDuration={2000}
-          >
-            <Alert
-              severity="success"
-              sx={{ width: "100%" }}
-            >{`${updatedCount} row${
-              updatedCount > 1 ? "s" : ""
-            } updated.`}</Alert>
-          </Snackbar>
+          <GPSnackbar
+            open={encode.openSnackbar}
+            onClose={() =>
+              setEncode((prev) => ({ ...prev, openSnackbar: false }))
+            }
+            error={encode.error}
+            message={encode.message}
+          />
         </Box>
       </DialogContent>
       <DialogActions>
-      {canUpload && (    
-        <Button
+        {canUpload && (
+          <Button
             variant="contained"
-            disabled={tableLoading || toUpdate.length < 1}
+            disabled={encode.loading || encode.toUpdate.length < 1}
             sx={{
               mt: 2,
               justifySelf: "center",
-              alignSelf: "left"
+              alignSelf: "left",
               // display: toUpdate.length ? "block" : "none",
             }}
             onClick={handleCheckNotUpdated}
           >
-            {tableLoading ? "Updating..." : "Update Record"}
-        </Button>
-      )}
+            {encode.loading ? "Updating..." : "Update Record"}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   );
@@ -358,16 +391,33 @@ const GradeTable = () => {
 export const loader = async ({ params }) => {
   const { code, class_code } = params;
   const [semester, currentSchoolYear, faculty_id] = code.split("-");
-  const { data } = await HomeSemesterServices.getStudentsByYearSemesterAndClassCode(currentSchoolYear,semester,class_code)
+  const { data } =
+    await HomeSemesterServices.getStudentsByYearSemesterAndClassCode(
+      currentSchoolYear,
+      semester,
+      class_code
+    );
 
   const rows = data;
 
-  const { facultyLoadData, status } = await HomeSemesterServices.getFacultyLoadByFacultyIdYearSemesterAndClassCode(faculty_id, currentSchoolYear, semester, class_code);
+  const { facultyLoadData, status } =
+    await HomeSemesterServices.getFacultyLoadByFacultyIdYearSemesterAndClassCode(
+      faculty_id,
+      currentSchoolYear,
+      semester,
+      class_code
+    );
   const loadInfoArr = facultyLoadData;
 
-  const { data: registrarActivityData } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
-  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo, term_type: dbTermType } = registrarActivityData;
-  
+  const { data: registrarActivityData } =
+    await HomeSemesterServices.getRegistrarActivityBySemester(semester);
+  const {
+    schoolyear: dbSchoolYear,
+    semester: dbSemester,
+    to: dbTo,
+    term_type: dbTermType,
+  } = registrarActivityData;
+
   return {
     rows,
     loadInfoArr,
@@ -375,7 +425,7 @@ export const loader = async ({ params }) => {
     dbSchoolYear,
     dbSemester,
     dbTo,
-    dbTermType
+    dbTermType,
   };
 };
 export default GradeTable;

@@ -1,7 +1,6 @@
 import React from "react";
 import { Box, Chip, CircularProgress, Paper, Typography } from "@mui/material";
 import { dateFormatter } from "@utils/formatDate";
-import { useOutletContext } from "react-router";
 import axiosInstance from "api/axiosInstance";
 const Start = () => {
   const initialRegistrarActivity = {

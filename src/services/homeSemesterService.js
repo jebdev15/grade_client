@@ -2,57 +2,107 @@ import { urlEncode } from "url-encode-base64";
 import axiosInstance from "../api/axiosInstance";
 
 export const HomeSemesterServices = {
-    getSubjectLoadByFacultyIdYearAndSemester: async (faculty_id, currentSchoolYear, semester) => {
-        const { data } = await axiosInstance.get(`/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}`);
-        return { data };
-    },
-    getRegistrarActivity: async () => {
-        const { data } = await axiosInstance.get(`/getRegistrarActivity`);
-        return { data };
-    },
-    getRegistrarActivityBySemester: async (semester) => {
-        const { data } = await axiosInstance.get(`/getRegistrarActivityBySemester?semester=${semester}`);
-        return { data };
-    },
-    getGraduateStudiesLoad: async () => {
-        const { data } = await axiosInstance.get(`/getGraduateStudiesLoad`);
-        return { data };
-    },
-    getStudentsByYearSemesterAndClassCode: async (currentSchoolYear, semester, class_code) => {
-        const { data } = await axiosInstance.get(`/getGradeTable?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`);
-        return { data };
-    },
-    getGraduateStudiesStudentsByYearSemesterAndClassCode: async (currentSchoolYear, semester, class_code) => {
-        const { data } = await axiosInstance.get(`/getGraduateStudiesTable?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`);
-        return { data };
-    },
-    getFacultyLoadByFacultyIdYearSemesterAndClassCode: async (faculty_id, currentSchoolYear, semester, class_code) => {
-        const { data: facultyLoadData, status } = await axiosInstance.get(`/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}&class_code=${class_code}`);
-        return { facultyLoadData, status };
-    },
-    getClassCodeDetails: async (semester, currentSchoolYear, class_code) => {
-        const { data } = await axiosInstance.get(`/getClassCodeDetails?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`);
-        return { data };
-    },
-    getClassStudents: async (semester, currentSchoolYear, class_code) => {
-        const { data: students } = await axiosInstance.get(`/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`);
-        return { students };
-    },
-    getClassGraduateStudiesStudents: async (semester, currentSchoolYear, class_code) => {
-        const { data:students } = await axiosInstance.get(`/getClassGraduateStudiesStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`);
-        return { students }
-    },
-    updateGrade: async (gradeData) => {
-        const { data } = await axiosInstance.post(`/updateGrade`, gradeData);
-        return { data };
-    },
-    submitGradeSheetConfirmation: async (semester, currentSchoolYear, class_code) => {
-        const encodedClassCode = urlEncode(class_code);
-        const { data } = await axiosInstance.get(`/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${encodedClassCode}`);
-        return { data };
-    },
-    submitGradeSheet: async (formData) =>  {
-        const { data } = await axiosInstance.post(`/submitGradeSheet`, formData);
-        return { data }
-    },
-}
+  getSubjectLoadByFacultyIdYearAndSemester: async (
+    faculty_id,
+    currentSchoolYear,
+    semester
+  ) => {
+    const { data } = await axiosInstance.get(
+      `/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}`
+    );
+    return { data };
+  },
+  getRegistrarActivity: async () => {
+    const { data } = await axiosInstance.get(`/getRegistrarActivity`);
+    return { data };
+  },
+  getRegistrarActivityBySemester: async (semester) => {
+    const { data } = await axiosInstance.get(
+      `/getRegistrarActivityBySemester?semester=${semester}`
+    );
+    return { data };
+  },
+  getGraduateStudiesLoad: async () => {
+    const { data } = await axiosInstance.get(`/getGraduateStudiesLoad`);
+    return { data };
+  },
+  getStudentsByYearSemesterAndClassCode: async (
+    currentSchoolYear,
+    semester,
+    class_code
+  ) => {
+    const { data } = await axiosInstance.get(
+      `/getGradeTable?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+    );
+    return { data };
+  },
+  getGraduateStudiesStudentsByYearSemesterAndClassCode: async (
+    currentSchoolYear,
+    semester,
+    class_code
+  ) => {
+    const { data } = await axiosInstance.get(
+      `/getGraduateStudiesTable?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+    );
+    return { data };
+  },
+  getFacultyLoadByFacultyIdYearSemesterAndClassCode: async (
+    faculty_id,
+    currentSchoolYear,
+    semester,
+    class_code
+  ) => {
+    // const { data: facultyLoadData, status } = await axiosInstance.get(`/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}&class_code=${class_code}`);
+    const { data, status } = await axiosInstance.get(
+      `/getLoad?faculty_id=${faculty_id}&school_year=${currentSchoolYear}&semester=${semester}&class_code=${class_code}`
+    );
+    if (data.length > 0) {
+      const filteredData = data.map((item, index) => {
+        return { ...item, id: index + 1 };
+      });
+      return { facultyLoadData: filteredData, status };
+    }
+    return { facultyLoadData: data, status };
+  },
+  getClassCodeDetails: async (semester, currentSchoolYear, class_code) => {
+    const { data } = await axiosInstance.get(
+      `/getClassCodeDetails?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+    );
+    return { data };
+  },
+  getClassStudents: async (semester, currentSchoolYear, class_code) => {
+    const { data: students } = await axiosInstance.get(
+      `/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+    );
+    return { students };
+  },
+  getClassGraduateStudiesStudents: async (
+    semester,
+    currentSchoolYear,
+    class_code
+  ) => {
+    const { data: students } = await axiosInstance.get(
+      `/getClassGraduateStudiesStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}`
+    );
+    return { students };
+  },
+  updateGrade: async (gradeData) => {
+    const { data } = await axiosInstance.post(`/updateGrade`, gradeData);
+    return { data };
+  },
+  submitGradeSheetConfirmation: async (
+    semester,
+    currentSchoolYear,
+    class_code
+  ) => {
+    const encodedClassCode = urlEncode(class_code);
+    const { data } = await axiosInstance.get(
+      `/getClassStudents?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${encodedClassCode}`
+    );
+    return { data };
+  },
+  submitGradeSheet: async (formData) => {
+    const { data } = await axiosInstance.post(`/submitGradeSheet`, formData);
+    return { data };
+  },
+};

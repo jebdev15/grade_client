@@ -155,8 +155,6 @@ const LoadCard = ({
     alert("Grade Sheet has been submitted.");
   }
   const disableEncodeIcon = loading.manual || loading.upload || loading.print;
-  const disableFolderOpenIcon =
-    loading.manual || loading.upload || loading.print || !canUpload || classLoadStatus;
   const disablePrintIcon =
     (dbTermType === "midterm" && !midterm_timestamp) ||
     (dbTermType === "finalterm" && !endterm_timestamp);
@@ -264,7 +262,7 @@ const LoadCard = ({
                 size="small"
                 aria-label=""
                 onClick={handleFolderOpen}
-                disabled={disableFolderOpenIcon}
+                // disabled={disableFolderOpenIcon}
               >
                 <FolderOpen />
               </IconButton>
