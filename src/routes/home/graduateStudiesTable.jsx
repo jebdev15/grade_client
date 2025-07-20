@@ -195,7 +195,10 @@ const GraduateStudiesTable = () => {
     setEncode((prev) => ({ ...prev, loading: true }));
     try {
       const payload = {
-        grades: encode.toUpdate,
+        grades: encode.toUpdate.map(row => ({
+          ...row,
+          status: row.grade > 0 ? (row.grade >= 1 && row.grade <= 2 ? "Passed" : "Failed") : "",
+        })),
         class_code,
         method: "Manual",
         email_used: cookies.email,
@@ -338,13 +341,9 @@ export const loader = async ({ params }) => {
   const { code, class_code } = params;
   const [semester, currentSchoolYear, faculty_id] = code.split("-");
   const { data } =
-    await HomeSemesterServices.getGraduateStudiesStudentsByYearSemesterAndClassCode(
-      currentSchoolYear,
-      semester,
-      class_code
-    );
+    await axiosInstance.get(`/student-grades/graduate-studies/class-code/${class_code}/school-year/${currentSchoolYear}/semester/${semester}`);
 
-  const rows = data;
+  const rows = data.rows;
 
   const { facultyLoadData: loadInfoArr, status } =
     await HomeSemesterServices.getFacultyLoadByFacultyIdYearSemesterAndClassCode(

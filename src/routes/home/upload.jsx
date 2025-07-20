@@ -1,6 +1,5 @@
 import { Close, Done, CloudUpload as CloudUploadIcon } from "@mui/icons-material";
 import {
-  Alert,
   Avatar,
   Box,
   Button,
@@ -9,40 +8,43 @@ import {
   DialogTitle,
   IconButton,
   Paper,
-  Snackbar,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
-import { useOutletContext, useLoaderData, useParams, useNavigate } from "react-router-dom";
+import React from "react";
+import { useOutletContext, useLoaderData, useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { saveAs } from "file-saver";
 import { urlDecode } from "url-encode-base64";
 import { HomeSemesterServices } from "../../services/homeSemesterService";
-import { HomeSemesterUploadService } from "../../services/homeSemesterUploadService";
+import { useUploadFeatureState } from "@hooks/useFeatureState";
+import GPSnackbar from "@components/GPSnackbar";
+import axiosInstance from "api/axiosInstance";
 
 const Upload = () => {
   const { code, class_code } = useParams();
   const [semester, currentSchoolYear] = code?.split("-");
-  const [cookies,,] = useCookies(["name", "email"]);
+  const [cookies, ,] = useCookies(["name", "email"]);
   const { loadInfoArr, dbTermType } = useLoaderData();
   const loadInfo = loadInfoArr[0];
-  const navigate = useNavigate();
 
   const [...contexts] = useOutletContext();
   const uploadOpen = contexts[2];
   const setUploadOpen = contexts[3];
   const canUpload = (loadInfo.canUpload || loadInfo.is_deadline_extended) && !(loadInfo.classLoadStatus);
 
-  const [uploadFile, setUploadFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [errorUpload, setErrorUpload] = useState(false);
+  const [download, setDownload] = useUploadFeatureState();
+  const [upload, setUpload] = useUploadFeatureState();
 
-  const [downloadStatus, setDownloadStatus] = useState(false)
-  const download = async () => {
-    setDownloadStatus(true);
-    const { data, status } = await HomeSemesterUploadService.getExcelFile(semester, currentSchoolYear, class_code, cookies, loadInfo)
-    if(status === 200) {
+  const downloadExcel = async () => {
+    setDownload((prev) => ({ ...prev, loading: true }))
+    try {
+      const { data } = await axiosInstance.get(
+        `/getExcelFile?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}&name=${cookies.name.toUpperCase()}&classSection=${loadInfo.section
+        }`,
+        {
+          responseType: "arraybuffer",
+        }
+      );
       let blob = new Blob([data], {
         type: "vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8",
       });
@@ -50,42 +52,86 @@ const Upload = () => {
         blob,
         `${loadInfo.subject_code}-${loadInfo.section}-${urlDecode(class_code)}.xlsx`
       )
-      setTimeout(() => {
-        setDownloadStatus(!true);
-      }, 1000)
-    } else {
-      setDownloadStatus('Error');
+      setDownload((prev) => ({
+        ...prev,
+        message: "Downloaded Successfully",
+      }))
+    } catch (error) {
+      setDownload((prev) => ({
+        ...prev,
+        error: true,
+        message: error.response.data.message || "There was an error downloading the file."
+      }))
+    } finally {
+      setDownload((prev) => ({
+        ...prev,
+        openSnackbar: true,
+        loading: false,
+      }))
     }
   };
 
   const handleChangeFile = (e) => {
-    setUploadFile(e.target.files[0]);
+    setUpload((prev) => ({ ...prev, file: e.target.files[0] }));
   }
-  const upload = async () => {
-    setUploading(true);
-    const formData = new FormData();
-    formData.append("uploadFile", uploadFile);
-    formData.append("class_code", class_code);
-    formData.append("method", "Upload");
-    formData.append("email_used", cookies.email);
-    formData.append("term_type", dbTermType);
-    const { data } = await HomeSemesterUploadService.uploadGradeSheet(formData)
-    const { isOkay, isError } = data
-    if (isOkay) {
-      setUploading(false);
-      setOpenSnackbar(true);
-      setUploadFile(null);
-      setTimeout(() => setUploadOpen(false),3500)
-      setErrorUpload(isError ? true : !true);
-      navigate(".", { replace: true });
+
+  const uploadExcel = async () => {
+    setUpload((prev) => ({
+      ...prev,
+      loading: true,
+      file: null,
+    }));
+    setDownload((prev) => ({
+      ...prev,
+      loading: true,
+    }));
+    try {
+      const formData = new FormData();
+      formData.append("uploadFile", upload.file);
+      formData.append("class_code", class_code);
+      formData.append("method", "Upload");
+      formData.append("email_used", cookies.email);
+      formData.append("term_type", dbTermType);
+      const { data } = await axiosInstance.post(
+        "/student-grades/upload-grade-sheet/undergraduate",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setUpload((prev) => ({
+        ...prev,
+        message: data.message,
+        file: null,
+      }));
+      setTimeout(() => setUploadOpen(), 3500);
+    } catch (error) {
+      setUpload((prev) => ({
+        ...prev,
+        message: error.response.data.message || "There was an error uploading the file.",
+        error: true,
+      }));
+    } finally {
+      setUpload((prev) => ({
+        ...prev,
+        openSnackbar: true,
+        loading: false,
+      }));
+      setDownload((prev) => ({
+        ...prev,
+        loading: false,
+      }));
     }
   };
+
   return (
     <Dialog
       open={uploadOpen}
       onClose={(e, reason) => {
         if (reason !== "backdropClick") {
-          setUploadFile(null);
+          setUpload((prev) => ({ ...prev, file: null }));
           setUploadOpen(false);
         }
       }}
@@ -104,7 +150,7 @@ const Upload = () => {
           Upload Grade Sheet
           <IconButton
             onClick={() => {
-              setUploadFile(null);
+              setUpload((prev) => ({ ...prev, file: null }));
               setUploadOpen(false);
             }}
           >
@@ -139,104 +185,101 @@ const Upload = () => {
                 <Typography>{`Section: ${loadInfo.section}`}</Typography>
                 <Typography>{`Total Students: ${loadInfo.noStudents}`}</Typography>
               </Box>
-              <Button variant="contained" onClick={download} disabled={downloadStatus || uploading ? true : false}>
+              <Button variant="contained" onClick={downloadExcel} disabled={download.loading || upload.loading ? true : false}>
                 {/* Download Grade Sheet */}
-                {downloadStatus ? "Downloading..." : "Download Grade Sheet"}
+                {download.loading ? "Downloading..." : "Download Grade Sheet"}
               </Button>
             </Paper>
           </Box>
-          {canUpload 
-          ? (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              flex: 1,
-              m: 2,
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>B</Avatar>
-              <Typography>Upload the grade sheet.</Typography>
-            </Box>
-            <Box sx={{ width: "100%", flex: 1 }}>
+          {canUpload
+            ? (
               <Box
-                  sx={{
-                  borderColor: "primary.light",
-                  border: "2px dashed",
-                  p: 2,
-                  height: "100%",
+                sx={{
                   display: "flex",
+                  flexDirection: "column",
+                  flex: 1,
+                  m: 2,
+                }}
+              >
+                <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                  <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>B</Avatar>
+                  <Typography>Upload the grade sheet.</Typography>
+                </Box>
+                <Box sx={{ width: "100%", flex: 1 }}>
+                  <Box
+                    sx={{
+                      borderColor: "primary.light",
+                      border: "2px dashed",
+                      p: 2,
+                      height: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      flexDirection: "column",
+                    }}
+                    disabled={upload.loading}
+                  >
+                    {upload.file ? (
+                      <Box sx={{ textAlign: "center" }}>
+                        <Done color="primary" fontSize="large" />
+                        <Typography variant="h6" sx={{ mt: 2 }}>
+                          File Inserted!
+                        </Typography>
+                        <Typography>{upload.file.name}</Typography>
+                      </Box>
+                    ) : (
+                      <Button
+                        component="label"
+                        role={undefined}
+                        variant=""
+                        tabIndex={-1}
+                        startIcon={<CloudUploadIcon />}
+
+                      >
+                        <input hidden type="file" onChange={handleChangeFile} name="file" allowed="xlsx" />
+                        <Typography variant="body1" color="initial">Click to Upload a file</Typography>
+                      </Button>
+                    )}
+                  </Box>
+                </Box>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  disabled={upload.loading}
+                  onClick={uploadExcel}
+                  sx={{ display: upload.file ? "flex" : "none", mt: 1 }}
+                >
+                  {upload.loading ? "Uploading..." : "Upload"}
+                </Button>
+              </Box>)
+            : (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
                   justifyContent: "center",
                   alignItems: "center",
-                  cursor: "pointer",
-                  flexDirection: "column",
+                  flex: 1,
+                  m: 2,
                 }}
-                disabled={uploading}
               >
-                {uploadFile ? (
-                  <Box sx={{ textAlign: "center" }}>
-                    <Done color="primary" fontSize="large" />
-                    <Typography variant="h6" sx={{ mt: 2 }}>
-                      File Inserted!
-                    </Typography>                      
-                    <Typography>{uploadFile.name}</Typography>
-                  </Box>
-                ) : (                  
-                <Button
-                  component="label"
-                  role={undefined}
-                  variant=""
-                  tabIndex={-1}
-                  startIcon={<CloudUploadIcon />}
-                  
-                >
-                  <input hidden type="file" onChange={handleChangeFile} name="file" allowed="xlsx"/>
-                  <Typography variant="body1" color="initial">Click to Upload a file</Typography>
-                </Button>
-                  )}
               </Box>
-            </Box>
-            <Button
-              variant="contained"
-              fullWidth
-              disabled={uploading}
-              onClick={upload}
-              sx={{ display: uploadFile ? "flex" : "none", mt: 1 }}
-            >
-              {uploading ? "Uploading..." : "Upload"}
-            </Button>
-          </Box>)
-          : (
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                flex: 1,
-                m: 2,
-              }}
-            >
-            </Box>
-          )
+            )
           }
         </Box>
-        <Snackbar
-          open={openSnackbar}
-          autoHideDuration={3000}
-          onClose={(e, reason) => {
-            if (reason === "clickaway") return;
-
-            setOpenSnackbar(false);
-          }}
-        >
-          {
-            errorUpload 
-            ? <Alert severity="error">Sorry, the file you uploaded either didn't upload correctly or does not match the subject.</Alert>
-            : <Alert severity="info">Uploaded Successfully</Alert>
-          }
-        </Snackbar>
+        <GPSnackbar
+          open={download.openSnackbar}
+          onClose={() => setDownload((prev) => ({ ...prev, openSnackbar: false }))}
+          error={download.error}
+          message={download.message}
+        />
+        <GPSnackbar
+          open={upload.openSnackbar}
+          onClose={() => setUpload((prev) => ({ ...prev, openSnackbar: false }))}
+          error={upload.error}
+          message={upload.message}
+        />
       </DialogContent>
     </Dialog>
   );

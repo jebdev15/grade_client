@@ -43,7 +43,7 @@ const GradeTable = () => {
     {
       field: "id",
       headerName: "No.",
-      width: 90,
+      width: 50,
       hideable: false,
     },
     {
@@ -333,7 +333,7 @@ const GradeTable = () => {
         <Box>
           {rows.length > 0 && (
             <DataGrid
-              getRowId={(row) => row.student_id}
+              getRowId={(row) => row.id}
               columns={columns}
               rows={rows}
               rowHeight={32}
@@ -391,14 +391,12 @@ const GradeTable = () => {
 export const loader = async ({ params }) => {
   const { code, class_code } = params;
   const [semester, currentSchoolYear, faculty_id] = code.split("-");
-  const { data } =
-    await HomeSemesterServices.getStudentsByYearSemesterAndClassCode(
-      currentSchoolYear,
-      semester,
-      class_code
-    );
+  const { data } = await axiosInstance.get(`/student-grades/undergraduate/class-code/${class_code}/school-year/${currentSchoolYear}/semester/${semester}`);
 
-  const rows = data;
+  const rows = data.rows.map((row, index) => ({
+    ...row,
+    id: index + 1,
+  }));
 
   const { facultyLoadData, status } =
     await HomeSemesterServices.getFacultyLoadByFacultyIdYearSemesterAndClassCode(

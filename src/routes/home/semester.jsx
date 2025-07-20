@@ -35,17 +35,16 @@ const Semester = () => {
   return (
     <React.Suspense fallback={<div>loading...</div>}>
       <Box
-        sx={{ 
+        sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-         }}
+        }}
       >
         <Box>
           <Typography variant="h4" fontWeight={700}>
-            {` ${decodedSemester?.toUpperCase()} ${
-              decodedSemester === "summer" ? "" : "SEMESTER"
-            }`}{dbTermType === "midterm" ? "(Midterm)" : "(Endterm)"}
+            {` ${decodedSemester?.toUpperCase()} ${decodedSemester === "summer" ? "" : "SEMESTER"
+              }`}{dbTermType === "midterm" ? "(Midterm)" : "(Endterm)"}
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center" }}>
             <IconButton onClick={() => navigate("/home")}>
@@ -77,30 +76,31 @@ const Semester = () => {
           />
 
           <Container maxWidth="xl" fixed>
-            {loads ? (
-              <Grid
-                className="semester-grid"
-                container
-                columnSpacing={3}
-                rowSpacing={5}
-              >
-                {loads.map((load) => {
-                  const classLoad = {...load, currentSchoolYear, semester, dbTermType, setManualOpen, setUploadOpen}
-                  return (
-                    <Grid key={load.class_code} item xs={4} md={3}>
-                      <LoadCard {...classLoad} />
-                    </Grid>
-                  )
-                } )}
-                {loads.length === 0 ? (
-                  <Typography sx={{ mt: 3 }} variant="h5">
-                    No class load in record.
-                  </Typography>
-                ) : null}
-              </Grid>
-            ) : (
-              <Typography>Loading...</Typography>
-            )}
+            { loads ? (
+                <Grid
+                  className="semester-grid"
+                  container
+                  columnSpacing={3}
+                  rowSpacing={5}
+                >
+                  {loads.map((load) => {
+                    const classLoad = { ...load, currentSchoolYear, semester, dbTermType, setManualOpen, setUploadOpen }
+                    return (
+                      <Grid key={load.class_code} item xs={4} md={3}>
+                        <LoadCard {...classLoad} />
+                      </Grid>
+                    )
+                  })}
+                  {loads.length === 0 ? (
+                    <Typography sx={{ mt: 3 }} variant="h5">
+                      No class load in record.
+                    </Typography>
+                  ) : null}
+                </Grid>
+              ) : (
+                <Typography>Loading...</Typography>
+              )
+            }
           </Container>
         </Box>
       </Box>
@@ -109,13 +109,18 @@ const Semester = () => {
 };
 
 export const loader = async ({ params }) => {
-  const { code } = params;
-  
-  const [semester,currentSchoolYear,faculty_id,] = code.split("-");
-  const { data:loads } = await HomeSemesterServices.getSubjectLoadByFacultyIdYearAndSemester(faculty_id,currentSchoolYear,semester);
-  
-  const { data:registrarActivity } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
-  const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo, term_type: dbTermType } = registrarActivity || {};
-  return { loads, dbSchoolYear, dbSemester, dbTo, dbTermType };
+  try {
+    const { code } = params;
+
+    const [semester, currentSchoolYear, faculty_id,] = code.split("-");
+    const { data: loads } = await HomeSemesterServices.getSubjectLoadByFacultyIdYearAndSemester(faculty_id, currentSchoolYear, semester);
+
+    const { data: registrarActivity } = await HomeSemesterServices.getRegistrarActivityBySemester(semester);
+    const { schoolyear: dbSchoolYear, semester: dbSemester, to: dbTo, term_type: dbTermType } = registrarActivity || {};
+    return { loads, dbSchoolYear, dbSemester, dbTo, dbTermType };
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    throw new Error(error);
+  }
 };
 export default Semester;

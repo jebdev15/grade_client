@@ -59,16 +59,16 @@ const router = createBrowserRouter([
   },
   {
     path: "home",
-    element: 
+    element:
       <RegistrarActivityProvider>
-          <Home />
+        <Home />
       </RegistrarActivityProvider>,
+    errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Start /> },
       {
         path: "/home/:code",
         element: <Semester />,
-        errorElement: <ErrorPage />,
         loader: semesterLoader,
         children: [
           {
