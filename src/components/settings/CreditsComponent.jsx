@@ -102,6 +102,7 @@ const CreditsComponent = () => {
                   id="select-semester"
                   label="Semester"
                   name="semester"
+                  onChange={changeHandler}
                   disabled={data.loading}
                   value={data.semester}
                 >

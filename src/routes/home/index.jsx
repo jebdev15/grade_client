@@ -34,10 +34,10 @@ import { Outlet, useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { googleLogout } from "@react-oauth/google";
 import { urlEncode } from "url-encode-base64";
-import chmsuLogo from "../../assets/chmsu-small.jpg";
-import { getCampus } from "../../utils/header.util";
-import { homeIndexUtil } from "../../utils/homeIndexUtil";
-import axiosInstance from "api/axiosInstance";
+import chmsuLogo from "@/assets/chmsu-small.jpg";
+import { getCampus } from "@/utils/header.util";
+import { homeIndexUtil } from "@/utils/homeIndexUtil";
+import axiosInstance from "@/api/axiosInstance";
 
 const currentYear = new Date().getFullYear();
 
@@ -87,11 +87,13 @@ const Home = () => {
     }
   }, []);
   React.useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     const fetchRegistrarActivity = async () => {
       setLoading(true);
       try {
         const response = await axiosInstance.get(
-          "/getRegistrarActivity"
+          "/getRegistrarActivity", { signal }
         );
         if (response.status === 200 && response.data.length > 0) {
           const newState = response.data.reduce((acc, { schoolyear, semester }) => {
@@ -106,10 +108,14 @@ const Home = () => {
       } catch (error) {
         console.log(error);
       } finally {
+        if (signal.aborted) return;
         setLoading(false);
       }
     };
     fetchRegistrarActivity();
+    return () => {
+      controller.abort();
+    };
   },[]);
 
   useEffect(() => {

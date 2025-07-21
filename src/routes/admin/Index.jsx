@@ -114,7 +114,7 @@ const SettingsListItems = [
   {
     text: "Credits",
     activeItem: "credits",
-    icon: <MilitaryTechIcon />,
+    icon: <SettingsIcon />,
     link: "/admin/settings/credits",
   },
 ];

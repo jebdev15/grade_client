@@ -55,13 +55,13 @@ const GraduateStudiesTable = ({ open, handleClose, classLoadData }) => {
       valueGetter: ({ row }) => parseFloat(row.mid_grade),
     },
     {
-      field: "end_grade",
+      field: "final_grade",
       headerName: "End Term",
       width: 90,
       editable: true,
       sortable: true,
       type: "number",
-      valueGetter: ({ row }) => parseFloat(row.end_grade),
+      valueGetter: ({ row }) => parseFloat(row.final_grade),
     },
     {
       field: "grade",
