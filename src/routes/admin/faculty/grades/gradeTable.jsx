@@ -16,6 +16,7 @@ import { Close } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import axiosInstance from "@/api/axiosInstance";
 import { useEncodedFeatureState } from "@hooks/useFeatureState";
+import GPSnackbar from "@components/GPSnackbar";
 
 const GradeTable = ({ open, handleClose, classLoadData }) => {
   const class_code = classLoadData[0]?.id;
@@ -389,25 +390,17 @@ const GradeTable = ({ open, handleClose, classLoadData }) => {
               processRowUpdate={handleProcessRowUpdate}
             />
           )}
-
-          <Snackbar
+          <GPSnackbar
             open={encoded.openSnackbar}
-            autoHideDuration={5000}
-            onClose={(e, reason) => {
-              if (reason === "clickaway") return;
+            onClose={() => {
               setEncoded((prev) => ({
                 ...prev,
                 openSnackbar: false,
               }));
             }}
-          >
-            <Alert
-              severity={encoded.error ? "error" : "success"}
-              sx={{ width: "100%" }}
-            >
-              {encoded.message}
-            </Alert>
-          </Snackbar>
+            error={encoded.error}
+            message={encoded.message}
+          />
         </Box>
       </DialogContent>
       <DialogActions>
