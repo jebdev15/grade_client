@@ -282,7 +282,7 @@ const ClassLoadSetting = () => {
               sx={{ padding: 2, color: "white" }}
               disabled={(!data.id && checked.length < 1) || loading}
             >
-              {loading ? <CircularProgress size={20} /> : "Submit"}
+              {loading ? <CircularProgress size={20} /> : "Save"}
             </Button>
           </Box>
         </Box>

@@ -5,7 +5,7 @@ export const getCampus = () => {
         case "https://staging-gs.chmsu.edu.ph" || "https://www.staging-gs.chmsu.edu.ph":
             campus= "Staging Campus";
             break;
-        case "https://gs.chmsu.edu.ph" || "https://www.gs.chmsu.edu.ph":
+        case "https://tal-gs.chmsu.edu.ph" || "https://www.tal-gs.chmsu.edu.ph":
             campus= "Talisay (Main) Campus";
             break;
         case "https://ft-gs.chmsu.edu.ph" || "https://www.ft-gs.chmsu.edu.ph":

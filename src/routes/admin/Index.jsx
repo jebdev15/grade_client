@@ -94,7 +94,7 @@ const SideNavListItems = [
 
 const SettingsListItems = [
   {
-    text: "Deadline",
+    text: "Manage Deadline",
     activeItem: "deadline",
     icon: <AccessTimeIcon />,
     link: "/admin/settings/deadline",
