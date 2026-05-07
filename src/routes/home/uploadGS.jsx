@@ -206,7 +206,7 @@ const UploadGS = () => {
                     sx={{
                       borderColor: "primary.light",
                       border: "2px dashed",
-                      p: 2,
+                      // p: 2,
                       height: "100%",
                       display: "flex",
                       justifyContent: "center",
@@ -231,7 +231,7 @@ const UploadGS = () => {
                         variant=""
                         tabIndex={-1}
                         startIcon={<CloudUploadIcon />}
-
+                        sx={{ display: "flex", alignItems: "center", height: "100%", width: "100%" }}
                       >
                         <input hidden type="file" onChange={handleChangeFile} name="file" allowed="xlsx" />
                         <Typography variant="body1" color="initial">Click to Upload a file</Typography>
