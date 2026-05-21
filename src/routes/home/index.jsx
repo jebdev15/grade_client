@@ -86,7 +86,7 @@ const Home = () => {
       return;
     }
   }, []);
-  React.useEffect(() => {
+  useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
     const fetchRegistrarActivity = async () => {

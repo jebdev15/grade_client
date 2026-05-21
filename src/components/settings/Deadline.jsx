@@ -139,10 +139,10 @@ const Deadline = () => {
               </Select>
             </FormControl>
             <FormControl fullWidth>
-              <InputLabel id="select-termType-label">Term Type(Midterm/Endterm)</InputLabel>
+              <InputLabel id="select-termType-label">Term(Midterm/Endterm)</InputLabel>
               <Select 
                 id="select-termType" 
-                label="Term Type" 
+                label="Term" 
                 name="termType" 
                 value={data.termType} 
                 onChange={changeHandler}

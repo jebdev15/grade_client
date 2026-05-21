@@ -258,6 +258,13 @@ div:has(> .semester-grid) {
   white-space: nowrap;
 }
 
+@media print {
+  @page {
+    size: legal;
+    margin: 12mm;
+  }
+}
+
 @media (max-width: 899px) {
   .systemName span:last-child::before {
     /* content: "GRADING SYST."; */

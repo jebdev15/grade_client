@@ -21,6 +21,7 @@ import {
   Keyboard,
   Print,
   Article,
+  ListAlt,
   Task as TaskIcon,
 } from "@mui/icons-material";
 import moment from "moment";
@@ -28,6 +29,7 @@ import { urlEncode } from "url-encode-base64";
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router";
 import { HomeSemesterServices } from "../../services/homeSemesterService";
+import FailureListDialog from "./FailureListDialog";
 const LoadCard = ({
   canUpload,
   currentSchoolYear,
@@ -55,6 +57,7 @@ const LoadCard = ({
     lockGradeSheet: false,
     print: false,
   });
+  const [failureListOpen, setFailureListOpen] = React.useState(false);
 
   const manualTimer = () => {
     setLoading((prevState) => ({
@@ -242,6 +245,20 @@ const LoadCard = ({
           />
         </Tooltip>
         <ButtonGroup>
+          {!isGraduateStudies && (
+            <Tooltip title="List of Failures">
+              <span>
+                <IconButton
+                  color="primary"
+                  size="small"
+                  aria-label=""
+                  onClick={() => setFailureListOpen(true)}
+                >
+                  <ListAlt />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
           <Tooltip title={semesterFunctions.encodeToolTipTitle()}>
             <span>
               <IconButton
@@ -296,6 +313,13 @@ const LoadCard = ({
           </Tooltip>
         </ButtonGroup>
       </CardActions>
+      <FailureListDialog
+        open={failureListOpen}
+        onClose={() => setFailureListOpen(false)}
+        class_code={class_code}
+        term_type={dbTermType}
+        isGraduateStudies={isGraduateStudies}
+      />
     </Card>
   );
 };

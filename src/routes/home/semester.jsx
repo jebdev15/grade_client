@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Alert,
   Box,
   Container,
   Grid,
@@ -10,6 +11,7 @@ import {
   useParams,
   useNavigate,
   useLoaderData,
+  useNavigation,
   Outlet,
 } from "react-router-dom";
 import {
@@ -24,6 +26,7 @@ const Semester = () => {
   const [semester, currentSchoolYear] = code.split("-");
 
   const navigate = useNavigate();
+  const navigation = useNavigation();
   const { loads, dbTermType } = useLoaderData();
 
   const [manualOpen, setManualOpen] = useState(false);
@@ -32,6 +35,23 @@ const Semester = () => {
 
   const decodedSemester = urlDecode(semester);
   const decodedSchoolYear = urlDecode(currentSchoolYear);
+  const isLoading = navigation.state === "loading";
+  // const extendedLoads = (loads || []).filter(
+  //   (load) => !!load.is_deadline_extended
+  // );
+  // const extendedLabels = extendedLoads
+  //   .map((load) => load.section)
+  //   .filter(Boolean)
+  //   .join(", ");
+  if(isLoading) {
+    return (
+      <Box sx={{ mt: 2 }}>
+        <Alert severity="info">
+          Loading data. Please wait... 
+        </Alert>
+      </Box>
+    )
+  }
   return (
     <React.Suspense fallback={<div>loading...</div>}>
       <Box
@@ -61,6 +81,19 @@ const Semester = () => {
           </Box>
         </Box>
       </Box>
+
+      {/* {extendedLoads.length > 0 && (
+        <Alert severity="info" sx={{ mt: 2 }}>
+          {dbTo
+            ? `Grade submission is open for ${dbTermType || "this term"} until ${new Date(
+                dbTo
+              ).toLocaleDateString()}.`
+            : "Grade submission timeline is not available yet for this term."}
+          {extendedLabels
+            ? ` Extended class loads: ${extendedLabels}.`
+            : " Extended class loads are available."}
+        </Alert>
+      )} */}
 
       <Box sx={{ mt: 2, overflowY: "auto" }}>
         <Box sx={{ p: 3, width: "100%" }}>

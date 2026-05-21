@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -9,6 +10,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import {
   useLoaderData,
   useNavigate,
@@ -23,6 +25,7 @@ import { HomeSemesterServices } from "@services/homeSemesterService";
 import axiosInstance from "api/axiosInstance";
 import GPSnackbar from "@components/GPSnackbar";
 import { useEncodedFeatureState } from "@hooks/useFeatureState";
+import { FailureListService } from "@services/failureListService";
 
 const GradeTable = () => {
   const [cookies, ,] = useCookies(["email"]);
@@ -39,6 +42,21 @@ const GradeTable = () => {
     (loadInfo.canUpload || loadInfo.is_deadline_extended) &&
     !loadInfo.classLoadStatus;
   const [encode, setEncode] = useEncodedFeatureState();
+  const [failurePolicy, setFailurePolicy] = React.useState(null);
+  const [failureListStudents, setFailureListStudents] = React.useState([]);
+  const failureListIds = React.useMemo(() => {
+    const listedStudents = failureListStudents.filter(
+      (student) => student.selected,
+    );
+    return {
+      studentIds: new Set(listedStudents.map((student) => student.student_id)),
+      gradeIds: new Set(
+        listedStudents
+          .map((student) => student.student_grades_id)
+          .filter((value) => value !== null && value !== undefined),
+      ),
+    };
+  }, [failureListStudents]);
   const columns = [
     {
       field: "id",
@@ -146,7 +164,7 @@ const GradeTable = () => {
       valueGetter: ({ row }) => {
         if (row.mid_grade > 0 && row.final_grade > 0) {
           const average = Math.round(
-            (parseFloat(row.mid_grade) + parseFloat(row.final_grade)) / 2
+            (parseFloat(row.mid_grade) + parseFloat(row.final_grade)) / 2,
           );
           return average > 74 ? "Passed" : "Failed";
         } else return "";
@@ -160,7 +178,7 @@ const GradeTable = () => {
     {
       field: "addRemark",
       flex: 0.5,
-      headerName: "Remark",
+      headerName: "Remarks",
       editable: canUpload,
       sortable: true,
       type: "singleSelect",
@@ -228,8 +246,87 @@ const GradeTable = () => {
     }
     return row;
   };
+  const isFailurePolicyActive = (policy) =>
+    Boolean(
+      policy?.isApplicable && policy.isWindowClosed && policy.isSubmitted,
+    );
+  const isSpecialRemark = (remark) => {
+    const normalized = String(remark || "").toLowerCase();
+    return [
+      "inc",
+      "drp",
+      "na",
+      "ng",
+      "w",
+      "incomplete",
+      "dropped",
+      "no attendance",
+      "no grade",
+      "withdrawn",
+    ].includes(normalized);
+  };
+  const getGradeSignals = (grade) => {
+    const mid = Number(grade.mid_grade || 0);
+    const final = Number(grade.final_grade || 0);
+    const average = Number.isFinite(Number(grade.average))
+      ? Number(grade.average)
+      : mid > 0 && final > 0
+        ? Math.round((mid + final) / 2)
+        : 0;
+    return {
+      mid,
+      final,
+      average,
+      hasFailingMid: mid > 0 && mid < 75,
+      hasFailingFinal: final > 0 && final < 75,
+      hasFailingAverage: average > 0 && average < 75,
+      hasPassingMid: mid >= 75,
+      hasPassingFinal: final >= 75,
+      hasPassingAverage: average >= 75,
+    };
+  };
+  const validateFailureList = (grades) => {
+    if (!isFailurePolicyActive(failurePolicy)) return null;
+    const listedStudentIds = new Set(
+      failureListStudents
+        .filter((student) => student.selected)
+        .map((student) => student.student_id),
+    );
+    const listedGradeIds = new Set(
+      failureListStudents
+        .filter((student) => student.selected)
+        .map((student) => student.student_grades_id)
+        .filter((value) => value !== null && value !== undefined),
+    );
+    for (const grade of grades) {
+      if (isSpecialRemark(grade.dbRemark)) continue;
+      const signals = getGradeSignals(grade);
+      const hasFailing = signals.hasFailingFinal || signals.hasFailingAverage;
+      const hasPassing = signals.hasPassingFinal || signals.hasPassingAverage;
+      const isListed =
+        listedGradeIds.has(grade.sg_id) ||
+        listedStudentIds.has(grade.student_id);
+      if (!isListed && hasFailing) {
+        return "List of Failures is finalized. Failing grades are only allowed for listed students.";
+      }
+      if (isListed && hasPassing) {
+        return "List of Failures is finalized. Listed students must receive failing grades.";
+      }
+    }
+    return null;
+  };
   const handleCheckNotUpdated = async () => {
     if (encode.toUpdate.length > 0) {
+      const failureError = validateFailureList(encode.toUpdate);
+      if (failureError) {
+        setEncode((prev) => ({
+          ...prev,
+          error: true,
+          message: failureError,
+          openSnackbar: true,
+        }));
+        return;
+      }
       let message = `Are you sure you want to update?`;
       const confirmation = window.confirm(message);
       if (!confirmation) return;
@@ -242,6 +339,29 @@ const GradeTable = () => {
       }));
     }
   };
+  React.useEffect(() => {
+    let isMounted = true;
+    const fetchFailureList = async () => {
+      if (!manualOpen || !class_code || !dbTermType) return;
+      try {
+        const result = await FailureListService.getFacultyRoster(
+          class_code,
+          dbTermType,
+        );
+        if (!isMounted) return;
+        setFailurePolicy(result.policy || null);
+        setFailureListStudents(result.students || []);
+      } catch (error) {
+        if (!isMounted) return;
+        setFailurePolicy(null);
+        setFailureListStudents([]);
+      }
+    };
+    fetchFailureList();
+    return () => {
+      isMounted = false;
+    };
+  }, [class_code, dbTermType, manualOpen]);
   const handleUpdateGrades = async () => {
     setEncode((prev) => ({ ...prev, loading: true }));
     try {
@@ -254,7 +374,7 @@ const GradeTable = () => {
       };
       const { data } = await axiosInstance.post(
         `/student-grades/update-grade/undergraduate`,
-        payload
+        payload,
       );
       if (data.affectedRows < 0) {
         return setEncode((prev) => ({
@@ -313,23 +433,37 @@ const GradeTable = () => {
         </Box>
       </DialogTitle>
       <DialogContent>
-        <Box
-          sx={{
-            color: "primary.dark",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mt: 2,
-            mb: 2,
-          }}
-        >
+        <Box sx={{ my: 2 }}>
           <Typography>
-            Subject Code: <strong>{loadInfo.subject_code}</strong>
+            <strong>{`${loadInfo.subject_code} ${loadInfo.section}`}</strong>
           </Typography>
-          <Typography>
-            Section: <strong>{loadInfo.section}</strong>
-          </Typography>
+          <Alert severity="info">
+            <Typography variant="body2">To set remarks like Incomplete, Dropped, No Attendance, No Grade, or Withdrawn, double-click the student’s Remarks cell.</Typography>
+          </Alert>
         </Box>
+
+        {failurePolicy?.isApplicable && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              mb: 2,
+            }}
+          >
+            <Box
+              sx={{
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                bgcolor: "warning.main",
+              }}
+            />
+            <Typography variant="body2">
+              Listed in the Failure List (highlighted row)
+            </Typography>
+          </Box>
+        )}
         <Box>
           {rows.length > 0 && (
             <DataGrid
@@ -343,9 +477,33 @@ const GradeTable = () => {
               disableColumnMenu
               hideFooter
               experimentalFeatures={{ newEditingApi: true }}
+              getRowClassName={(params) => {
+                const isListed =
+                  failureListIds.gradeIds.has(params.row.sg_id) ||
+                  failureListIds.studentIds.has(params.row.student_id);
+                return isListed ? "failure-list-row" : "";
+              }}
               sx={{
                 '& .MuiDataGrid-booleanCell[data-value="true"]': {
                   color: theme.palette.secondary.main,
+                },
+                "& .failure-list-row": {
+                  bgcolor: alpha(theme.palette.warning.light, 0.35),
+                },
+                "& .failure-list-row:hover": {
+                  bgcolor: alpha(theme.palette.warning.light, 0.35),
+                },
+                "& .failure-list-row.Mui-selected": {
+                  bgcolor: alpha(theme.palette.warning.light, 0.35),
+                },
+                "& .failure-list-row.Mui-selected:hover": {
+                  bgcolor: alpha(theme.palette.warning.light, 0.35),
+                },
+                "& .failure-list-row:focus": {
+                  bgcolor: alpha(theme.palette.warning.light, 0.35),
+                },
+                "& .failure-list-row:focus-within": {
+                  bgcolor: alpha(theme.palette.warning.light, 0.35),
                 },
                 "& .MuiCheckbox-root:hover": {
                   bgcolor: theme.palette.text.main,
@@ -391,7 +549,9 @@ const GradeTable = () => {
 export const loader = async ({ params }) => {
   const { code, class_code } = params;
   const [semester, currentSchoolYear, faculty_id] = code.split("-");
-  const { data } = await axiosInstance.get(`/student-grades/undergraduate/class-code/${class_code}/school-year/${currentSchoolYear}/semester/${semester}`);
+  const { data } = await axiosInstance.get(
+    `/student-grades/undergraduate/class-code/${class_code}/school-year/${currentSchoolYear}/semester/${semester}`,
+  );
 
   const rows = data.rows.map((row, index) => ({
     ...row,
@@ -403,7 +563,7 @@ export const loader = async ({ params }) => {
       faculty_id,
       currentSchoolYear,
       semester,
-      class_code
+      class_code,
     );
   const loadInfoArr = facultyLoadData;
 

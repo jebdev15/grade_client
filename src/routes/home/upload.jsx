@@ -39,8 +39,7 @@ const Upload = () => {
     setDownload((prev) => ({ ...prev, loading: true }))
     try {
       const { data } = await axiosInstance.get(
-        `/getExcelFile?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}&name=${cookies.name.toUpperCase()}&classSection=${loadInfo.section
-        }`,
+        `/getExcelFile?semester=${semester}&currentSchoolYear=${currentSchoolYear}&class_code=${class_code}&name=${cookies.name.toUpperCase()}&classSection=${loadInfo.section}`,
         {
           responseType: "arraybuffer",
         }

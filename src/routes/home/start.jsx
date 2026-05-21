@@ -24,19 +24,33 @@ const Start = () => {
       } finally {
         setLoading(false);
       }
-    }
+    };
     getRegistrarActivity();
-  },[])
-  if(loading) return <CircularProgress sx={{ position: "absolute", top: "50%", left: "50%" }} />
+  }, []);
+  if (loading)
+    return (
+      <CircularProgress
+        sx={{ position: "absolute", top: "50%", left: "50%" }}
+      />
+    );
   return (
     <React.Suspense fallback={<div>Loading...</div>}>
       <Box>
-        <Typography variant="h3" fontWeight={700}>
-          Welcome to {process.env.REACT_APP_TITLE}
-        </Typography>
-        <Typography>Navigate on the sidebar to start.</Typography>
-        <br />
-        <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))" }}>
+        <Paper variant="outlined" sx={{ mb: 2, p: 2 }}>
+          <Typography variant="h6" fontWeight={600} sx={{ mb: 0.5 }}>
+            Welcome
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Use the semester menu on the left to view your assigned class loads, then select a class card to encode grades, upload files, submit failure lists and grade sheets, or print grade sheets. Use the profile menu in the top-right corner to view your campus and sign out.
+          </Typography>
+        </Paper>
+        <Box
+          sx={{
+            display: "grid",
+            gap: 2,
+            gridTemplateColumns: "repeat(auto-fill, minmax(350px, 1fr))",
+          }}
+        >
           {data?.length > 0 &&
             data.map(
               (
@@ -51,11 +65,11 @@ const Start = () => {
                   term_type,
                   withinDuration,
                 },
-                index
+                index,
               ) => {
                 if (Boolean(currentSem)) {
                   return (
-                    <Box item sx={{display: "block" }} key={id || index}>
+                    <Box item sx={{ display: "block" }} key={id || index}>
                       <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
                         <Typography variant="subtitle2" color="text.secondary">
                           Academic Year:{" "}
@@ -144,10 +158,9 @@ const Start = () => {
                       </Paper>
                     </Box>
                   );
-                } else {
-                  return "";
                 }
-              }
+                return "";
+              },
             )}
         </Box>
       </Box>

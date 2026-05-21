@@ -117,6 +117,12 @@ const SettingsListItems = [
     icon: <SettingsIcon />,
     link: "/admin/settings/credits",
   },
+  {
+    text: "List of Failures",
+    activeItem: "failure-list",
+    icon: <MilitaryTechIcon />,
+    link: "/admin/settings/failure-list",
+  },
 ];
 
 const MenuPaperProps = {
