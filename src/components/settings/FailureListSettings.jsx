@@ -13,14 +13,15 @@ import {
   Select,
   TextField,
   Typography,
-  Checkbox,
-  FormControlLabel,
+  // Checkbox,
+  // FormControlLabel,
   Paper,
   Alert,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import GPSnackbar from "@components/GPSnackbar";
 import { FailureListService } from "@services/failureListService";
+import { dateOnlyFormatter } from "@utils/formatDate";
 
 const FailureListSettings = () => {
   const [windowForm, setWindowForm] = useState({
@@ -37,14 +38,14 @@ const FailureListSettings = () => {
   const [windows, setWindows] = useState([]);
   const [windowDialogOpen, setWindowDialogOpen] = useState(false);
 
-  const [classForm, setClassForm] = useState({
-    class_code: "",
-    status: "draft",
-  });
-  const [rosterRows, setRosterRows] = useState([]);
-  const [rosterPolicy, setRosterPolicy] = useState(null);
-  const [selection, setSelection] = useState([]);
-  const [rosterLoading, setRosterLoading] = useState(false);
+  // const [classForm, setClassForm] = useState({
+  //   class_code: "",
+  //   status: "draft",
+  // });
+  // const [rosterRows, setRosterRows] = useState([]);
+  // const [rosterPolicy, setRosterPolicy] = useState(null);
+  // const [selection, setSelection] = useState([]);
+  // const [rosterLoading, setRosterLoading] = useState(false);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -63,15 +64,21 @@ const FailureListSettings = () => {
     setWindowForm((prev) => ({ ...prev, [field]: event.target.value }));
   };
 
-  const handleClassChange = (field) => (event) => {
-    setClassForm((prev) => ({ ...prev, [field]: event.target.value }));
-  };
+  // const handleClassChange = (field) => (event) => {
+  //   setClassForm((prev) => ({ ...prev, [field]: event.target.value }));
+  // };
 
   const loadWindows = async () => {
     setWindowsLoading(true);
     try {
       const { windows: data } = await FailureListService.getWindows();
-      setWindows(data || []);
+      const formattedData = (data || []).map((window) => ({
+        ...window,
+        start_date: dateOnlyFormatter(window.start_date) || "",
+        end_date: dateOnlyFormatter(window.end_date) || "",
+      }));
+
+      setWindows(formattedData);
     } catch (error) {
       showMessage(error.message, true);
     } finally {
@@ -136,122 +143,122 @@ const FailureListSettings = () => {
     }
   };
 
-  const handleDeleteWindow = async () => {
-    if (!windowId) {
-      showMessage("No window to delete.", true);
-      return;
-    }
-    const confirm = window.confirm("Delete this failure list window?");
-    if (!confirm) return;
+  // const handleDeleteWindow = async () => {
+  //   if (!windowId) {
+  //     showMessage("No window to delete.", true);
+  //     return;
+  //   }
+  //   const confirm = window.confirm("Delete this failure list window?");
+  //   if (!confirm) return;
 
-    setWindowLoading(true);
-    try {
-      await FailureListService.deleteWindow(windowId);
-      setWindowId(null);
-      showMessage("Window deleted.");
-      await loadWindows();
-      setWindowDialogOpen(false);
-    } catch (error) {
-      showMessage(error.message, true);
-    } finally {
-      setWindowLoading(false);
-    }
-  };
+  //   setWindowLoading(true);
+  //   try {
+  //     await FailureListService.deleteWindow(windowId);
+  //     setWindowId(null);
+  //     showMessage("Window deleted.");
+  //     await loadWindows();
+  //     setWindowDialogOpen(false);
+  //   } catch (error) {
+  //     showMessage(error.message, true);
+  //   } finally {
+  //     setWindowLoading(false);
+  //   }
+  // };
 
-  const handleLoadRoster = async () => {
-    if (!classForm.class_code) {
-      showMessage("Please enter class code.", true);
-      return;
-    }
-    setRosterLoading(true);
-    try {
-      const result = await FailureListService.getAdminRoster(
-        classForm.class_code
-      );
-      setRosterPolicy(result.policy || null);
-      const rows = (result.students || []).map((row, index) => ({
-        id: row.student_grades_id || index + 1,
-        ...row,
-      }));
-      setRosterRows(rows);
-      const selectedIds = rows.filter((row) => row.selected).map((row) => row.id);
-      setSelection(selectedIds);
-    } catch (error) {
-      showMessage(error.response?.data?.error || error.message, true);
-    } finally {
-      setRosterLoading(false);
-    }
-  };
+  // const handleLoadRoster = async () => {
+  //   if (!classForm.class_code) {
+  //     showMessage("Please enter class code.", true);
+  //     return;
+  //   }
+  //   setRosterLoading(true);
+  //   try {
+  //     const result = await FailureListService.getAdminRoster(
+  //       classForm.class_code
+  //     );
+  //     setRosterPolicy(result.policy || null);
+  //     const rows = (result.students || []).map((row, index) => ({
+  //       id: row.student_grades_id || index + 1,
+  //       ...row,
+  //     }));
+  //     setRosterRows(rows);
+  //     const selectedIds = rows.filter((row) => row.selected).map((row) => row.id);
+  //     setSelection(selectedIds);
+  //   } catch (error) {
+  //     showMessage(error.response?.data?.error || error.message, true);
+  //   } finally {
+  //     setRosterLoading(false);
+  //   }
+  // };
 
-  const handleToggleAll = (event) => {
-    if (event.target.checked) {
-      setSelection(rosterRows.map((row) => row.id));
-    } else {
-      setSelection([]);
-    }
-  };
+  // const handleToggleAll = (event) => {
+  //   if (event.target.checked) {
+  //     setSelection(rosterRows.map((row) => row.id));
+  //   } else {
+  //     setSelection([]);
+  //   }
+  // };
 
-  const handleSaveList = async () => {
-    if (!rosterRows.length) {
-      showMessage("Load class roster first.", true);
-      return;
-    }
-    const confirm = window.confirm("Save the current list of failures?");
-    if (!confirm) return;
+  // const handleSaveList = async () => {
+  //   if (!rosterRows.length) {
+  //     showMessage("Load class roster first.", true);
+  //     return;
+  //   }
+  //   const confirm = window.confirm("Save the current list of failures?");
+  //   if (!confirm) return;
 
-    const students = rosterRows
-      .filter((row) => selection.includes(row.id))
-      .map((row) => ({
-        student_id: row.student_id,
-        student_grades_id: row.student_grades_id,
-      }));
+  //   const students = rosterRows
+  //     .filter((row) => selection.includes(row.id))
+  //     .map((row) => ({
+  //       student_id: row.student_id,
+  //       student_grades_id: row.student_grades_id,
+  //     }));
 
-    setRosterLoading(true);
-    try {
-      await FailureListService.adminUpsertList({
-        class_code: classForm.class_code,
-        status: classForm.status,
-        students,
-      });
-      showMessage("Failure list saved.");
-      await handleLoadRoster();
-    } catch (error) {
-      showMessage(error.response?.data?.error || error.message, true);
-    } finally {
-      setRosterLoading(false);
-    }
-  };
+  //   setRosterLoading(true);
+  //   try {
+  //     await FailureListService.adminUpsertList({
+  //       class_code: classForm.class_code,
+  //       status: classForm.status,
+  //       students,
+  //     });
+  //     showMessage("Failure list saved.");
+  //     await handleLoadRoster();
+  //   } catch (error) {
+  //     showMessage(error.response?.data?.error || error.message, true);
+  //   } finally {
+  //     setRosterLoading(false);
+  //   }
+  // };
 
-  const handleDeleteList = async () => {
-    if (!classForm.class_code) {
-      showMessage("Please enter class code.", true);
-      return;
-    }
-    const confirm = window.confirm("Remove the failure list for this class?");
-    if (!confirm) return;
+  // const handleDeleteList = async () => {
+  //   if (!classForm.class_code) {
+  //     showMessage("Please enter class code.", true);
+  //     return;
+  //   }
+  //   const confirm = window.confirm("Remove the failure list for this class?");
+  //   if (!confirm) return;
 
-    setRosterLoading(true);
-    try {
-      await FailureListService.adminDeleteList(
-        classForm.class_code
-      );
-      showMessage("Failure list removed.");
-      setRosterRows([]);
-      setSelection([]);
-    } catch (error) {
-      showMessage(error.response?.data?.error || error.message, true);
-    } finally {
-      setRosterLoading(false);
-    }
-  };
+  //   setRosterLoading(true);
+  //   try {
+  //     await FailureListService.adminDeleteList(
+  //       classForm.class_code
+  //     );
+  //     showMessage("Failure list removed.");
+  //     setRosterRows([]);
+  //     setSelection([]);
+  //   } catch (error) {
+  //     showMessage(error.response?.data?.error || error.message, true);
+  //   } finally {
+  //     setRosterLoading(false);
+  //   }
+  // };
 
-  const columns = useMemo(
-    () => [
-      { field: "student_id", headerName: "Student ID", width: 120 },
-      { field: "name", headerName: "Student Name", flex: 1, minWidth: 160 },
-    ],
-    []
-  );
+  // const columns = useMemo(
+  //   () => [
+  //     { field: "student_id", headerName: "Student ID", width: 120 },
+  //     { field: "name", headerName: "Student Name", flex: 1, minWidth: 160 },
+  //   ],
+  //   []
+  // );
 
   const windowColumns = useMemo(
     () => [
@@ -274,6 +281,11 @@ const FailureListSettings = () => {
         <Alert severity="info" sx={{ mb: 2 }}>
           <Typography variant="body2">
             The Failure List feature allows faculty to submit a list of students who are failing at the end of the term. Admins can set up windows for when lists can be submitted and manage the lists by class.
+          </Typography>
+        </Alert>
+        <Alert severity="info" sx={{ mb: 2 }}>
+          <Typography variant="caption">
+            To edit the list of failures timeline, click on a window to modify it.
           </Typography>
         </Alert>
         <Typography variant="h6" gutterBottom>
@@ -304,7 +316,7 @@ const FailureListSettings = () => {
 
       <Divider />
 
-      <Paper sx={{ p: 2 }} variant="outlined">
+      {/* <Paper sx={{ p: 2 }} variant="outlined">
         <Typography variant="h6" gutterBottom>
           Manage Failure List by Class
         </Typography>
@@ -368,7 +380,7 @@ const FailureListSettings = () => {
             hideFooter
           />
         </Box>
-      </Paper>
+      </Paper> */}
 
       <GPSnackbar
         open={snackbar.open}
@@ -430,13 +442,13 @@ const FailureListSettings = () => {
                 onChange={handleWindowChange("post_deadline_action")}
               >
                 <MenuItem value="restrict_only">Restrict only</MenuItem>
-                <MenuItem value="auto_pass">Auto-pass 75</MenuItem>
+                {/* <MenuItem value="auto_pass">Auto-pass 75</MenuItem> */}
               </Select>
             </FormControl>
           </Box>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          {windowId && (
+          {/* {windowId && (
             <Button
               variant="text"
               color="error"
@@ -445,7 +457,7 @@ const FailureListSettings = () => {
             >
               Delete
             </Button>
-          )}
+          )} */}
           <Button onClick={handleCloseWindowDialog} disabled={windowLoading}>
             Cancel
           </Button>

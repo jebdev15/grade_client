@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   Dialog,
@@ -269,18 +270,17 @@ const GraduateStudiesTable = () => {
           sx={{
             color: "primary.dark",
             display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            flexDirection: "column",
             mt: 2,
-            mb: 2,
           }}
         >
-          <Typography>
-            Subject Code:{" "}
-            <strong>{`${loadInfo.subject_code}(Graduate Studies)`}</strong>
-          </Typography>
-          <Typography>
-            Section: <strong>{loadInfo.section}</strong>
+          <Alert severity="info">
+            <Typography>
+              Graduate Studies subjects follow the point-based grading system.
+            </Typography>
+          </Alert>
+          <Typography sx={{ my: 2 }}>
+            <strong>{loadInfo.subject_code} {loadInfo.section}</strong>
           </Typography>
         </Box>
         <Box>

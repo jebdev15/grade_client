@@ -26,6 +26,7 @@ import axiosInstance from "api/axiosInstance";
 import GPSnackbar from "@components/GPSnackbar";
 import { useEncodedFeatureState } from "@hooks/useFeatureState";
 import { FailureListService } from "@services/failureListService";
+import { urlDecode } from "url-encode-base64";
 
 const GradeTable = () => {
   const [cookies, ,] = useCookies(["email"]);
@@ -307,10 +308,10 @@ const GradeTable = () => {
         listedGradeIds.has(grade.sg_id) ||
         listedStudentIds.has(grade.student_id);
       if (!isListed && hasFailing) {
-        return "List of Failures is finalized. Failing grades are only allowed for listed students.";
+        return "The List of Failures has been finalized. Failing grades are only allowed for highlighted rows.";
       }
       if (isListed && hasPassing) {
-        return "List of Failures is finalized. Listed students must receive failing grades.";
+        return "The List of Failures has been finalized. Students in the highlighted rows must receive failing grades.";
       }
     }
     return null;
@@ -345,7 +346,7 @@ const GradeTable = () => {
       if (!manualOpen || !class_code || !dbTermType) return;
       try {
         const result = await FailureListService.getFacultyRoster(
-          class_code,
+          urlDecode(class_code),
           dbTermType,
         );
         if (!isMounted) return;

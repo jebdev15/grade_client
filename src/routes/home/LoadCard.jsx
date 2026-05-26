@@ -187,9 +187,7 @@ const LoadCard = ({
   return (
     <Card variant="outlined">
       <CardHeader
-        title={
-          isGraduateStudies ? `${subject_code}(Graduate Studies)` : subject_code
-        }
+        title={subject_code}
         subheader={section}
         avatar={
           <Avatar sx={{ bgcolor: "white" }}>

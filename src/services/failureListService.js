@@ -1,5 +1,4 @@
 import axiosInstance from "api/axiosInstance";
-import { urlDecode } from "url-encode-base64";
 
 export const FailureListService = {
   getWindow: async (school_year, semester, term_type) => {
@@ -31,7 +30,7 @@ export const FailureListService = {
   getFacultyRoster: async (class_code, term_type) => {
     const termQuery = term_type ? `&term_type=${term_type}` : "";
     const { data } = await axiosInstance.get(
-      `/failure-list/faculty/class?class_code=${urlDecode(class_code)}${termQuery}`
+      `/failure-list/faculty/class?class_code=${class_code}${termQuery}`
     );
     return data;
   },
