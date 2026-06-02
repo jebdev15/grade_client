@@ -85,7 +85,7 @@ const Home = () => {
       console.log("not authorized");
       return;
     }
-  }, []);
+  }, [cookies, navigate]);
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;

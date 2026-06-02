@@ -391,7 +391,7 @@ const Faculty = () => {
       });
       handleFetchFacultyList();
     }
-  }, [registrarActivityData]);
+  }, [registrarActivityData, cookie]);
   return (
     <>
       <Alert severity="info">

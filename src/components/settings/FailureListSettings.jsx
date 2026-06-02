@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
   Box,
   Button,
@@ -13,8 +13,6 @@ import {
   Select,
   TextField,
   Typography,
-  // Checkbox,
-  // FormControlLabel,
   Paper,
   Alert,
 } from "@mui/material";
@@ -56,9 +54,9 @@ const FailureListSettings = () => {
   const handleCloseSnackbar = () =>
     setSnackbar((prev) => ({ ...prev, open: false }));
 
-  const showMessage = (message, error = false) => {
+  const showMessage = useCallback((message, error = false) => {
     setSnackbar({ open: true, message, error });
-  };
+  }, []);
 
   const handleWindowChange = (field) => (event) => {
     setWindowForm((prev) => ({ ...prev, [field]: event.target.value }));
@@ -68,7 +66,7 @@ const FailureListSettings = () => {
   //   setClassForm((prev) => ({ ...prev, [field]: event.target.value }));
   // };
 
-  const loadWindows = async () => {
+  const loadWindows = useCallback(async () => {
     setWindowsLoading(true);
     try {
       const { windows: data } = await FailureListService.getWindows();
@@ -84,7 +82,7 @@ const FailureListSettings = () => {
     } finally {
       setWindowsLoading(false);
     }
-  };
+  }, [showMessage]);
 
   const handleSelectWindow = (window) => {
     if (!window) return;
@@ -273,7 +271,7 @@ const FailureListSettings = () => {
 
   React.useEffect(() => {
     loadWindows();
-  }, []);
+  }, [loadWindows]);
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>

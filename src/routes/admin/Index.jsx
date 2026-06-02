@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   AppBar,
   Avatar,
@@ -182,6 +182,13 @@ export default function Admin() {
   const [open, setOpen] = React.useState(false);
   const isMobile = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
+  const logout = useCallback(async () => {
+    adminIndexUtil.siteCookies.map((cookie) => removeCookie(cookie, { path: "/" }));
+    googleLogout();
+    localStorage.removeItem("activeItem");
+    navigate("/");
+  }, [navigate, removeCookie]);
+
   useEffect(() => {
     localStorage.setItem("activeItem", activeItem);
   }, [activeItem]);
@@ -202,19 +209,14 @@ export default function Admin() {
     if (!checkAccessLevel(cookies)) {
       navigate("/");
     }
-  }, [cookies]);
+  }, [cookies, navigate]);
 
   useEffect(() => {
     if(!cookies.token) {
       logout();
     }
-  },[cookies.token])
-  const logout = () => {
-    adminIndexUtil.siteCookies.map((cookie) => removeCookie(cookie, { path: "/" }));
-    googleLogout();
-    localStorage.removeItem("activeItem");
-    navigate("/");
-  };
+  },[cookies, logout])
+  
   useEffect(() => {
     setDrawerMinimize(isSmallScreen ? true : !true);
   }, [isSmallScreen, setDrawerMinimize, navigate]);
