@@ -53,11 +53,11 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
-          # If you have a build step, change source to "dist" or "build"
-          source: "dist/" # Assuming your build output is in the "dist" folder
+          # If you have a build step, change source to "build" or "build"
+          source: "build/" # Assuming your build output is in the "build" folder
           # Deploying to the public web root for the frontend
           target: "/home/${{ secrets.SSH_USERNAME }}/public_html/subdomains/staging-grading-portal"
-          strip_components: 1        # ✅ ADDED — removes "dist/" prefix, files land directly in target
+          strip_components: 1        # ✅ ADDED — removes "build/" prefix, files land directly in target
 
       # ✅ Step 6 — Verify frontend is accessible after deployment
       - name: ✅ Health Check
