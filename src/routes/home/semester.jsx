@@ -20,7 +20,6 @@ import {
   FolderOpen as FolderOpenIcon,
   Keyboard as KeyboardIcon,
   Print as PrintIcon,
-  Article as ArticleIcon,
   ListAlt as ListAltIcon,
 } from "@mui/icons-material";
 import { urlDecode } from "url-encode-base64";

@@ -1,6 +1,5 @@
-import React from "react";
+import React, { useCallback } from "react";
 import {
-  Alert,
   Box,
   Button,
   Dialog,
@@ -8,7 +7,6 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  Snackbar,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -261,8 +259,7 @@ const GradeTable = ({ open, handleClose, classLoadData }) => {
       }));
     }
   };
-  React.useEffect(() => {
-    const fetchStudentsWithGrades = async () => {
+  const fetchStudentsWithGrades = useCallback(async () => {
       setEncoded((prev) => ({
         ...prev,
         loading: true,
@@ -300,9 +297,11 @@ const GradeTable = ({ open, handleClose, classLoadData }) => {
           loading: false,
         }));
       }
-    };
+    }, [class_code, setEncoded]);
+  React.useEffect(() => {
+    
     fetchStudentsWithGrades();
-  }, [class_code]);
+  }, [fetchStudentsWithGrades]);
   return (
     <Dialog
       open={open}

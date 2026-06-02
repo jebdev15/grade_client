@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { Close } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
-import React from "react";
+import React, { useCallback } from "react";
 import axiosInstance from "@/api/axiosInstance";
 import { useEncodedFeatureState } from "@hooks/useFeatureState";
 
@@ -199,7 +199,7 @@ const GraduateStudiesTable = ({ open, handleClose, classLoadData }) => {
       };
       const response = await axiosInstance.put(
         `/admin-student/grades/graduate-studies`,
-        payload
+        payload,
       );
       if (response.data) {
         setEncoded((prev) => ({
@@ -224,49 +224,49 @@ const GraduateStudiesTable = ({ open, handleClose, classLoadData }) => {
       }));
     }
   };
-
-  React.useEffect(() => {
-    const fetchStudentsWithGrades = async () => {
+  const fetchStudentsWithGrades = useCallback( async () => {
+    setEncoded((prev) => ({
+      ...prev,
+      loading: true,
+    }));
+    try {
+      const { data: students } = await axiosInstance.get(
+        `/admin-student/grades/${class_code}/graduate`,
+      );
+      if (students.rows.length > 0) {
+        const formattedRows = students.rows.map((row, index) => ({
+          ...row,
+          id: index + 1,
+        }));
+        setEncoded((prev) => ({
+          ...prev,
+          rows: formattedRows,
+        }));
+        return;
+      }
       setEncoded((prev) => ({
         ...prev,
-        loading: true,
+        rows: [],
       }));
-      try {
-        const { data: students } = await axiosInstance.get(
-          `/admin-student/grades/${class_code}/graduate`
-        );
-        if (students.rows.length > 0) {
-          const formattedRows = students.rows.map((row, index) => ({
-            ...row,
-            id: index + 1,
-          }));
-          setEncoded((prev) => ({
-            ...prev,
-            rows: formattedRows,
-          }));
-          return;
-        }
-        setEncoded((prev) => ({
-          ...prev,
-          rows: [],
-        }));
-      } catch (error) {
-        console.error("Error fetching students:", error);
-        setEncoded((prev) => ({
-          ...prev,
-          error: true,
-          message: "Failed to fetch students with grades. Please try again.",
-          rows: [],
-        }));
-      } finally {
-        setEncoded((prev) => ({
-          ...prev,
-          loading: false,
-        }));
-      }
-    };
+    } catch (error) {
+      console.error("Error fetching students:", error);
+      setEncoded((prev) => ({
+        ...prev,
+        error: true,
+        message: "Failed to fetch students with grades. Please try again.",
+        rows: [],
+      }));
+    } finally {
+      setEncoded((prev) => ({
+        ...prev,
+        loading: false,
+      }));
+    }
+  }, [class_code, setEncoded]);
+  
+  React.useEffect(() => {
     fetchStudentsWithGrades();
-  }, [class_code]);
+  }, [fetchStudentsWithGrades]);
   return (
     <Dialog
       open={open}

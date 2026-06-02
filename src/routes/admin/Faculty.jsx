@@ -26,7 +26,6 @@ import {
   Subject as SubjectIcon,
   Settings as SettingsIcon,
   Keyboard as KeyboardIcon,
-  UploadFile as UploadFileIcon,
 } from "@mui/icons-material";
 import { urlEncode } from "url-encode-base64";
 import ViewStudentsDialog from "../../components/dialogs/ViewStudentsDialog";
@@ -244,21 +243,6 @@ const Faculty = () => {
                     )}
                   </IconButton>
                 </Tooltip>
-
-                {/* <Tooltip title="Upload Grade Sheet">
-                  <IconButton
-                    aria-label="upload-grade-sheet"
-                    color="primary"
-                    onClick={() => handleClick(params.row.isGraduate ? "uploadGradeSheetGraduate" : "uploadGradeSheet")}
-                    disabled={uploadGradeSheet.loading}
-                  >
-                    {uploadGradeSheet.loading ? (
-                      <CircularProgress size={24} />
-                    ) : (
-                      <UploadFileIcon />
-                    )}
-                  </IconButton>
-                </Tooltip> */}
 
                 <Tooltip title="View Students">
                   <IconButton
