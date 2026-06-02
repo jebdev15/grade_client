@@ -279,17 +279,17 @@ const FailureListSettings = () => {
     <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
       <Paper sx={{ p: 2 }} variant="outlined">
         <Alert severity="info" sx={{ mb: 2 }}>
-          <Typography variant="body2">
-            The Failure List feature allows faculty to submit a list of students who are failing at the end of the term. Admins can set up windows for when lists can be submitted and manage the lists by class.
+          <Typography variant="caption">
+            The Failure List feature allows faculty to submit a list of students who are failing at the end of the term.
           </Typography>
         </Alert>
         <Alert severity="info" sx={{ mb: 2 }}>
           <Typography variant="caption">
-            To edit the list of failures timeline, click on a window to modify it.
+            To edit the failure list window, click on a window to modify it.
           </Typography>
         </Alert>
         <Typography variant="h6" gutterBottom>
-          List of Failures Timeline
+          Failure List Windows
         </Typography>
         <Box sx={{ mb: 2 }}>
           <DataGrid

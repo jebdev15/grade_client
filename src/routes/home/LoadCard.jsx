@@ -1,5 +1,5 @@
 import React from "react";
-import { identifyPrintLink, submittedGradeSheetMessage } from "../../utils/semester.utils";
+import { identifyPrintLink, submittedGradeSheetMessage } from "@utils/semester.utils";
 import {
   Avatar,
   Box,
@@ -283,7 +283,7 @@ const LoadCard = ({
               </IconButton>
             </span>
           </Tooltip>
-          <Tooltip title="Submit gradesheet">
+          <Tooltip title="Submit Grade Sheet">
             <span>
               <IconButton 
                 onClick={() => handleSubmitGradeSheetConfirmation(class_code, dbTermType)}

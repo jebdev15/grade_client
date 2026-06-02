@@ -9,8 +9,10 @@ import {
   DialogContent,
   DialogTitle,
   FormControlLabel,
+  IconButton,
   Typography,
 } from "@mui/material";
+import { Close as CloseIcon } from "@mui/icons-material";
 import { DataGrid } from "@mui/x-data-grid";
 import GPSnackbar from "@components/GPSnackbar";
 import { FailureListService } from "@services/failureListService";
@@ -40,7 +42,10 @@ const FailureListDialog = ({
     if (!open || !class_code) return;
     setLoading(true);
     try {
-      const result = await FailureListService.getFacultyRoster(class_code, term_type);
+      const result = await FailureListService.getFacultyRoster(
+        class_code,
+        term_type,
+      );
       const students = (result.students || []).map((row, index) => ({
         id: row.student_grades_id || `${row.student_id}-${index + 1}`,
         ...row,
@@ -115,7 +120,32 @@ const FailureListDialog = ({
   return (
     <>
       <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-        <DialogTitle>List of Failures</DialogTitle>
+        <DialogTitle
+          sx={{
+            bgcolor: "primary.main",
+            color: "text.light",
+            padding: "8px 24px",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            Grade Sheet
+            <IconButton
+              onClick={() => {
+                onClose();
+                // setEncode((prev) => ({ ...prev, toUpdate: [], open: false }));
+                // navigate(`/home/${code}`);
+              }}
+            >
+              <CloseIcon sx={{ color: "text.light" }} />
+            </IconButton>
+          </Box>
+        </DialogTitle>
         <DialogContent>
           {isGraduateStudies && (
             <Alert severity="info" sx={{ mb: 2 }}>
@@ -128,14 +158,24 @@ const FailureListDialog = ({
             </Alert>
           )}
           {policy && policy.isApplicable && (
-            <Alert severity={policy.isWindowOpen ? "success" : "warning"} sx={{ mb: 2 }}>
+            <Alert
+              severity={policy.isWindowOpen ? "success" : "warning"}
+              sx={{ mb: 2 }}
+            >
               {policy.isWindowOpen
                 ? "Window is open. Select students to fail and finalize submission."
                 : "Window is closed. You can review but cannot submit changes."}
             </Alert>
           )}
 
-          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mb: 1,
+            }}
+          >
             <Typography variant="body2">
               Selected: {selectedCount} / {totalCount}
             </Typography>
@@ -143,7 +183,9 @@ const FailureListDialog = ({
               control={
                 <Checkbox
                   checked={selectedCount > 0 && selectedCount === totalCount}
-                  indeterminate={selectedCount > 0 && selectedCount < totalCount}
+                  indeterminate={
+                    selectedCount > 0 && selectedCount < totalCount
+                  }
                   onChange={handleToggleAll}
                   disabled={!policy?.isWindowOpen}
                 />
@@ -162,34 +204,52 @@ const FailureListDialog = ({
             hideFooter
             selectionModel={selection}
             isRowSelectable={() => Boolean(policy?.isWindowOpen)}
-            onSelectionModelChange={(newSelection) => setSelection(newSelection)}
+            onSelectionModelChange={(newSelection) =>
+              setSelection(newSelection)
+            }
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose}>Close</Button>
           <Button
             variant="contained"
             onClick={handleConfirm}
-            disabled={loading || isGraduateStudies || !policy?.isApplicable || !policy?.isWindowOpen}
+            disabled={
+              loading ||
+              isGraduateStudies ||
+              !policy?.isApplicable ||
+              !policy?.isWindowOpen
+            }
           >
             Finalize List
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)} fullWidth maxWidth="sm">
+      <Dialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Confirm Final Submission</DialogTitle>
         <DialogContent>
           <Typography>
-            You are about to submit {selectedCount} student(s) in the List of Failures for class {class_code}.
+            You are about to submit {selectedCount} student(s) in the List of
+            Failures for class {class_code}.
           </Typography>
           <Typography sx={{ mt: 1 }}>
-            After the window closes, students not on this list cannot receive failing grades.
+            After the window closes, students not on this list cannot receive
+            failing grades.
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
-          <Button variant="contained" color="error" onClick={handleSubmit} disabled={loading}>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleSubmit}
+            disabled={loading}
+          >
             Confirm Submission
           </Button>
         </DialogActions>

@@ -16,6 +16,12 @@ import {
 } from "react-router-dom";
 import {
   Home,
+  Task as TaskIcon,
+  FolderOpen as FolderOpenIcon,
+  Keyboard as KeyboardIcon,
+  Print as PrintIcon,
+  Article as ArticleIcon,
+  ListAlt as ListAltIcon,
 } from "@mui/icons-material";
 import { urlDecode } from "url-encode-base64";
 import { HomeSemesterServices } from "../../services/homeSemesterService";
@@ -80,20 +86,14 @@ const Semester = () => {
             </Typography>
           </Box>
         </Box>
-      </Box>
-
-      {/* {extendedLoads.length > 0 && (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          {dbTo
-            ? `Grade submission is open for ${dbTermType || "this term"} until ${new Date(
-                dbTo
-              ).toLocaleDateString()}.`
-            : "Grade submission timeline is not available yet for this term."}
-          {extendedLabels
-            ? ` Extended class loads: ${extendedLabels}.`
-            : " Extended class loads are available."}
+        <Alert severity="info" sx={{ fontSize: 12 }}>
+          <ListAltIcon sx={{ fontSize: 16, ml: 0.5 }} /> List of Failures, 
+          <KeyboardIcon sx={{ fontSize: 16, ml: 0.5 }} /> Encode Grades, 
+          <FolderOpenIcon sx={{ fontSize: 16, ml: 0.5 }} /> Download/Upload Grade Sheet, 
+          <TaskIcon sx={{ fontSize: 16, ml: 0.5 }} /> Submit Grade Sheet, 
+          <PrintIcon sx={{ fontSize: 16, ml: 0.5 }} /> Print Grade Sheet.
         </Alert>
-      )} */}
+      </Box>
 
       <Box sx={{ mt: 2, overflowY: "auto" }}>
         <Box sx={{ p: 3, width: "100%" }}>

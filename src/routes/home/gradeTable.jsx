@@ -7,6 +7,8 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
+  List,
+  ListItem,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -391,7 +393,15 @@ const GradeTable = () => {
         updatedCount: data.affectedRows,
       }));
     } catch (error) {
-      setEncode((prev) => ({ ...prev, error: true, message: error.message }));
+      console.error(error);
+      setEncode((prev) => ({
+        ...prev,
+        error: true,
+        message:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Failed to update. Please try again later.",
+      }));
     } finally {
       setEncode((prev) => ({ ...prev, openSnackbar: true, loading: false }));
     }
@@ -439,7 +449,19 @@ const GradeTable = () => {
             <strong>{`${loadInfo.subject_code} ${loadInfo.section}`}</strong>
           </Typography>
           <Alert severity="info">
-            <Typography variant="body2">To set remarks like Incomplete, Dropped, No Attendance, No Grade, or Withdrawn, double-click the student’s Remarks cell.</Typography>
+            <List>
+              <ListItem disablePadding>
+                <Typography variant="caption">
+                  To set remarks like Incomplete, Dropped, No Attendance, No
+                  Grade, or Withdrawn, double-click the student’s Remarks cell.
+                </Typography>
+              </ListItem>
+              <ListItem disablePadding>
+                <Typography variant="caption">
+                  Only highlighted rows can receive failing grades.
+                </Typography>
+              </ListItem>
+            </List>
           </Alert>
         </Box>
 
