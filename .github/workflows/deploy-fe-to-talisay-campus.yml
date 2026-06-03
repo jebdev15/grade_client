@@ -56,10 +56,10 @@ jobs:
           # If you have a build step, change source to "build" or "build"
           source: "build/" # Assuming your build output is in the "build" folder
           # Deploying to the public web root for the frontend
-          target: "/home/${{ secrets.SSH_USERNAME }}/public_html/subdomains/ali-gs"
+          target: "/home/${{ secrets.SSH_USERNAME }}/public_html/subdomains/tal-gs"
           strip_components: 1        # ✅ ADDED — removes "build/" prefix, files land directly in target
 
       # ✅ Step 6 — Verify frontend is accessible after deployment
       - name: ✅ Health Check
         run: |
-          curl -f https://ali-gs.chmsu.edu.ph || exit 1
+          curl -f https://tal-gs.chmsu.edu.ph || exit 1
