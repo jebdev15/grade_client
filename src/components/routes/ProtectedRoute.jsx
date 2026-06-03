@@ -4,10 +4,11 @@ import { useCookies } from "react-cookie";
 import { AuthUtil } from "@/utils/authUtil";
 
 const ProtectedRoute = ({ allowedAccessLevels, children }) => {
-  const [cookies] = useCookies(AuthUtil.siteCookies);
+  const [cookies,,removeCookie] = useCookies(AuthUtil.siteCookies);
   const location = useLocation();
 
   if (!AuthUtil.isTokenValid(cookies.token)) {
+    removeCookie("token", { path: "/" });
     return <Navigate to="/" replace state={{ from: location }} />;
   }
 
