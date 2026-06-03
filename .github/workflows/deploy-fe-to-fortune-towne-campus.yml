@@ -7,7 +7,7 @@ on:
 
 # ✅ ADDED — Allow only one deployment at a time
 concurrency:
-  group: production-chmsu-grading-portal-frontend-deploy
+  group: production-chmsu-grading-portal-frontend-deploy-fortune-towne
   cancel-in-progress: true
 
 # This workflow deploys the frontend to the production environment
