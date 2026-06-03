@@ -1,5 +1,12 @@
 import React from "react";
-import { Box, Chip, CircularProgress, Paper, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Chip,
+  CircularProgress,
+  Paper,
+  Typography,
+} from "@mui/material";
 import { dateFormatter } from "@utils/formatDate";
 import axiosInstance from "api/axiosInstance";
 const Start = () => {
@@ -41,8 +48,21 @@ const Start = () => {
             Welcome
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Use the semester menu on the left to view your assigned class loads, then select a class card to encode grades, upload files, submit failure lists and grade sheets, or print grade sheets. Use the profile menu in the top-right corner to view your campus and sign out.
+            Use the semester menu on the left to view your assigned class loads,
+            then select a class card to encode grades, upload files, submit
+            failure lists and grade sheets, or print grade sheets. Use the
+            profile menu in the top-right corner to view your campus and sign
+            out.
           </Typography>
+          <Alert severity="info" sx={{ mt: 2 }}>
+            <strong>Note:</strong>
+            <Typography variant="body2" color="text.secondary">
+              The system is able to accept List of Failures after the grade
+              submission deadline. Please ensure that you submit your grades on
+              time to avoid any inconvenience. If you have any questions or need
+              assistance, please contact the MIS Office.
+            </Typography>
+          </Alert>
         </Paper>
         <Box
           sx={{
