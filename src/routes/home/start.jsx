@@ -57,7 +57,7 @@ const Start = () => {
           <Alert severity="info" sx={{ mt: 2 }}>
             <strong>Note:</strong>
             <Typography variant="body2" color="text.secondary">
-              The system is able to accept List of Failures after the grade
+              The system is able to accept Lists of Failures after the grade
               submission deadline. Please ensure that you submit your grades on
               time to avoid any inconvenience. If you have any questions or need
               assistance, please contact the MIS Office.

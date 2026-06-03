@@ -1,0 +1,65 @@
+name: Deploy CHMSU Grading Portal Frontend to Production - Binalbagan Campus
+
+on:
+  push:
+    branches:
+      - production
+
+# ✅ ADDED — Allow only one deployment at a time
+concurrency:
+  group: production-chmsu-grading-portal-frontend-deploy
+  cancel-in-progress: true
+
+# This workflow deploys the frontend to the production environment
+jobs:
+  deploy-frontend:
+    name: 🎨 Deploy CHMSU Grading Portal Frontend - Binalbagan Campus
+    runs-on: ubuntu-latest
+    
+    # Steps to deploy the frontend
+    steps:
+      # Step 1: Get the latest code from the production branch
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v4
+
+      # Step 2 — Setup Node.js AFTER checkout so package.json exists for cache
+      - name: ⚙️ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'        # ✅ Match your cPanel Node.js version
+          cache: 'npm'
+
+      # Step 3 — Create .env file before build
+      - name: 🔐 Create .env file
+        run: |
+          echo "MODE=production" >> .env
+          echo "REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }}" >> .env
+          echo "REACT_APP_APP_NAME=${{ secrets.REACT_APP_APP_NAME }}" >> .env
+          echo "REACT_APP_GOOGLE_CLIENT_ID=${{ secrets.REACT_APP_GOOGLE_CLIENT_ID }}" >> .env
+          echo "REACT_APP_RECAPTCHA_SITE_KEY=${{ secrets.REACT_APP_RECAPTCHA_SITE_KEY }}" >> .env
+          # Add other REACT_APP_ variables as needed
+
+      # Step 4: Install dependencies and build the frontend (if needed)
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build
+
+      # Step 5: Copy files to the server via SCP
+      - name: 📂 Copy files via SCP
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          # If you have a build step, change source to "build" or "build"
+          source: "build/" # Assuming your build output is in the "build" folder
+          # Deploying to the public web root for the frontend
+          target: "/home/${{ secrets.SSH_USERNAME }}/public_html/subdomains/bin-gs"
+          strip_components: 1        # ✅ ADDED — removes "build/" prefix, files land directly in target
+
+      # ✅ Step 6 — Verify frontend is accessible after deployment
+      - name: ✅ Health Check
+        run: |
+          curl -f https://bin-gs.chmsu.edu.ph || exit 1
