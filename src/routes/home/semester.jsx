@@ -87,7 +87,7 @@ const Semester = () => {
         </Box>
         <Alert severity="info" sx={{ fontSize: 12 }}>
           <ListAltIcon sx={{ fontSize: 16, ml: 0.5 }} /> List of Failures, 
-          <KeyboardIcon sx={{ fontSize: 16, ml: 0.5 }} /> Encode Grades, 
+          <KeyboardIcon sx={{ fontSize: 16, ml: 0.5 }} /> Direct Encoding of Grades, 
           <FolderOpenIcon sx={{ fontSize: 16, ml: 0.5 }} /> Download/Upload Grade Sheet, 
           <TaskIcon sx={{ fontSize: 16, ml: 0.5 }} /> Submit Grade Sheet, 
           <PrintIcon sx={{ fontSize: 16, ml: 0.5 }} /> Print Grade Sheet.

@@ -163,7 +163,7 @@ const Upload = () => {
             <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
               <Avatar sx={{ bgcolor: "primary.main", mr: 2 }}>A</Avatar>
               <Typography>
-                Download the grade sheet of the class and fill it up.
+                Download the class grade sheet and fill it out.
               </Typography>
             </Box>
             <Paper

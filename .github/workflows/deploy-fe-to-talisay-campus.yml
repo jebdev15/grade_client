@@ -1,4 +1,4 @@
-name: Deploy CHMSU Grading Portal Frontend to Production - Alijis Campus
+name: Deploy CHMSU Grading Portal Frontend to Production - Talisay Campus
 
 on:
   push:
@@ -13,7 +13,7 @@ concurrency:
 # This workflow deploys the frontend to the production environment
 jobs:
   deploy-frontend:
-    name: 🎨 Deploy CHMSU Grading Portal Frontend - Alijis Campus
+    name: 🎨 Deploy CHMSU Grading Portal Frontend - Talisay Campus
     runs-on: ubuntu-latest
     
     # Steps to deploy the frontend

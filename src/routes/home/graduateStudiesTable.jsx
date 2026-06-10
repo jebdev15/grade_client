@@ -276,7 +276,7 @@ const GraduateStudiesTable = () => {
         >
           <Alert severity="info">
             <Typography>
-              Graduate Studies subjects follow the point-based grading system.
+              To avoid issues in grade submission, Graduate School subjects follow the point-based grading system (e.g., 1.0, 1.25, 1.5, 1.75, 2.0, ... 3.0).
             </Typography>
           </Alert>
           <Typography sx={{ my: 2 }}>

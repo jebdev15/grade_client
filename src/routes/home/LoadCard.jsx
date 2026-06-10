@@ -108,7 +108,7 @@ const LoadCard = ({
   const semesterFunctions = {
     encodeToolTipTitle: () => {
       if ((canUpload || is_deadline_extended) && !(classLoadStatus)) {
-        return "Encoding of Grades";
+        return "Direct Encoding of Grades";
       }
       return "View Grades";
     },
