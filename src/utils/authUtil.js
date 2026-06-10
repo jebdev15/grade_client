@@ -1,6 +1,20 @@
-const adminAccessLevels = ["Administrator", "Registrar", "Dean", "Chairperson"];
-const facultyAccessLevels = ["Faculty", "Part Time"];
+import jwt_decode from "jwt-decode";
+
+export const adminAccessLevels = ["Administrator", "Registrar", "Dean", "Chairperson"];
+export const facultyAccessLevels = ["Faculty", "Part Time"];
 export const AuthUtil = {
+    isTokenValid: (token) => {
+        if (!token) {
+            return false;
+        }
+
+        try {
+            const decodedToken = jwt_decode(token);
+            return Boolean(decodedToken?.exp) && decodedToken.exp * 1000 > Date.now();
+        } catch (error) {
+            return false;
+        }
+    },
     statusCodeResponse: (status) => {
         let response = '';
         switch(status){
@@ -21,7 +35,6 @@ export const AuthUtil = {
     },
     siteCookies: ["picture", "name", "faculty_id", "email", "college_code", "program_code", "campus", "accessLevel", "token"],
     getInitialPath: (cookies) => {
-        console.log(cookies);
         const accessLevels = [...adminAccessLevels, ...facultyAccessLevels];
         if(accessLevels.includes(cookies.accessLevel)){
             return adminAccessLevels.includes(cookies.accessLevel) ? "/admin" : "/home";

@@ -54,7 +54,7 @@ const Index = () => {
     setLoading(false);
   };
   React.useEffect(() => {
-    if (cookies.token && cookies.accessLevel) {
+    if (AuthUtil.isTokenValid(cookies.token) && cookies.accessLevel) {
       const path = AuthUtil.getInitialPath(cookies);
       navigate(path);
     }

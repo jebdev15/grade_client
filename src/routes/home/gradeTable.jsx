@@ -310,10 +310,10 @@ const GradeTable = () => {
         listedGradeIds.has(grade.sg_id) ||
         listedStudentIds.has(grade.student_id);
       if (!isListed && hasFailing) {
-        return "The List of Failures has been finalized. Failing grades are only allowed for highlighted rows.";
+        return "The List of Failures is now active. Failing grades are only allowed for highlighted rows.";
       }
       if (isListed && hasPassing) {
-        return "The List of Failures has been finalized. Students in the highlighted rows must receive failing grades.";
+        return "The List of Failures is now active. Students in the highlighted rows must receive failing grades.";
       }
     }
     return null;

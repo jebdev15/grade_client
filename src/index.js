@@ -29,7 +29,7 @@ import PrintGradeSheet, { loader as printLoader } from "./routes/home/PrintNew";
 import PrintGraduateStudiesGradeSheet, { loader as printGSLoader } from "./routes/home/PrintGS";
 
 // Admin Routes
-import Admin from './routes/admin/Index';
+import Admin from "./routes/admin/Index";
 import Faculty, { loader as facultyLoader } from "./routes/admin/Faculty";
 import DownloadGradeSheetPdf from "./components/faculty/downloadble/DownloadGradeSheetPdf";
 import Users from "./routes/admin/Users";
@@ -49,6 +49,9 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import { RegistrarActivityProvider } from "./context/RegistrarActivityContext";
 import FacultyErrorPage from "./components/errors/FacultyErrorPage";
 import CreditsComponent from "@components/settings/CreditsComponent";
+import ProtectedRoute from "./components/routes/ProtectedRoute";
+import { adminAccessLevels, facultyAccessLevels } from "./utils/authUtil";
+import { protectLoader } from "./utils/routeAuth";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
@@ -60,37 +63,40 @@ const router = createBrowserRouter([
   },
   {
     path: "home",
-    element:
-      <RegistrarActivityProvider>
-        <Home />
-      </RegistrarActivityProvider>,
+    element: (
+      <ProtectedRoute allowedAccessLevels={facultyAccessLevels}>
+        <RegistrarActivityProvider>
+          <Home />
+        </RegistrarActivityProvider>
+      </ProtectedRoute>
+    ),
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Start /> },
       {
         path: "/home/:code",
         element: <Semester />,
-        loader: semesterLoader,
+        loader: protectLoader(facultyAccessLevels, semesterLoader),
         children: [
           {
             path: "/home/:code/:class_code",
             element: <GradeTable />,
-            loader: gradeTableLoader,
+            loader: protectLoader(facultyAccessLevels, gradeTableLoader),
           },
           {
             path: "/home/:code/:class_code/graduateStudies",
             element: <GraduateStudiesTable />,
-            loader: graduateStudiesTableLoader,
+            loader: protectLoader(facultyAccessLevels, graduateStudiesTableLoader),
           },
           {
             path: "/home/:code/upload/:class_code",
             element: <Upload />,
-            loader: uploadLoader,
+            loader: protectLoader(facultyAccessLevels, uploadLoader),
           },
           {
             path: "/home/:code/upload/:class_code/gs",
             element: <UploadGS />,
-            loader: uploadGSLoader,
+            loader: protectLoader(facultyAccessLevels, uploadGSLoader),
           },
         ],
       },
@@ -98,31 +104,51 @@ const router = createBrowserRouter([
   },
   {
     path: "/print/:code/:class_code",
-    element: <PrintGradeSheet />,
+    element: (
+      <ProtectedRoute allowedAccessLevels={facultyAccessLevels}>
+        <PrintGradeSheet />
+      </ProtectedRoute>
+    ),
     errorElement: <ErrorPage />,
-    loader: printLoader,
+    loader: protectLoader(facultyAccessLevels, printLoader),
   },
   {
     path: "/print/:code/:class_code/graduateStudies",
-    element: <PrintGraduateStudiesGradeSheet />,
+    element: (
+      <ProtectedRoute allowedAccessLevels={facultyAccessLevels}>
+        <PrintGraduateStudiesGradeSheet />
+      </ProtectedRoute>
+    ),
     errorElement: <ErrorPage />,
-    loader: printGSLoader,
+    loader: protectLoader(facultyAccessLevels, printGSLoader),
   },
   {
     path: "/admin/print/:code/:class_code",
-    element: <PrintUnderGraduateGS />,
+    element: (
+      <ProtectedRoute allowedAccessLevels={adminAccessLevels}>
+        <PrintUnderGraduateGS />
+      </ProtectedRoute>
+    ),
     errorElement: <ErrorPage />,
-    loader: printUnderGraduateGSLoader,
+    loader: protectLoader(adminAccessLevels, printUnderGraduateGSLoader),
   },
   {
     path: "/admin/print/:code/:class_code/gs",
-    element: <PrintGraduateStudiesGS />,
+    element: (
+      <ProtectedRoute allowedAccessLevels={adminAccessLevels}>
+        <PrintGraduateStudiesGS />
+      </ProtectedRoute>
+    ),
     errorElement: <ErrorPage />,
-    loader: printGraduateStudiesGSLoader,
+    loader: protectLoader(adminAccessLevels, printGraduateStudiesGSLoader),
   },
   {
     path: "admin",
-    element: <Admin />,
+    element: (
+      <ProtectedRoute allowedAccessLevels={adminAccessLevels}>
+        <Admin />
+      </ProtectedRoute>
+    ),
     errorElement: <ErrorPage />,
     children: [
       { index: true, element: <AdminStart /> },
@@ -133,7 +159,7 @@ const router = createBrowserRouter([
       {
         path: "faculty",
         element: <Faculty />,
-        loader: facultyLoader,
+        loader: protectLoader(adminAccessLevels, facultyLoader),
         errorElement: <FacultyErrorPage />,
       },
       {
@@ -167,8 +193,8 @@ const router = createBrowserRouter([
           {
             path: "failure-list",
             element: <FailureListSettings />,
-          }
-        ]
+          },
+        ],
       },
       {
         path: "download",
@@ -176,9 +202,9 @@ const router = createBrowserRouter([
           {
             path: "gradesheet",
             element: <DownloadGradeSheetPdf />,
-          }
-        ]
-      }
+          },
+        ],
+      },
     ],
   },
 ]);

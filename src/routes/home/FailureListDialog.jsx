@@ -220,7 +220,7 @@ const FailureListDialog = ({
               !policy?.isWindowOpen
             }
           >
-            Finalize List
+            Submit
           </Button>
         </DialogActions>
       </Dialog>
