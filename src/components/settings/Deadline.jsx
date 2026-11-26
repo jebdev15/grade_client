@@ -4,7 +4,7 @@ import { dateOnlyFormatter } from "../../utils/formatDate";
 import { AdminSettingsServices } from "../../services/adminSettingsService";
 
 const Deadline = () => {
-  
+
   const initialState = {
     id: 0,
     activity: "",
@@ -24,12 +24,12 @@ const Deadline = () => {
     try {
       // Fetch data for the selected semester
       const response = await AdminSettingsServices.getRegistrarActivityBySemester(event.target.value);
-      
+
       if (!response.data) {
         console.error("No data returned from the API.");
         return;
       }
-  
+
       // Ensure the data has valid properties and handle invalid/empty date values
       const filteredData = {
         id: response.data.id || 0,
@@ -42,7 +42,7 @@ const Deadline = () => {
         currentSem: response.data.currentSem || "",
         termType: response.data.term_type || "",
       };
-  
+
       // Now you can set the state with valid data
       setData(filteredData);
       console.log(filteredData, response.status);
@@ -69,159 +69,159 @@ const Deadline = () => {
   };
   return (
     <>
-    <React.Suspense fallback={<div>Loading...</div>}>
-      <Paper 
-        elevation={12}
-        sx={{ 
-          padding: 2,
-        }}
-      >
-        <Box
+      <React.Suspense fallback={<div>Loading...</div>}>
+        <Paper
+          elevation={12}
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 3,
+            padding: 2,
           }}
         >
-          <Typography variant="h5" color="initial">
-            Manage Submission Deadlines
-          </Typography>
-          {!data.id && (
-            <Alert severity="info">Select Semester to Proceed</Alert>
-          )}
-          <Box component="form" onSubmit={updateHandler} sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: "100%" }}>
-            <FormControl fullWidth>
-              <TextField 
-                id="select-activity" 
-                name="activity" 
-                label="Activity" 
-                type="text" 
-                value={data.activity} 
-                onChange={changeHandler} 
-                disabled={data.activity === ""}
-                fullWidth 
-              />
-            </FormControl>
-            <FormControl sx={{ display: "flex", flexDirection: "row", gap: 1 }} fullWidth>
-              <TextField 
-                id="select-schoolyear" 
-                name="schoolyear" 
-                label="School Year" 
-                type="number" 
-                value={data.schoolyear} 
-                onChange={changeHandler} 
-                disabled={data.schoolyear === ""}
-                fullWidth 
-              />
-              <TextField 
-                label="School Year" 
-                type="number" 
-                value={`${data.schoolyear && parseInt(data.schoolyear) + 1}`} 
-                disabled 
-                fullWidth 
-              />
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel id="select-semester-label">Semester</InputLabel>
-              <Select 
-                id="select-semester" 
-                label="Semester" 
-                name="semester" 
-                value={data.semester} 
-                onChange={(event) => {
-                  changeHandler(event)
-                  setTimeout(() => changeSemesterHandler(event), 500); 
-                }}
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 3,
+            }}
+          >
+            <Typography variant="h5" color="initial">
+              Manage Submission Deadlines
+            </Typography>
+            {!data.id && (
+              <Alert severity="info">Select Semester to Proceed</Alert>
+            )}
+            <Box component="form" onSubmit={updateHandler} sx={{ display: "flex", flexDirection: "column", gap: 2, maxWidth: "100%" }}>
+              <FormControl fullWidth>
+                <TextField
+                  id="select-activity"
+                  name="activity"
+                  label="Activity"
+                  type="text"
+                  value={data.activity}
+                  onChange={changeHandler}
+                  disabled={data.activity === ""}
+                  fullWidth
+                />
+              </FormControl>
+              <FormControl sx={{ display: "flex", flexDirection: "row", gap: 1 }} fullWidth>
+                <TextField
+                  id="select-schoolyear"
+                  name="schoolyear"
+                  label="School Year"
+                  type="number"
+                  value={data.schoolyear}
+                  onChange={changeHandler}
+                  disabled={data.schoolyear === ""}
+                  fullWidth
+                />
+                <TextField
+                  label="School Year"
+                  type="number"
+                  value={`${data.schoolyear && parseInt(data.schoolyear) + 1}`}
+                  disabled
+                  fullWidth
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="select-semester-label">Semester</InputLabel>
+                <Select
+                  id="select-semester"
+                  label="Semester"
+                  name="semester"
+                  value={data.semester}
+                  onChange={(event) => {
+                    changeHandler(event)
+                    setTimeout(() => changeSemesterHandler(event), 500);
+                  }}
+                >
+                  <MenuItem value="summer">Summer</MenuItem>
+                  <MenuItem value="1st">1st Semester</MenuItem>
+                  <MenuItem value="2nd">2nd Semester</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="select-termType-label">Term(Midterm/Endterm)</InputLabel>
+                <Select
+                  id="select-termType"
+                  label="Term"
+                  name="termType"
+                  value={data.termType}
+                  onChange={changeHandler}
+                  disabled={data.termType === ""}
+                  required
+                >
+                  <MenuItem value="midterm">Midterm</MenuItem>
+                  <MenuItem value="endterm">Endterm</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth sx={{ display: "none" }}>
+                <InputLabel id="select-status-label">Status</InputLabel>
+                <Select
+                  id="select-status"
+                  label="Status"
+                  name="status"
+                  value={data.status}
+                  onChange={changeHandler}
+                  disabled={data.status === ""}
+                  required
+                >
+                  <MenuItem value="Open">Open</MenuItem>
+                  <MenuItem value="Close">Close</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <TextField
+                  id="select-from-label"
+                  name="from"
+                  label="From"
+                  type="date"
+                  value={data.from}
+                  onChange={changeHandler}
+                  disabled={data.from === "0000-00-00"}
+                  required
+                  fullWidth
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <TextField
+                  id="select-to-label"
+                  name="to"
+                  label="To"
+                  type="date"
+                  value={data.to}
+                  onChange={changeHandler}
+                  disabled={data.from === "0000-00-00"}
+                  required
+                  fullWidth
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel id="select-currentSem-label">Set as Current Semester</InputLabel>
+                <Select
+                  id="select-currentSem"
+                  label="Set as Current Semester"
+                  name="currentSem"
+                  value={data.currentSem}
+                  onChange={changeHandler}
+                  disabled={data.semester === ""}
+                  required
+                >
+                  <MenuItem value=""></MenuItem>
+                  <MenuItem value="1">Yes</MenuItem>
+                  <MenuItem value="0">No</MenuItem>
+                </Select>
+              </FormControl>
+              <Button
+                variant="contained"
+                type="submit"
+                sx={{ padding: 2, color: "white" }}
+                disabled={!data.id}
               >
-                <MenuItem value="summer">Summer</MenuItem>
-                <MenuItem value="1st">1st Semester</MenuItem>
-                <MenuItem value="2nd">2nd Semester</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel id="select-termType-label">Term(Midterm/Endterm)</InputLabel>
-              <Select 
-                id="select-termType" 
-                label="Term" 
-                name="termType" 
-                value={data.termType} 
-                onChange={changeHandler}
-                disabled={data.termType === ""}
-                required
-              >
-                <MenuItem value="midterm">Midterm</MenuItem>
-                <MenuItem value="endterm">Endterm</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel id="select-status-label">Status</InputLabel>
-              <Select 
-                id="select-status" 
-                label="Status" 
-                name="status" 
-                value={data.status} 
-                onChange={changeHandler}
-                disabled={data.status === ""}
-                required
-              >
-                <MenuItem value="Open">Open</MenuItem>
-                <MenuItem value="Close">Close</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <TextField 
-                id="select-from-label" 
-                name="from" 
-                label="From" 
-                type="date" 
-                value={data.from} 
-                onChange={changeHandler} 
-                disabled={data.from === "0000-00-00"}
-                required
-                fullWidth 
-              />
-            </FormControl>
-            <FormControl fullWidth>
-              <TextField 
-                id="select-to-label" 
-                name="to" 
-                label="To" 
-                type="date" 
-                value={data.to} 
-                onChange={changeHandler} 
-                disabled={data.from === "0000-00-00"}
-                required
-                fullWidth 
-              />
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel id="select-currentSem-label">Set as Current Semester</InputLabel>
-              <Select 
-                id="select-currentSem" 
-                label="Set as Current Semester" 
-                name="currentSem" 
-                value={data.currentSem} 
-                onChange={changeHandler}
-                disabled={data.semester === ""}
-                required
-              >
-                <MenuItem value=""></MenuItem>
-                <MenuItem value="1">Yes</MenuItem>
-                <MenuItem value="0">No</MenuItem>
-              </Select>
-            </FormControl>
-            <Button 
-              variant="contained" 
-              type="submit" 
-              sx={{ padding: 2, color: "white" }}
-              disabled={!data.id}
-              >
-              SAVE
-            </Button>
+                SAVE
+              </Button>
+            </Box>
           </Box>
-        </Box>
-      </Paper>
-    </React.Suspense>
+        </Paper>
+      </React.Suspense>
     </>
   );
 };
