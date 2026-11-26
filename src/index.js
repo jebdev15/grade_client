@@ -41,14 +41,14 @@ import Students from "./routes/admin/Students";
 import Deadline from "./components/settings/Deadline";
 import ExtendDeadline from "./components/settings/ExtendDeadline";
 import ClassLoad from "./components/settings/ClassLoad";
-import FailureListSettings from "./components/settings/FailureListSettings";
+// import FailureListSettings from "./components/settings/FailureListSettings";
 import { Provider } from "react-redux";
 import { store } from "./app/store";
 import { REACT_APP_GOOGLE_CLIENT_ID } from "./utils/envVariables";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { RegistrarActivityProvider } from "./context/RegistrarActivityContext";
 import FacultyErrorPage from "./components/errors/FacultyErrorPage";
-import CreditsComponent from "@components/settings/CreditsComponent";
+// import CreditsComponent from "@components/settings/CreditsComponent";
 import ProtectedRoute from "./components/routes/ProtectedRoute";
 import { adminAccessLevels, facultyAccessLevels } from "./utils/authUtil";
 import { protectLoader } from "./utils/routeAuth";
@@ -186,14 +186,14 @@ const router = createBrowserRouter([
             path: "class-load",
             element: <ClassLoad />,
           },
-          {
-            path: "credits",
-            element: <CreditsComponent />,
-          },
-          {
-            path: "failure-list",
-            element: <FailureListSettings />,
-          },
+          // {
+          //   path: "credits",
+          //   element: <CreditsComponent />,
+          // },
+          // {
+          //   path: "failure-list",
+          //   element: <FailureListSettings />,
+          // },
         ],
       },
       {

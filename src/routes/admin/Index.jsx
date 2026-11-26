@@ -111,18 +111,18 @@ const SettingsListItems = [
     icon: <SubjectIcon />,
     link: "/admin/settings/class-load",
   },
-  {
-    text: "Credits",
-    activeItem: "credits",
-    icon: <SettingsIcon />,
-    link: "/admin/settings/credits",
-  },
-  {
-    text: "List of Failures",
-    activeItem: "failure-list",
-    icon: <MilitaryTechIcon />,
-    link: "/admin/settings/failure-list",
-  },
+  // {
+  //   text: "Credits",
+  //   activeItem: "credits",
+  //   icon: <SettingsIcon />,
+  //   link: "/admin/settings/credits",
+  // },
+  // {
+  //   text: "List of Failures",
+  //   activeItem: "failure-list",
+  //   icon: <MilitaryTechIcon />,
+  //   link: "/admin/settings/failure-list",
+  // },
 ];
 
 const MenuPaperProps = {
@@ -212,11 +212,11 @@ export default function Admin() {
   }, [cookies, navigate]);
 
   useEffect(() => {
-    if(!cookies.token) {
+    if (!cookies.token) {
       logout();
     }
-  },[cookies, logout])
-  
+  }, [cookies, logout])
+
   useEffect(() => {
     setDrawerMinimize(isSmallScreen ? true : !true);
   }, [isSmallScreen, setDrawerMinimize, navigate]);
@@ -348,91 +348,91 @@ export default function Admin() {
             <List>
               {isAdminAccessing
                 ? SideNavListItems.map((item, index) => {
-                    const isSettings = item.text === "Settings";
-                    return (
-                      <>
-                        <ListItemButton
-                          key={++index}
-                          className={
-                            activeItem === item.activeItem
-                              ? "navbtn active"
-                              : "navbtn"
-                          }
-                          onClick={() => {
-                            setActiveItem(item.activeItem);
-                            navigate(item.link);
-                            if (isSettings) setOpen(!open);
-                          }}
-                        >
-                          <Tooltip title={item.text}>
-                            <ListItemIcon>{item.icon}</ListItemIcon>
-                          </Tooltip>
-                          {drawerMinimize ? null : (
-                            <ListItemText primary={item.text} />
-                          )}
-                          {isSettings &&
-                            (open ? <ExpandLess /> : <ExpandMore />)}
-                        </ListItemButton>
+                  const isSettings = item.text === "Settings";
+                  return (
+                    <>
+                      <ListItemButton
+                        key={++index}
+                        className={
+                          activeItem === item.activeItem
+                            ? "navbtn active"
+                            : "navbtn"
+                        }
+                        onClick={() => {
+                          setActiveItem(item.activeItem);
+                          navigate(item.link);
+                          if (isSettings) setOpen(!open);
+                        }}
+                      >
+                        <Tooltip title={item.text}>
+                          <ListItemIcon>{item.icon}</ListItemIcon>
+                        </Tooltip>
+                        {drawerMinimize ? null : (
+                          <ListItemText primary={item.text} />
+                        )}
                         {isSettings &&
-                          SettingsListItems.map((item, index) => {
-                            return (
-                              <Collapse
-                                key={++index}
-                                in={open}
-                                timeout="auto"
-                                unmountOnExit
-                                className={
-                                  activeItem === item.activeItem
-                                    ? "navbtn active"
-                                    : "navbtn"
-                                }
-                                onClick={() => setActiveItem(item.activeItem)}
-                              >
-                                <List component="div" disablePadding>
-                                  <ListItemButton
-                                    sx={{ pl: 4 }}
-                                    onClick={() => navigate(item.link)}
-                                  >
-                                    <ListItemIcon>{item.icon}</ListItemIcon>
-                                    <ListItemText sx={{ flexGrow: 1 }} primary={item.text} />
-                                  </ListItemButton>
-                                </List>
-                              </Collapse>
-                            );
-                          })}
-                      </>
-                    );
-                  })
+                          (open ? <ExpandLess /> : <ExpandMore />)}
+                      </ListItemButton>
+                      {isSettings &&
+                        SettingsListItems.map((item, index) => {
+                          return (
+                            <Collapse
+                              key={++index}
+                              in={open}
+                              timeout="auto"
+                              unmountOnExit
+                              className={
+                                activeItem === item.activeItem
+                                  ? "navbtn active"
+                                  : "navbtn"
+                              }
+                              onClick={() => setActiveItem(item.activeItem)}
+                            >
+                              <List component="div" disablePadding>
+                                <ListItemButton
+                                  sx={{ pl: 4 }}
+                                  onClick={() => navigate(item.link)}
+                                >
+                                  <ListItemIcon>{item.icon}</ListItemIcon>
+                                  <ListItemText sx={{ flexGrow: 1 }} primary={item.text} />
+                                </ListItemButton>
+                              </List>
+                            </Collapse>
+                          );
+                        })}
+                    </>
+                  );
+                })
                 : SideNavListItems.filter((item) =>
-                    ["Home", "Students", "Faculty"].includes(item.text)
-                  ).map((item, index) => {
-                    const isSettings = item.text === "Settings";
-                    if(item.text === "Faculty" && cookies.accessLevel === "Chairperson") return null;
-                    return (
-                      <>
-                        <ListItemButton
-                          key={++index}
-                          className={
-                            activeItem === item.activeItem
-                              ? "navbtn active"
-                              : "navbtn"
-                          }
-                          onClick={() => {
-                            setActiveItem(item.activeItem);
-                            navigate(item.link);
-                            if (isSettings) setOpen(!open);
-                          }}
-                        >
-                          <Tooltip title={item.text}>
-                            <ListItemIcon>{item.icon}</ListItemIcon>
-                          </Tooltip>
-                          {drawerMinimize ? null : (
-                            <ListItemText primary={item.text} />
-                          )}
-                        </ListItemButton>
-                      </>
-                    );
-                  })}
+                  ["Home", "Students", "Faculty"].includes(item.text)
+                ).map((item, index) => {
+                  const isSettings = item.text === "Settings";
+                  if (item.text === "Faculty" && cookies.accessLevel === "Chairperson") return null;
+                  return (
+                    <>
+                      <ListItemButton
+                        key={++index}
+                        className={
+                          activeItem === item.activeItem
+                            ? "navbtn active"
+                            : "navbtn"
+                        }
+                        onClick={() => {
+                          setActiveItem(item.activeItem);
+                          navigate(item.link);
+                          if (isSettings) setOpen(!open);
+                        }}
+                      >
+                        <Tooltip title={item.text}>
+                          <ListItemIcon>{item.icon}</ListItemIcon>
+                        </Tooltip>
+                        {drawerMinimize ? null : (
+                          <ListItemText primary={item.text} />
+                        )}
+                      </ListItemButton>
+                    </>
+                  );
+                })}
             </List>
           </Paper>
         </Box>
