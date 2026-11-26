@@ -14,7 +14,7 @@ concurrency:
 jobs:
   deploy-frontend:
     name: 🎨 Deploy CHMSU Grading Portal Frontend - Fortune Towne Campus
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     
     # Steps to deploy the frontend
     steps:
