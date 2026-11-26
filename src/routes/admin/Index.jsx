@@ -30,7 +30,7 @@ import {
   Home as HomeIcon,
   Logout,
   Menu as MenuIcon,
-  MilitaryTech as MilitaryTechIcon,
+  // MilitaryTech as MilitaryTechIcon,
   MoreTime as MoreTimeIcon,
   People as PeopleIcon,
   Settings as SettingsIcon,
